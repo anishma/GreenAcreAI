@@ -340,11 +340,11 @@ npm install \
 ### Epic 0.3: External Service Setup
 
 #### Task 0.3.1: Supabase Project Setup
-- [ ] **Subtask 0.3.1.1:** Create Supabase account and new project (name: `greenacre-ai-dev`)
-- [ ] **Subtask 0.3.1.2:** Note down project URL and anon key
-- [ ] **Subtask 0.3.1.3:** Enable necessary extensions (uuid-ossp, pgcrypto) in SQL Editor
-- [ ] **Subtask 0.3.1.4:** Configure Supabase Auth providers (Email, Google OAuth)
-- [ ] **Subtask 0.3.1.5:** Set up Supabase Storage bucket: `call-recordings` (public: false)
+- [x] **Subtask 0.3.1.1:** Create Supabase account and new project (name: `greenacre-ai-dev`)
+- [x] **Subtask 0.3.1.2:** Note down project URL and anon key
+- [x] **Subtask 0.3.1.3:** Enable necessary extensions (uuid-ossp, pgcrypto) in SQL Editor
+- [x] **Subtask 0.3.1.4:** Configure Supabase Auth providers (Email, Google OAuth)
+- [x] **Subtask 0.3.1.5:** Set up Supabase Storage bucket: `call-recordings` (public: false)
 
 #### Task 0.3.2: Vercel Project Setup
 - [ ] **Subtask 0.3.2.1:** Create Vercel account and connect GitHub repository
