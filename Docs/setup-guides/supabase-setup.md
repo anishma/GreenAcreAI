@@ -10,14 +10,16 @@ Your Supabase project URL: `https://dausexigvmmppiijbzyb.supabase.co`
 
 1. Go to your project: https://app.supabase.com/project/dausexigvmmppiijbzyb/settings/api
 2. Copy the following keys:
-   - **Publishable API Key** (starts with `sb_publishable_...`) - **RECOMMENDED**
-   - **Anon Key** (JWT format, starts with `eyJ...`) - Legacy fallback
-   - **Service Role Key** (JWT format, starts with `eyJ...`) - Server-side only, PRIVATE
+   - **Publishable API Key** (starts with `sb_publishable_...`) - **RECOMMENDED for client-side**
+   - **Secret Key** (starts with `sb_secret_...`) - **RECOMMENDED for server-side**
+   - **Anon Key** (JWT format, starts with `eyJ...`) - Legacy fallback for publishable key
+   - **Service Role Key** (JWT format, starts with `eyJ...`) - Legacy fallback for secret key
 
 ### Key Differences:
-- **Publishable Key** (`sb_publishable_...`): Modern, independently rotatable, preferred for client-side
-- **Anon Key** (JWT): Legacy, still works but being phased out
-- **Service Role Key**: Bypasses Row-Level Security, server-side only, NEVER expose to client
+- **Publishable Key** (`sb_publishable_...`): Modern, independently rotatable, preferred for client-side. Replaces anon key.
+- **Secret Key** (`sb_secret_...`): Modern, independently rotatable, preferred for server-side. Has browser protection and replaces service_role key.
+- **Anon Key** (JWT): Legacy, still works but being phased out. Use publishable key instead.
+- **Service Role Key** (JWT): Legacy, still works but being phased out. Use secret key instead.
 
 ---
 
@@ -92,9 +94,10 @@ Open `/Users/anishmamavuram/PersonalProjects/GreenAcreAI/.env.local` and fill in
 NEXT_PUBLIC_SUPABASE_URL=https://dausexigvmmppiijbzyb.supabase.co
 
 # Fill in these values:
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxx  # From Step 1
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxxx                     # From Step 1 (fallback)
-SUPABASE_SERVICE_ROLE_KEY=eyJxxxxx                         # From Step 1 (PRIVATE)
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxx  # From Step 1 (RECOMMENDED)
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxxx                     # From Step 1 (legacy fallback)
+SUPABASE_SECRET_KEY=sb_secret_xxxxx                        # From Step 1 (RECOMMENDED for server)
+SUPABASE_SERVICE_ROLE_KEY=eyJxxxxx                         # From Step 1 (legacy fallback)
 SUPABASE_DB_PASSWORD=YourPasswordHere                      # From Step 2
 
 # Update the DATABASE_URL with your password:
@@ -111,9 +114,10 @@ Once you've filled in the `.env.local` file, we'll verify the connection in the 
 
 ## Checklist
 
-- [ ] Copied Publishable API Key to `.env.local`
-- [ ] Copied Anon Key to `.env.local`
-- [ ] Copied Service Role Key to `.env.local`
+- [ ] Copied Publishable API Key (sb_publishable_...) to `.env.local` - RECOMMENDED
+- [ ] Copied Secret Key (sb_secret_...) to `.env.local` - RECOMMENDED
+- [ ] Copied Anon Key (eyJ...) to `.env.local` - Legacy fallback
+- [ ] Copied Service Role Key (eyJ...) to `.env.local` - Legacy fallback
 - [ ] Set/Reset database password
 - [ ] Updated DATABASE_URL with password
 - [ ] Enabled uuid-ossp extension
