@@ -34,6 +34,11 @@ This implementation plan breaks down the GreenAcre AI platform into **7 sequenti
 - Security-first (RLS, encryption, validation)
 - Incremental deployment capability
 
+**Implementation Workflow Rules:**
+1. **Task Completion:** After completing any task or subtask, immediately mark it as completed with `[x]` in this implementation plan
+2. **Ask Before Proceeding:** Always ask for permission before moving to the next task
+3. **Commit Progress:** Commit changes to Git after each completed task with descriptive commit messages
+
 ---
 
 ## Technology Stack Reference
@@ -282,11 +287,11 @@ greenacre-ai/
 ### Epic 0.1: Repository & Version Control
 
 #### Task 0.1.1: Initialize Git Repository
-- [ ] **Subtask 0.1.1.1:** Initialize Git repository with `git init`
-- [ ] **Subtask 0.1.1.2:** Create `.gitignore` file with Next.js, Node, and environment variables
-- [ ] **Subtask 0.1.1.3:** Create initial `README.md` with project overview
-- [ ] **Subtask 0.1.1.4:** Set up GitHub repository and push initial commit
-- [ ] **Subtask 0.1.1.5:** Configure branch protection rules for `main` branch
+- [x] **Subtask 0.1.1.1:** Initialize Git repository with `git init`
+- [x] **Subtask 0.1.1.2:** Create `.gitignore` file with Next.js, Node, and environment variables
+- [x] **Subtask 0.1.1.3:** Create initial `README.md` with project overview
+- [x] **Subtask 0.1.1.4:** Set up GitHub repository and push initial commit
+- [x] **Subtask 0.1.1.5:** Configure branch protection rules for `main` branch
 
 #### Task 0.1.2: Set Up GitHub Actions for CI/CD
 - [ ] **Subtask 0.1.2.1:** Create `.github/workflows/ci.yml` for linting and type checking
