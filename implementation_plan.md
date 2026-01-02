@@ -301,11 +301,11 @@ greenacre-ai/
 ### Epic 0.2: Next.js Project Initialization
 
 #### Task 0.2.1: Create Next.js 14 Project
-- [ ] **Subtask 0.2.1.1:** Run `npx create-next-app@latest greenacre-ai --typescript --tailwind --app --use-npm`
-- [ ] **Subtask 0.2.1.2:** Configure `next.config.js` with required settings (experimental features, image domains)
-- [ ] **Subtask 0.2.1.3:** Update `tsconfig.json` with strict mode and path aliases (`@/`)
-- [ ] **Subtask 0.2.1.4:** Set up ESLint configuration (`.eslintrc.json`)
-- [ ] **Subtask 0.2.1.5:** Set up Prettier configuration (`prettier.config.js`)
+- [x] **Subtask 0.2.1.1:** Run `npx create-next-app@latest greenacre-ai --typescript --tailwind --app --use-npm`
+- [x] **Subtask 0.2.1.2:** Configure `next.config.js` with required settings (experimental features, image domains)
+- [x] **Subtask 0.2.1.3:** Update `tsconfig.json` with strict mode and path aliases (`@/`)
+- [x] **Subtask 0.2.1.4:** Set up ESLint configuration (`.eslintrc.json`)
+- [x] **Subtask 0.2.1.5:** Set up Prettier configuration (`prettier.config.js`)
 
 #### Task 0.2.2: Install Core Dependencies
 ```bash
