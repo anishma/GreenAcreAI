@@ -294,9 +294,9 @@ greenacre-ai/
 - [x] **Subtask 0.1.1.5:** Configure branch protection rules for `main` branch
 
 #### Task 0.1.2: Set Up GitHub Actions for CI/CD
-- [ ] **Subtask 0.1.2.1:** Create `.github/workflows/ci.yml` for linting and type checking
-- [ ] **Subtask 0.1.2.2:** Create `.github/workflows/deploy.yml` for Vercel deployments
-- [ ] **Subtask 0.1.2.3:** Add workflow status badges to README
+- [x] **Subtask 0.1.2.1:** Create `.github/workflows/ci.yml` for linting and type checking
+- [x] **Subtask 0.1.2.2:** Create `.github/workflows/deploy.yml` for Vercel deployments
+- [x] **Subtask 0.1.2.3:** Add workflow status badges to README
 
 ### Epic 0.2: Next.js Project Initialization
 

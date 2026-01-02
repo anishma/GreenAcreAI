@@ -1,5 +1,8 @@
 # GreenAcre AI
 
+[![CI](https://github.com/anishma/GreenAcreAI/actions/workflows/ci.yml/badge.svg)](https://github.com/anishma/GreenAcreAI/actions/workflows/ci.yml)
+[![Deploy](https://github.com/anishma/GreenAcreAI/actions/workflows/deploy.yml/badge.svg)](https://github.com/anishma/GreenAcreAI/actions/workflows/deploy.yml)
+
 Enterprise-Grade Multi-Tenant Voice AI Platform for Lawn Care Service Businesses
 
 ## Overview
