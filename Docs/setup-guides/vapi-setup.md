@@ -8,27 +8,31 @@ VAPI provides Speech-to-Text (STT) and Text-to-Speech (TTS) for our voice AI pla
 
 ## Step 1: Create VAPI Account
 
-1. Go to https://vapi.ai
-2. Click **"Get Started"** or **"Sign Up"**
-3. Sign up with your email or Google account
-4. Verify your email address
+1. Go to https://dashboard.vapi.ai (or https://vapi.ai and click "Sign up")
+2. Sign up with your email or Google account
+3. Verify your email address
+4. Complete any onboarding steps
 
 ---
 
 ## Step 2: Access Dashboard
 
-1. Log in to https://dashboard.vapi.ai
-2. You'll be taken to the main dashboard
+1. Once logged in, you'll be at the main dashboard: https://dashboard.vapi.ai
+2. Take a moment to explore the interface
+3. You should see options for creating agents, phone numbers, and settings
 
 ---
 
 ## Step 3: Generate API Key
 
-1. Click on **"API Keys"** in the sidebar (or Settings → API Keys)
-2. Click **"Create API Key"**
-3. Name: `GreenAcreAI Development`
-4. Copy the API key (starts with `vapi_...`)
-5. **Important**: Save this immediately - you won't see it again!
+1. Look for **"Settings"**, **"API Keys"**, or **"Credentials"** in the dashboard
+   - This is typically in the sidebar or top navigation
+2. Find the option to **"Create"** or **"Generate"** a new API key
+3. If prompted, give it a name: `GreenAcreAI Development`
+4. Copy the API key immediately (typically starts with a prefix)
+5. **Important**: Save this in a secure location - you may not be able to see it again!
+
+**Note**: If you can't find the API key section, check VAPI's help documentation or contact their support.
 
 ---
 
@@ -55,10 +59,11 @@ https://your-vercel-url.vercel.app/api/vapi-llm
 **Note**: We'll configure this endpoint in Phase 5 (Voice Infrastructure Integration)
 
 ### Webhook Secret
-- VAPI provides a webhook secret for signature verification
-- Go to **Settings** → **Webhooks**
-- Copy the **Webhook Secret**
+- VAPI may provide a webhook secret for signature verification
+- Look for **Settings**, **Webhooks**, or **Security** section in the dashboard
+- If available, copy any **Webhook Secret** or **Signing Secret**
 - Save this for `.env.local`
+- If not available now, you can set this up later when configuring webhooks
 
 ---
 

@@ -32,14 +32,17 @@ OpenAI powers our LangGraph conversational agent with GPT-4o.
 ## Step 3: Generate API Key
 
 1. Go to https://platform.openai.com/api-keys
-2. Click **"Create new secret key"**
-3. Settings:
-   - **Name**: `GreenAcreAI Development`
-   - **Permissions**: **All** (or restrict to specific models if you prefer)
-   - **Project**: Default project (or create a new one)
-4. Click **"Create secret key"**
-5. **Copy the key immediately** (starts with `sk-proj-...` or `sk-...`)
-6. You won't be able to see it again!
+2. Look for a button like **"Create new secret key"** or **"+ Create new key"**
+3. If prompted, configure:
+   - **Name**: `GreenAcreAI Development` (or similar descriptive name)
+   - **Permissions**: **All** (recommended for development) or restrict to specific capabilities
+   - **Project**: Select your project (or use default project)
+4. Click **"Create"** or **"Create secret key"**
+5. **Copy the key immediately** - it typically starts with `sk-proj-...` or `sk-...`
+6. **Important**: You won't be able to see the full key again after closing the dialog!
+7. Store it securely in your password manager or `.env.local` file
+
+**Note**: OpenAI has been updating their key formats. Project-scoped keys (starting with `sk-proj-`) are recommended for better organization.
 
 ---
 

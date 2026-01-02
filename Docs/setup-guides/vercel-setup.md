@@ -16,31 +16,48 @@ Vercel will host our Next.js application with automatic deployments from GitHub.
 
 ## Step 2: Import GitHub Repository
 
-1. From Vercel Dashboard, click **"Add New..."** → **"Project"**
-2. Click **"Import Git Repository"**
-3. Find and select: `anishma/GreenAcreAI`
-4. Click **"Import"**
+1. Go to Vercel's New Project page: https://vercel.com/new
+   - Or from Dashboard, click **"Add New..."** → **"Project"**
+
+2. Under **"Import Git Repository"** section:
+   - You'll see your Git provider options (GitHub, GitLab, Bitbucket)
+   - If this is your first time, click **"Install Vercel for GitHub"** or **"Add GitHub Account"**
+   - Follow prompts to authorize Vercel access to your GitHub repositories
+   - You can grant access to all repositories or select specific ones (choose `anishma/GreenAcreAI`)
+
+3. Once authorized, you'll see a list of your repositories
+   - Find `anishma/GreenAcreAI` in the list
+   - Click the **"Import"** button next to it
 
 ---
 
 ## Step 3: Configure Project Settings
 
+You'll now see the configuration screen for your project:
+
 ### Framework Detection
-- Vercel should auto-detect **Next.js**
-- If not, manually select: **Framework Preset: Next.js**
+- Vercel will automatically detect **Next.js**
+- Framework Preset should show: **Next.js**
+- ✅ No action needed if correctly detected
 
 ### Root Directory
-- Leave as default (root of repository)
+- Leave as: `.` (root of repository)
+- ✅ No action needed
 
-### Build Settings
+### Build and Output Settings
+You can expand this section, but defaults should work:
 - **Build Command**: `npm run build` (auto-detected)
 - **Output Directory**: `.next` (auto-detected)
 - **Install Command**: `npm install` (auto-detected)
+- ✅ No changes needed for now
 
 ### Environment Variables
-**Important**: We'll add environment variables after deployment. For now, deploy without them.
+**Important**: For the first deployment, skip adding environment variables. We'll add them after the initial deploy.
 
-Click **"Deploy"**
+- You can expand the "Environment Variables" section, but leave it empty for now
+- ✅ Skip for first deployment
+
+4. Click the **"Deploy"** button to start your first deployment
 
 ---
 

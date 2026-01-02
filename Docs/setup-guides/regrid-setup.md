@@ -9,60 +9,82 @@ Regrid provides property parcel data for lot size lookup - a critical feature fo
 ## Step 1: Visit Regrid Website
 
 1. Go to https://regrid.com
-2. Click **"Sign Up"** or **"Get Started"**
+2. Look for **"Sign Up"**, **"Get Started"**, or **"Try API"** button
+3. You may also see an option for **"API Sandbox"** for testing
 
 ---
 
-## Step 2: Create Account
+## Step 2: Create Account and Start Trial
 
-1. Fill out the registration form:
+1. Click the sign-up option
+2. Fill out the registration form (typically includes):
    - Name
-   - Email
-   - Company: `GreenAcre AI` (or your company name)
-   - Use case: `Lawn care service property lookup`
-2. Verify your email address
+   - Email address
+   - Company name: `GreenAcre AI` (or your company name)
+   - Use case or industry: `Lawn care services` or `Property data lookup`
+3. Verify your email address
+4. Complete any onboarding steps
+
+**Note**: Regrid offers a **30-day free trial** for their API Sandbox. This is perfect for development and testing.
 
 ---
 
 ## Step 3: Choose a Plan
 
-Regrid offers different pricing tiers:
+After your trial, you'll need to select a plan:
 
-### Free Tier (if available)
-- Limited API calls per month
+### Free Trial / Sandbox
+- 30-day trial period
+- Limited API calls
 - Good for development and testing
+- **Start here for MVP development**
 
-### Paid Plans
-- **Starter**: ~$50-100/month
-- **Professional**: ~$200-500/month
-- **Enterprise**: Custom pricing
+### Monthly Plans
+- Visit https://app.regrid.com/api/plans to see current pricing
+- Plans vary based on:
+  - Number of API calls per month
+  - Support level
+  - Additional features
+- **Typical range**: $50-500/month depending on usage
+
+### Enterprise
+- Custom pricing for high-volume needs
+- Contact Regrid team for quote
 
 **Recommendation for MVP**:
-- Start with **Free Tier** or **Starter Plan**
-- Upgrade as call volume increases
+- Start with **Free 30-day trial**
+- Monitor your API usage during development
+- Upgrade to paid plan when ready to launch
 
 ---
 
 ## Step 4: Access API Documentation
 
-1. Go to https://regrid.com/api
-2. Review the **Parcel API** documentation
-3. Key endpoints we'll use:
-   - `/parcels` - Search parcels by address
-   - `/parcels/{id}` - Get parcel details
+1. After signing up, look for **"API Documentation"**, **"Developer Docs"**, or **"Support"**
+2. You may also find it at:
+   - https://support.regrid.com (Support Center)
+   - https://support.regrid.com/api/section/interactive-api-sandbox (Interactive Sandbox)
+3. Review the **Parcel API** documentation
+4. Key endpoints we'll use:
+   - Parcel search by address
+   - Parcel details by ID
+5. Look for the **OpenAPI specification** (downloadable blueprint)
+
+**Note**: The exact documentation location may vary. Check your account dashboard or email for links.
 
 ---
 
 ## Step 5: Generate API Key
 
-1. Log in to your Regrid account
-2. Go to **Dashboard** → **API Keys** (or Account Settings)
-3. Click **"Create API Key"**
-4. Name: `GreenAcreAI Development`
-5. Copy the API key
+1. Log in to your Regrid account (likely at https://app.regrid.com)
+2. Look for **"API Keys"**, **"Credentials"**, or **"Settings"** section
+   - This might be under Dashboard, Account, or Developer sections
+3. Find the option to **"Create"** or **"Generate"** an API key
+4. If prompted, give it a name: `GreenAcreAI Development`
+5. Copy the API key immediately
 6. Save it securely
 
-**Note**: Regrid API keys typically don't have a specific prefix, they're usually long alphanumeric strings.
+**Note**: Regrid API keys are typically long alphanumeric strings without a specific prefix. The exact format and location may vary based on your account type.
 
 ---
 

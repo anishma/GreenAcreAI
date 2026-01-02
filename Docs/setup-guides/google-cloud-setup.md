@@ -39,40 +39,49 @@ This is required before creating OAuth credentials.
 
 1. Go to **"APIs & Services"** → **"OAuth consent screen"**
    - Or visit: https://console.cloud.google.com/apis/credentials/consent
-2. Choose user type:
-   - **External** (for public access)
+
+2. **Choose User Type**:
+   - For development/testing: Select **"Internal"** (if you have a Google Workspace organization)
+   - For public application: Select **"External"**
    - Click **"Create"**
 
-3. **App Information**:
+3. **OAuth Consent Screen - App Information** (Step 1):
    - **App name**: `GreenAcre AI`
-   - **User support email**: Your email
+   - **User support email**: Select your email from dropdown
    - **App logo**: (optional, skip for now)
-   - **Application home page**: `https://your-vercel-url.vercel.app`
-   - **Application privacy policy link**: (skip for MVP, add later)
-   - **Application terms of service link**: (skip for MVP, add later)
+   - **Application home page**: `https://your-vercel-url.vercel.app` (add later when you have it)
+   - **Application privacy policy link**: (skip for MVP, required for production)
+   - **Application terms of service link**: (skip for MVP, required for production)
+   - **Authorized domains**: (leave empty for now, add your Vercel domain later)
+   - **Developer contact information**: Enter your email address
+   - Click **"Save and Continue"**
 
-4. **Developer contact information**:
-   - Enter your email address
-
-5. Click **"Save and Continue"**
-
-6. **Scopes** (Step 2):
+4. **Scopes** (Step 2):
    - Click **"Add or Remove Scopes"**
-   - Search and select:
+   - In the filter/search box, type: `calendar`
+   - Select the following scopes:
      - `https://www.googleapis.com/auth/calendar` - See, edit, share, and permanently delete all calendars
      - `https://www.googleapis.com/auth/calendar.events` - View and edit events on all calendars
-   - Click **"Update"**
+   - Click **"Update"** at the bottom
    - Click **"Save and Continue"**
 
-7. **Test users** (Step 3):
+5. **Test Users** (Step 3 - for External apps):
+   - If you selected "External", you'll need to add test users during development
    - Click **"Add Users"**
-   - Add your email (and any team members' emails)
+   - Add your email address
+   - Add any team members' email addresses
    - Click **"Add"**
    - Click **"Save and Continue"**
+   - **Note**: While in "Testing" mode, only these users can authorize the app
 
-8. **Summary** (Step 4):
-   - Review your settings
+6. **Summary** (Step 4):
+   - Review all your settings
    - Click **"Back to Dashboard"**
+
+**Important Note**:
+- Apps in "Testing" status can have up to 100 test users
+- To publish publicly, you'll need to complete verification (requires privacy policy, terms of service, etc.)
+- For MVP, staying in "Testing" mode is fine
 
 ---
 
