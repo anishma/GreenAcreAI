@@ -29,7 +29,17 @@
   },
   "homepage": "https://github.com/anishma/GreenAcreAI#readme",
   "dependencies": {
-    "@types/node": "^20.12.0",
+    "@hookform/resolvers": "^3.10.0",
+    "@langchain/core": "^0.1.63",
+    "@langchain/langgraph": "^0.0.15",
+    "@langchain/openai": "^0.0.25",
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "@prisma/client": "^5.22.0",
+    "@supabase/supabase-js": "^2.89.0",
+    "@tanstack/react-query": "^4.42.0",
+    "@trpc/client": "^10.45.4",
+    "@trpc/react-query": "^10.45.4",
+    "@trpc/server": "^10.45.4",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
@@ -39,11 +49,17 @@
     "postcss": "^8.4.38",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "react-hook-form": "^7.69.0",
+    "stripe": "^14.25.0",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zod": "^3.25.76",
+    "zustand": "^4.5.7"
   },
   "devDependencies": {
+    "@types/node": "^20.19.27",
     "prettier": "^3.7.4",
-    "prettier-plugin-tailwindcss": "^0.7.2"
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "prisma": "^5.22.0"
   }
 }

@@ -327,9 +327,9 @@ npm install \
   react-hook-form@^7.51.0 \
   @hookform/resolvers@^3.3.4
 ```
-- [ ] **Subtask 0.2.2.1:** Install production dependencies listed above
-- [ ] **Subtask 0.2.2.2:** Install dev dependencies (`@types/*`, `eslint`, `prettier`)
-- [ ] **Subtask 0.2.2.3:** Verify all dependencies install without conflicts
+- [x] **Subtask 0.2.2.1:** Install production dependencies listed above
+- [x] **Subtask 0.2.2.2:** Install dev dependencies (`@types/*`, `eslint`, `prettier`)
+- [x] **Subtask 0.2.2.3:** Verify all dependencies install without conflicts
 
 #### Task 0.2.3: Set Up shadcn/ui
 - [ ] **Subtask 0.2.3.1:** Run `npx shadcn-ui@latest init` and configure (New York style, Zinc color)
