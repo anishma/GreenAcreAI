@@ -332,10 +332,10 @@ npm install \
 - [x] **Subtask 0.2.2.3:** Verify all dependencies install without conflicts
 
 #### Task 0.2.3: Set Up shadcn/ui
-- [ ] **Subtask 0.2.3.1:** Run `npx shadcn-ui@latest init` and configure (New York style, Zinc color)
-- [ ] **Subtask 0.2.3.2:** Install base components: `button`, `input`, `card`, `dialog`, `table`, `form`, `select`, `checkbox`, `toast`
-- [ ] **Subtask 0.2.3.3:** Verify `components.json` configuration
-- [ ] **Subtask 0.2.3.4:** Create `src/components/ui/` directory structure
+- [x] **Subtask 0.2.3.1:** Run `npx shadcn-ui@latest init` and configure (New York style, Zinc color)
+- [x] **Subtask 0.2.3.2:** Install base components: `button`, `input`, `card`, `dialog`, `table`, `form`, `select`, `checkbox`, `toast`
+- [x] **Subtask 0.2.3.3:** Verify `components.json` configuration
+- [x] **Subtask 0.2.3.4:** Create `src/components/ui/` directory structure
 
 ### Epic 0.3: External Service Setup
 
