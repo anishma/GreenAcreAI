@@ -468,9 +468,9 @@ NODE_ENV="development"
 ### Epic 1.1: Database Schema & Migrations
 
 #### Task 1.1.1: Initialize Prisma
-- [ ] **Subtask 1.1.1.1:** Run `npx prisma init` to create `prisma/` directory
-- [ ] **Subtask 1.1.1.2:** Configure `prisma/schema.prisma` datasource to use Supabase connection string
-- [ ] **Subtask 1.1.1.3:** Set `directUrl` for migrations (Supabase transaction mode)
+- [x] **Subtask 1.1.1.1:** Run `npx prisma init` to create `prisma/` directory
+- [x] **Subtask 1.1.1.2:** Configure `prisma/schema.prisma` datasource to use Supabase connection string
+- [x] **Subtask 1.1.1.3:** Set `directUrl` for migrations (Supabase transaction mode)
 
 #### Task 1.1.2: Define Prisma Schema - Core Tables
 Based on technical-architecture.md Section 5.1:
@@ -536,42 +536,42 @@ Based on technical-architecture.md Section 5.1:
   }
   ```
 
-- [ ] **Subtask 1.1.2.2:** Create `User` model in `schema.prisma`
-- [ ] **Subtask 1.1.2.3:** Create `Call` model in `schema.prisma`
-- [ ] **Subtask 1.1.2.4:** Create `Lead` model in `schema.prisma`
-- [ ] **Subtask 1.1.2.5:** Create `Booking` model in `schema.prisma`
-- [ ] **Subtask 1.1.2.6:** Create `Notification` model in `schema.prisma`
-- [ ] **Subtask 1.1.2.7:** Create `Webhook` model in `schema.prisma`
-- [ ] **Subtask 1.1.2.8:** Create `AnalyticsDaily` model in `schema.prisma`
-- [ ] **Subtask 1.1.2.9:** Create `PricingTemplate` model in `schema.prisma`
+- [x] **Subtask 1.1.2.2:** Create `User` model in `schema.prisma`
+- [x] **Subtask 1.1.2.3:** Create `Call` model in `schema.prisma`
+- [x] **Subtask 1.1.2.4:** Create `Lead` model in `schema.prisma`
+- [x] **Subtask 1.1.2.5:** Create `Booking` model in `schema.prisma`
+- [x] **Subtask 1.1.2.6:** Create `Notification` model in `schema.prisma`
+- [x] **Subtask 1.1.2.7:** Create `Webhook` model in `schema.prisma`
+- [x] **Subtask 1.1.2.8:** Create `AnalyticsDaily` model in `schema.prisma`
+- [x] **Subtask 1.1.2.9:** Create `PricingTemplate` model in `schema.prisma`
 
 #### Task 1.1.3: Create Initial Migration
-- [ ] **Subtask 1.1.3.1:** Run `npx prisma migrate dev --name init` to create first migration
-- [ ] **Subtask 1.1.3.2:** Verify migration SQL matches TAD schema (Section 5.1)
-- [ ] **Subtask 1.1.3.3:** Apply migration to Supabase database
-- [ ] **Subtask 1.1.3.4:** Verify tables created in Supabase dashboard
+- [x] **Subtask 1.1.3.1:** Run `npx prisma migrate dev --name init` to create first migration
+- [x] **Subtask 1.1.3.2:** Verify migration SQL matches TAD schema (Section 5.1)
+- [x] **Subtask 1.1.3.3:** Apply migration to Supabase database
+- [x] **Subtask 1.1.3.4:** Verify tables created in Supabase dashboard
 
 #### Task 1.1.4: Create Database Functions (Raw SQL)
 These are PostgreSQL functions that Prisma doesn't handle:
 
-- [ ] **Subtask 1.1.4.1:** Create migration file: `prisma/migrations/.../add_functions.sql`
-- [ ] **Subtask 1.1.4.2:** Add `update_updated_at_column()` trigger function
-- [ ] **Subtask 1.1.4.3:** Add `get_quote_for_lot_size()` function (TAD line 1425)
-- [ ] **Subtask 1.1.4.4:** Add `get_generic_price_range()` function (TAD line 1458)
-- [ ] **Subtask 1.1.4.5:** Add `is_in_service_area()` function (TAD line 1506)
-- [ ] **Subtask 1.1.4.6:** Add `is_within_business_hours()` function (TAD line 1523)
-- [ ] **Subtask 1.1.4.7:** Add `update_lead_on_booking()` trigger function (TAD line 1562)
-- [ ] **Subtask 1.1.4.8:** Apply migration: `npx prisma migrate deploy`
+- [x] **Subtask 1.1.4.1:** Create migration file: `prisma/migrations/.../add_functions.sql`
+- [x] **Subtask 1.1.4.2:** Add `update_updated_at_column()` trigger function
+- [x] **Subtask 1.1.4.3:** Add `get_quote_for_lot_size()` function (TAD line 1425)
+- [x] **Subtask 1.1.4.4:** Add `get_generic_price_range()` function (TAD line 1458)
+- [x] **Subtask 1.1.4.5:** Add `is_in_service_area()` function (TAD line 1506)
+- [x] **Subtask 1.1.4.6:** Add `is_within_business_hours()` function (TAD line 1523)
+- [x] **Subtask 1.1.4.7:** Add `update_lead_on_booking()` trigger function (TAD line 1562)
+- [x] **Subtask 1.1.4.8:** Apply migration: `npx prisma migrate deploy`
 
 #### Task 1.1.5: Create Database Views
-- [ ] **Subtask 1.1.5.1:** Create `call_summary` view (TAD line 1584) via SQL migration
-- [ ] **Subtask 1.1.5.2:** Verify view works with test query
+- [x] **Subtask 1.1.5.1:** Create `call_summary` view (TAD line 1584) via SQL migration
+- [x] **Subtask 1.1.5.2:** Verify view works with test query
 
 #### Task 1.1.6: Seed Database with Templates
-- [ ] **Subtask 1.1.6.1:** Create `prisma/seed.ts` file
-- [ ] **Subtask 1.1.6.2:** Add seed data for `PricingTemplate` (Standard Lawn Care - TAD line 1615)
-- [ ] **Subtask 1.1.6.3:** Add seed script to `package.json`: `"prisma": { "seed": "ts-node prisma/seed.ts" }`
-- [ ] **Subtask 1.1.6.4:** Run `npx prisma db seed`
+- [x] **Subtask 1.1.6.1:** Create `prisma/seed.ts` file
+- [x] **Subtask 1.1.6.2:** Add seed data for `PricingTemplate` (Standard Lawn Care - TAD line 1615)
+- [x] **Subtask 1.1.6.3:** Add seed script to `package.json`: `"prisma": { "seed": "ts-node prisma/seed.ts" }`
+- [x] **Subtask 1.1.6.4:** Run `npx prisma db seed`
 
 ### Epic 1.2: Row-Level Security (RLS)
 
