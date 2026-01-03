@@ -166,23 +166,42 @@ GOOGLE_REDIRECT_URI=https://your-vercel-url.vercel.app/api/auth/callback/google
 
 ## Step 8: Configure Supabase Google OAuth (Complete Task 0.3.1.4)
 
-Now that we have Google OAuth credentials, we can complete Supabase setup:
+**IMPORTANT**: This section is for **Supabase Authentication** (user login), not Google Calendar API.
+
+For Supabase Auth, you need DIFFERENT Google OAuth credentials than the Calendar API.
+
+### Create Separate OAuth Client for Supabase Auth
+
+1. Go to Google Cloud Console → **Credentials**
+2. Click **"Create Credentials"** → **"OAuth client ID"**
+3. Settings:
+   - **Application type**: **Web application**
+   - **Name**: `GreenAcreAI Supabase Auth`
+4. **Authorized redirect URIs**:
+   - Click **"Add URI"**
+   - Add ONLY: `https://dausexigvmmppiijbzyb.supabase.co/auth/v1/callback`
+   - **DO NOT** add your app's callback URLs here
+5. Click **"Create"**
+6. Copy the **Client ID** and **Client Secret**
+
+### Configure in Supabase
 
 1. Go to Supabase: https://app.supabase.com/project/dausexigvmmppiijbzyb/auth/providers
 2. Find **"Google"** provider
 3. Enable it and enter:
-   - **Client ID**: `xxxxx.apps.googleusercontent.com`
-   - **Client Secret**: `GOCSPX-xxxxx`
-   - **Authorized redirect URI**: Use the one shown by Supabase
-     (e.g., `https://dausexigvmmppiijbzyb.supabase.co/auth/v1/callback`)
+   - **Client ID**: (from the Supabase Auth OAuth client you just created)
+   - **Client Secret**: (from the Supabase Auth OAuth client)
 4. Click **"Save"**
 
-5. Go back to Google Cloud Console
-6. Add Supabase redirect URI to your OAuth client:
-   - Go to **Credentials** → Click on your OAuth client
-   - Under **Authorized redirect URIs**, click **"Add URI"**
-   - Add: `https://dausexigvmmppiijbzyb.supabase.co/auth/v1/callback`
-   - Click **"Save"**
+### Why Two OAuth Clients?
+
+- **OAuth Client 1** (lines 106-108): For Google Calendar API (future feature)
+  - Redirects to your app: `/api/auth/callback/google`
+  - Used to access user's Google Calendar
+
+- **OAuth Client 2** (this step): For Supabase Authentication
+  - Redirects to Supabase: `/auth/v1/callback`
+  - Used for user login/signup
 
 ---
 

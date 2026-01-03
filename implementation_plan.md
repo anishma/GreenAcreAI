@@ -667,6 +667,18 @@ Based on TAD Section 5.1 (lines 1392-1419):
 - [x] **Subtask 1.4.3.1:** Create `src/app/api/auth/callback/route.ts` (OAuth callback handler)
 - [x] **Subtask 1.4.3.2:** Create `src/app/api/auth/signout/route.ts` (Sign out handler)
 - [ ] **Subtask 1.4.3.3:** Test OAuth flow with Google (using test Google account)
+  - **BLOCKED:** OAuth redirects to error page without showing Google consent screen
+  - **Debug Steps Needed:**
+    1. Check Network tab for Supabase authorize request (status code, redirects)
+    2. Check if request reaches Google OAuth servers
+    3. Check Supabase logs for OAuth errors
+    4. Verify all configurations are correct (Google OAuth scopes, test users, redirect URIs)
+  - **All configurations verified as correct:**
+    - ✅ Google OAuth Client has Supabase callback URL
+    - ✅ Scopes configured (openid, userinfo.email, userinfo.profile)
+    - ✅ Test user added (anishmareddy11@gmail.com)
+    - ✅ Supabase provider has correct Client ID/Secret
+    - ✅ Supabase Site URL and Redirect URLs configured correctly
 
 #### Task 1.4.4: Create Auth Context & Hooks
 - [x] **Subtask 1.4.4.1:** Create `src/lib/hooks/use-user.ts`:
