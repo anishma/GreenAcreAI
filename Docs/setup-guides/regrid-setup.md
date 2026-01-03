@@ -183,16 +183,18 @@ For production, consider:
 
 ## Checklist
 
-- [ ] Created Regrid account
-- [ ] Chose appropriate pricing plan (Free/Starter recommended for MVP)
-- [ ] Generated API key
-- [ ] Saved API key securely
-- [ ] Reviewed Parcel API documentation
-- [ ] Understood response structure (ll_gissqft field)
-- [ ] Checked rate limits for your plan
-- [ ] Tested API with sample address
-- [ ] Updated `.env.local` with REGRID_API_KEY
-- [ ] Noted monthly request limit
+- [x] Created Regrid account
+- [x] Chose appropriate pricing plan (30-day trial with 7 sample counties)
+- [x] Generated API key
+- [x] Saved API key securely
+- [x] Reviewed Parcel API documentation
+- [x] Understood response structure (ll_gissqft field = lot size in square feet)
+- [x] Checked rate limits for your plan (2,000 parcels for trial)
+- [x] Tested API with sample address (Dallas County, TX)
+- [x] Updated `.env.local` with REGRID_API_KEY
+- [x] Noted monthly request limit (2,000 parcels for 30-day trial)
+
+**Trial Counties Available**: Marion (IN), Dallas (TX), Wilson (TN), Durham (NC), Fillmore (NE), Clark (WI), Gurabo (PR)
 
 ---
 
