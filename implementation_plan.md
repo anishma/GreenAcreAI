@@ -349,11 +349,10 @@ npm install \
 #### Task 0.3.2: Vercel Project Setup
 - [x] **Subtask 0.3.2.1:** Create Vercel account and connect GitHub repository
 - [x] **Subtask 0.3.2.2:** Configure Vercel project settings (Framework Preset: Next.js)
-- [ ] **Subtask 0.3.2.3:** Set up preview deployments for all branches (PENDING)
-- [x] **Subtask 0.3.2.4:** Note down Vercel project URL
-- [x] **Subtask 0.3.2.5:** Added environment variables to Vercel
-- [x] **Subtask 0.3.2.6:** Generated application secrets (NEXTAUTH_SECRET, JWT_SECRET, ENCRYPTION_KEY)
-- [ ] **Subtask 0.3.2.7:** Add GitHub Secrets (VERCEL_TOKEN, PROJECT_ID, ORG_ID) (PENDING)
+- [x] **Subtask 0.3.2.3:** Note down Vercel project URL
+- [x] **Subtask 0.3.2.4:** Added environment variables to Vercel
+- [x] **Subtask 0.3.2.5:** Generated application secrets (NEXTAUTH_SECRET, JWT_SECRET, ENCRYPTION_KEY)
+- [x] **Subtask 0.3.2.6:** Add GitHub Secrets (VERCEL_TOKEN, PROJECT_ID, ORG_ID)
 
 #### Task 0.3.3: VAPI Account Setup
 - [x] **Subtask 0.3.3.1:** Create VAPI account at vapi.ai
@@ -363,7 +362,7 @@ npm install \
 - [ ] **Subtask 0.3.3.5:** Add payment method (PENDING)
 - [ ] **Subtask 0.3.3.6:** Set up usage alerts (PENDING)
 
-#### Task 0.3.4: Stripe Account Setup
+#### Task 0.3.4: Stripe Account Setup (DEFERRED FOR LATER)
 - [ ] **Subtask 0.3.4.1:** Create Stripe account (Test mode)
 - [ ] **Subtask 0.3.4.2:** Generate API keys (Publishable and Secret)
 - [ ] **Subtask 0.3.4.3:** Configure webhook endpoint (will be implemented later)
@@ -401,9 +400,9 @@ npm install \
 ### Epic 0.4: Environment Variables Configuration
 
 #### Task 0.4.1: Create Environment Files
-- [ ] **Subtask 0.4.1.1:** Create `.env.local` file (DO NOT commit)
-- [ ] **Subtask 0.4.1.2:** Create `.env.local.example` file (commit this)
-- [ ] **Subtask 0.4.1.3:** Create `.env.production` template for Vercel
+- [x] **Subtask 0.4.1.1:** Create `.env.local` file (DO NOT commit)
+- [x] **Subtask 0.4.1.2:** Create `.env.local.example` file (commit this)
+- [ ] **Subtask 0.4.1.3:** Create `.env.production` template for Vercel (NOT NEEDED - using Vercel dashboard)
 
 #### Task 0.4.2: Configure Environment Variables
 Add all environment variables to `.env.local`:
@@ -450,9 +449,9 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NODE_ENV="development"
 ```
 
-- [ ] **Subtask 0.4.2.1:** Add all environment variables to `.env.local`
-- [ ] **Subtask 0.4.2.2:** Add sanitized versions to `.env.local.example`
-- [ ] **Subtask 0.4.2.3:** Configure same variables in Vercel project settings
+- [x] **Subtask 0.4.2.1:** Add all environment variables to `.env.local`
+- [x] **Subtask 0.4.2.2:** Add sanitized versions to `.env.local.example`
+- [x] **Subtask 0.4.2.3:** Configure same variables in Vercel project settings
 
 #### Task 0.4.3: Create Environment Validation
 - [ ] **Subtask 0.4.3.1:** Create `src/lib/env.ts` with Zod schema to validate env vars at build time
