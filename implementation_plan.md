@@ -454,8 +454,10 @@ NODE_ENV="development"
 - [x] **Subtask 0.4.2.3:** Configure same variables in Vercel project settings
 
 #### Task 0.4.3: Create Environment Validation
-- [ ] **Subtask 0.4.3.1:** Create `src/lib/env.ts` with Zod schema to validate env vars at build time
-- [ ] **Subtask 0.4.3.2:** Import and validate in `next.config.js`
+- [x] **Subtask 0.4.3.1:** Create `src/lib/env.ts` with Zod schema to validate env vars at build time
+- [x] **Subtask 0.4.3.2:** Enable instrumentation hook in `next.config.js`
+- [x] **Subtask 0.4.3.3:** Create `instrumentation.ts` to validate env vars on server startup
+- [x] **Subtask 0.4.3.4:** Test build to ensure validation works correctly
 
 ---
 

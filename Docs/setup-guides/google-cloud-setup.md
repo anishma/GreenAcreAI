@@ -205,21 +205,21 @@ These limits are very generous and should be sufficient for our use case.
 
 ## Checklist
 
-- [ ] Created Google Cloud project (`GreenAcreAI`)
-- [ ] Enabled Google Calendar API
-- [ ] Configured OAuth consent screen (External)
-- [ ] Added required scopes (calendar, calendar.events)
-- [ ] Added test users (your email)
-- [ ] Created OAuth 2.0 Web Client credentials
-- [ ] Copied Client ID (.apps.googleusercontent.com)
-- [ ] Copied Client Secret (GOCSPX-...)
-- [ ] Added authorized JavaScript origins (localhost and Vercel)
-- [ ] Added authorized redirect URIs (localhost and Vercel)
-- [ ] Updated `.env.local` with GOOGLE_CLIENT_ID
-- [ ] Updated `.env.local` with GOOGLE_CLIENT_SECRET
-- [ ] Updated `.env.local` with GOOGLE_REDIRECT_URI
-- [ ] Configured Google OAuth in Supabase
-- [ ] Added Supabase redirect URI to Google OAuth client
+- [x] Created Google Cloud project (`GreenAcreAI`)
+- [x] Enabled Google Calendar API
+- [x] Configured OAuth consent screen (External)
+- [x] Added required scopes (calendar, calendar.events)
+- [x] Added test users (your email)
+- [x] Created OAuth 2.0 Web Client credentials
+- [x] Copied Client ID (.apps.googleusercontent.com)
+- [x] Copied Client Secret (GOCSPX-...)
+- [x] Added authorized JavaScript origins (localhost and Vercel)
+- [x] Added authorized redirect URIs (localhost and Vercel)
+- [x] Updated `.env.local` with GOOGLE_CLIENT_ID
+- [x] Updated `.env.local` with GOOGLE_CLIENT_SECRET
+- [x] Updated `.env.local` with GOOGLE_REDIRECT_URI
+- [x] Configured Google OAuth in Supabase
+- [x] Added Supabase redirect URI to Google OAuth client
 
 ---
 

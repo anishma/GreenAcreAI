@@ -147,17 +147,17 @@ Should return a JSON response with GPT-4o's reply.
 
 ## Checklist
 
-- [ ] Created OpenAI account
-- [ ] Added payment method
-- [ ] Set up usage limits (hard limit and soft limit)
-- [ ] Generated API key (sk-proj-... or sk-...)
-- [ ] Saved API key securely
+- [x] Created OpenAI account
+- [x] Added payment method
+- [x] Set up usage limits (hard limit and soft limit)
+- [x] Generated API key (sk-proj-... or sk-...)
+- [x] Saved API key securely
 - [ ] Copied Organization ID (if applicable)
 - [ ] Verified GPT-4o model access
 - [ ] Enabled usage monitoring and email notifications
-- [ ] Understood pricing structure
-- [ ] Updated `.env.local` with OPENAI_API_KEY
-- [ ] Updated `.env.local` with OPENAI_ORG_ID (if applicable)
+- [x] Understood pricing structure
+- [x] Updated `.env.local` with OPENAI_API_KEY
+- [x] Updated `.env.local` with OPENAI_ORG_ID (if applicable)
 - [ ] Tested API connection (optional)
 
 ---

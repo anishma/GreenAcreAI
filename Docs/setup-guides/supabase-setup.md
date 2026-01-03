@@ -114,16 +114,17 @@ Once you've filled in the `.env.local` file, we'll verify the connection in the 
 
 ## Checklist
 
-- [ ] Copied Publishable API Key (sb_publishable_...) to `.env.local` - RECOMMENDED
-- [ ] Copied Secret Key (sb_secret_...) to `.env.local` - RECOMMENDED
-- [ ] Copied Anon Key (eyJ...) to `.env.local` - Legacy fallback
-- [ ] Copied Service Role Key (eyJ...) to `.env.local` - Legacy fallback
-- [ ] Set/Reset database password
-- [ ] Updated DATABASE_URL with password
-- [ ] Enabled uuid-ossp extension
-- [ ] Enabled pgcrypto extension
-- [ ] Enabled Email auth provider
-- [ ] Created `call-recordings` storage bucket (private)
+- [x] Copied Publishable API Key (sb_publishable_...) to `.env.local` - RECOMMENDED
+- [x] Copied Secret Key (sb_secret_...) to `.env.local` - RECOMMENDED
+- [x] Copied Anon Key (eyJ...) to `.env.local` - Legacy fallback
+- [x] Copied Service Role Key (eyJ...) to `.env.local` - Legacy fallback
+- [x] Set/Reset database password
+- [x] Updated DATABASE_URL with password
+- [x] Enabled uuid-ossp extension
+- [x] Enabled pgcrypto extension
+- [x] Enabled Email auth provider
+- [x] Created `call-recordings` storage bucket (private)
+- [x] Google OAuth enabled (waiting for Task 0.3.7 - Google Cloud Console setup)
 
 ---
 

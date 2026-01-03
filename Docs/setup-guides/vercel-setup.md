@@ -202,19 +202,19 @@ NEXT_PUBLIC_APP_URL=https://your-project.vercel.app
 
 ## Checklist
 
-- [ ] Created Vercel account
-- [ ] Imported GitHub repository (anishma/GreenAcreAI)
-- [ ] Confirmed Next.js framework preset
-- [ ] Deployed project (initial deployment - may fail)
-- [ ] Added Supabase environment variables to Vercel
-- [ ] Added Next.js environment variables to Vercel
+- [x] Created Vercel account
+- [x] Imported GitHub repository (anishma/GreenAcreAI)
+- [x] Confirmed Next.js framework preset
+- [x] Deployed project (initial deployment - may fail)
+- [x] Added Supabase environment variables to Vercel
+- [x] Added Next.js environment variables to Vercel
 - [ ] Generated application secrets (NEXTAUTH_SECRET, JWT_SECRET, ENCRYPTION_KEY)
-- [ ] Copied Vercel Project ID to `.env.local`
-- [ ] Copied Vercel Org ID to `.env.local`
-- [ ] Created Vercel deploy token
-- [ ] Added VERCEL_TOKEN to GitHub Secrets
-- [ ] Added VERCEL_PROJECT_ID to GitHub Secrets
-- [ ] Added VERCEL_ORG_ID to GitHub Secrets
+- [x] Copied Vercel Project ID to `.env.local`
+- [x] Copied Vercel Org ID to `.env.local`
+- [x] Created Vercel deploy token
+- [x] Added VERCEL_TOKEN to GitHub Secrets
+- [x] Added VERCEL_PROJECT_ID to GitHub Secrets
+- [x] Added VERCEL_ORG_ID to GitHub Secrets
 - [ ] Enabled preview deployments for all branches
 - [ ] Triggered successful redeploy with env vars
 

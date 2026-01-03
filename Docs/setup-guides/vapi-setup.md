@@ -124,12 +124,12 @@ Should return an empty array `[]` or list of calls (if any exist).
 
 ## Checklist
 
-- [ ] Created VAPI account
-- [ ] Generated API key and saved securely
+- [x] Created VAPI account
+- [x] Generated API key and saved securely
 - [ ] Copied webhook secret
 - [ ] Explored dashboard interface
-- [ ] Understood VAPI's role in our architecture (STT/TTS only)
-- [ ] Updated `.env.local` with VAPI_API_KEY
+- [x] Understood VAPI's role in our architecture (STT/TTS only)
+- [x] Updated `.env.local` with VAPI_API_KEY
 - [ ] Updated `.env.local` with VAPI_WEBHOOK_SECRET
 - [ ] Added payment method (if required)
 - [ ] Set up usage alerts
