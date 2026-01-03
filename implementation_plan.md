@@ -578,38 +578,38 @@ These are PostgreSQL functions that Prisma doesn't handle:
 #### Task 1.2.1: Enable RLS on Tables
 Create SQL migration to enable RLS:
 
-- [ ] **Subtask 1.2.1.1:** Create migration: `prisma/migrations/.../enable_rls.sql`
-- [ ] **Subtask 1.2.1.2:** Add `ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;`
-- [ ] **Subtask 1.2.1.3:** Add `ALTER TABLE users ENABLE ROW LEVEL SECURITY;`
-- [ ] **Subtask 1.2.1.4:** Add `ALTER TABLE calls ENABLE ROW LEVEL SECURITY;`
-- [ ] **Subtask 1.2.1.5:** Add `ALTER TABLE leads ENABLE ROW LEVEL SECURITY;`
-- [ ] **Subtask 1.2.1.6:** Add `ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;`
-- [ ] **Subtask 1.2.1.7:** Add `ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;`
-- [ ] **Subtask 1.2.1.8:** Add `ALTER TABLE analytics_daily ENABLE ROW LEVEL SECURITY;`
+- [x] **Subtask 1.2.1.1:** Create migration: `prisma/migrations/.../enable_rls.sql`
+- [x] **Subtask 1.2.1.2:** Add `ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;`
+- [x] **Subtask 1.2.1.3:** Add `ALTER TABLE users ENABLE ROW LEVEL SECURITY;`
+- [x] **Subtask 1.2.1.4:** Add `ALTER TABLE calls ENABLE ROW LEVEL SECURITY;`
+- [x] **Subtask 1.2.1.5:** Add `ALTER TABLE leads ENABLE ROW LEVEL SECURITY;`
+- [x] **Subtask 1.2.1.6:** Add `ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;`
+- [x] **Subtask 1.2.1.7:** Add `ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;`
+- [x] **Subtask 1.2.1.8:** Add `ALTER TABLE analytics_daily ENABLE ROW LEVEL SECURITY;`
 
 #### Task 1.2.2: Create RLS Policies
 Based on TAD Section 5.1 (lines 1392-1419):
 
-- [ ] **Subtask 1.2.2.1:** Create policy for `tenants` table (tenant_isolation_policy)
+- [x] **Subtask 1.2.2.1:** Create policy for `tenants` table (tenant_isolation_policy)
   ```sql
   CREATE POLICY tenant_isolation_policy ON tenants
     FOR ALL
     USING (id = (SELECT tenant_id FROM users WHERE auth_user_id = auth.uid()));
   ```
-- [ ] **Subtask 1.2.2.2:** Create policy for `users` table
-- [ ] **Subtask 1.2.2.3:** Create policy for `calls` table
-- [ ] **Subtask 1.2.2.4:** Create policy for `leads` table
-- [ ] **Subtask 1.2.2.5:** Create policy for `bookings` table
-- [ ] **Subtask 1.2.2.6:** Create policy for `notifications` table
-- [ ] **Subtask 1.2.2.7:** Create policy for `analytics_daily` table
-- [ ] **Subtask 1.2.2.8:** Apply migration and verify policies in Supabase dashboard
+- [x] **Subtask 1.2.2.2:** Create policy for `users` table
+- [x] **Subtask 1.2.2.3:** Create policy for `calls` table
+- [x] **Subtask 1.2.2.4:** Create policy for `leads` table
+- [x] **Subtask 1.2.2.5:** Create policy for `bookings` table
+- [x] **Subtask 1.2.2.6:** Create policy for `notifications` table
+- [x] **Subtask 1.2.2.7:** Create policy for `analytics_daily` table
+- [x] **Subtask 1.2.2.8:** Apply migration and verify policies in Supabase dashboard
 
 ### Epic 1.3: Prisma Client & Type Generation
 
 #### Task 1.3.1: Generate Prisma Client
-- [ ] **Subtask 1.3.1.1:** Run `npx prisma generate` to create Prisma Client
-- [ ] **Subtask 1.3.1.2:** Verify `node_modules/.prisma/client` is generated
-- [ ] **Subtask 1.3.1.3:** Create `src/lib/prisma.ts` singleton instance:
+- [x] **Subtask 1.3.1.1:** Run `npx prisma generate` to create Prisma Client
+- [x] **Subtask 1.3.1.2:** Verify `node_modules/.prisma/client` is generated
+- [x] **Subtask 1.3.1.3:** Create `src/lib/prisma.ts` singleton instance:
   ```typescript
   import { PrismaClient } from '@prisma/client'
 
@@ -623,10 +623,10 @@ Based on TAD Section 5.1 (lines 1392-1419):
   ```
 
 #### Task 1.3.2: Generate Supabase Types
-- [ ] **Subtask 1.3.2.1:** Install Supabase CLI: `npm install -g supabase`
-- [ ] **Subtask 1.3.2.2:** Generate types: `supabase gen types typescript --project-id <project-id> > src/types/database.types.ts`
-- [ ] **Subtask 1.3.2.3:** Add script to `package.json`: `"types:supabase": "supabase gen types..."`
-- [ ] **Subtask 1.3.2.4:** Verify types are correctly generated
+- [x] **Subtask 1.3.2.1:** Install Supabase CLI: `npm install -g supabase`
+- [x] **Subtask 1.3.2.2:** Generate types: `supabase gen types typescript --project-id <project-id> > src/types/database.types.ts`
+- [x] **Subtask 1.3.2.3:** Add script to `package.json`: `"types:supabase": "supabase gen types..."`
+- [x] **Subtask 1.3.2.4:** Verify types are correctly generated
 
 ### Epic 1.4: Authentication Setup
 
