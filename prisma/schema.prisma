@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+model analytics_daily {
+  id                        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  date                      DateTime @db.Date
+  tenant_id                 String   @db.Uuid
+  created_at                DateTime @default(now()) @db.Timestamptz(6)
+  total_calls               Int      @default(0)
+  successful_calls          Int      @default(0)
+  failed_calls              Int      @default(0)
+  avg_call_duration_seconds Int      @default(0)
+  quotes_given              Int      @default(0)
+  bookings_made             Int      @default(0)
+  leads_captured            Int      @default(0)
+  quote_to_booking_rate     Decimal? @db.Decimal(5, 2)
+  total_cost                Decimal? @db.Decimal(10, 2)
+  avg_cost_per_call         Decimal? @db.Decimal(10, 4)
+  tenants                   tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@unique([date, tenant_id])
+  @@index([date(sort: Desc)], map: "idx_analytics_daily_date")
+  @@index([tenant_id, date(sort: Desc)], map: "idx_analytics_daily_tenant_date")
+}
+
+model bookings {
+  id                       String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at               DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime        @db.Timestamptz(6)
+  tenant_id                String          @db.Uuid
+  call_id                  String?         @db.Uuid
+  lead_id                  String?         @db.Uuid
+  scheduled_at             DateTime        @db.Timestamptz(6)
+  duration_minutes         Int             @default(60)
+  service_type             String          @default("lawn_mowing") @db.VarChar(100)
+  estimated_price          Decimal?        @db.Decimal(10, 2)
+  customer_name            String?         @db.VarChar(255)
+  customer_phone           String?         @db.VarChar(20)
+  customer_email           String?         @db.VarChar(255)
+  property_address         String?
+  property_city            String?         @db.VarChar(100)
+  property_state           String?         @db.VarChar(2)
+  property_zip             String?         @db.VarChar(10)
+  google_calendar_event_id String?         @db.VarChar(255)
+  status                   String          @default("confirmed") @db.VarChar(50)
+  cancellation_reason      String?
+  confirmation_sent        Boolean         @default(false)
+  reminder_sent            Boolean         @default(false)
+  metadata                 Json            @default("{}")
+  notes                    String?
+  calls                    calls?          @relation(fields: [call_id], references: [id])
+  leads                    leads?          @relation(fields: [lead_id], references: [id])
+  tenants                  tenants         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  notifications            notifications[]
+
+  @@index([call_id], map: "idx_bookings_call_id")
+  @@index([lead_id], map: "idx_bookings_lead_id")
+  @@index([scheduled_at], map: "idx_bookings_scheduled_at")
+  @@index([status], map: "idx_bookings_status")
+  @@index([tenant_id], map: "idx_bookings_tenant_id")
+  @@index([tenant_id, scheduled_at], map: "idx_bookings_tenant_scheduled")
+}
+
+model calls {
+  id                  String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at          DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime        @db.Timestamptz(6)
+  tenant_id           String          @db.Uuid
+  vapi_call_id        String?         @unique @db.VarChar(255)
+  phone_number_called String?         @db.VarChar(20)
+  caller_phone_number String?         @db.VarChar(20)
+  started_at          DateTime?       @db.Timestamptz(6)
+  ended_at            DateTime?       @db.Timestamptz(6)
+  duration_seconds    Int?
+  status              String?         @db.VarChar(50)
+  end_reason          String?         @db.VarChar(100)
+  transcript          Json?
+  transcript_text     String?
+  summary             String?
+  outcome             String?         @db.VarChar(50)
+  quote_amount        Decimal?        @db.Decimal(10, 2)
+  booking_made        Boolean         @default(false)
+  lead_captured       Boolean         @default(false)
+  recording_url       String?
+  recording_duration  Int?
+  cost_total          Decimal?        @db.Decimal(10, 4)
+  cost_breakdown      Json?
+  metadata            Json            @default("{}")
+  bookings            bookings[]
+  tenants             tenants         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  leads               leads[]
+  notifications       notifications[]
+  webhooks            webhooks[]
+
+  @@index([caller_phone_number], map: "idx_calls_caller_phone_number")
+  @@index([created_at(sort: Desc)], map: "idx_calls_created_at")
+  @@index([outcome], map: "idx_calls_outcome")
+  @@index([tenant_id, created_at(sort: Desc)], map: "idx_calls_tenant_created")
+  @@index([tenant_id], map: "idx_calls_tenant_id")
+  @@index([vapi_call_id], map: "idx_calls_vapi_call_id")
+}
+
+model leads {
+  id               String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at       DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime   @db.Timestamptz(6)
+  tenant_id        String     @db.Uuid
+  call_id          String?    @db.Uuid
+  phone_number     String     @db.VarChar(20)
+  email            String?    @db.VarChar(255)
+  name             String?    @db.VarChar(255)
+  address          String?
+  city             String?    @db.VarChar(100)
+  state            String?    @db.VarChar(2)
+  zip              String?    @db.VarChar(10)
+  lot_size_sqft    Int?
+  parcel_id        String?    @db.VarChar(100)
+  quote_amount     Decimal?   @db.Decimal(10, 2)
+  quote_frequency  String?    @db.VarChar(50)
+  service_type     String     @default("lawn_mowing") @db.VarChar(100)
+  status           String     @default("new") @db.VarChar(50)
+  source           String     @default("phone_call") @db.VarChar(50)
+  follow_up_needed Boolean    @default(false)
+  follow_up_at     DateTime?  @db.Timestamptz(6)
+  notes            String?
+  metadata         Json       @default("{}")
+  bookings         bookings[]
+  calls            calls?     @relation(fields: [call_id], references: [id])
+  tenants          tenants    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([call_id], map: "idx_leads_call_id")
+  @@index([created_at(sort: Desc)], map: "idx_leads_created_at")
+  @@index([phone_number], map: "idx_leads_phone_number")
+  @@index([status], map: "idx_leads_status")
+  @@index([tenant_id], map: "idx_leads_tenant_id")
+  @@index([tenant_id, status], map: "idx_leads_tenant_status")
+}
+
+model notifications {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  tenant_id           String    @db.Uuid
+  call_id             String?   @db.Uuid
+  booking_id          String?   @db.Uuid
+  type                String    @db.VarChar(50)
+  template            String?   @db.VarChar(100)
+  recipient           String    @db.VarChar(255)
+  subject             String?   @db.VarChar(255)
+  body                String
+  status              String    @default("pending") @db.VarChar(50)
+  provider            String?   @db.VarChar(50)
+  provider_message_id String?   @db.VarChar(255)
+  error_message       String?
+  sent_at             DateTime? @db.Timestamptz(6)
+  delivered_at        DateTime? @db.Timestamptz(6)
+  bookings            bookings? @relation(fields: [booking_id], references: [id])
+  calls               calls?    @relation(fields: [call_id], references: [id])
+  tenants             tenants   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([created_at(sort: Desc)], map: "idx_notifications_created_at")
+  @@index([status], map: "idx_notifications_status")
+  @@index([tenant_id], map: "idx_notifications_tenant_id")
+}
+
+model pricing_templates {
+  id    String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name  String @db.VarChar(100)
+  tiers Json
+}
+
+model tenants {
+  id                               String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at                       DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at                       DateTime          @db.Timestamptz(6)
+  business_name                    String            @db.VarChar(255)
+  owner_name                       String            @db.VarChar(255)
+  email                            String            @unique @db.VarChar(255)
+  phone                            String?           @db.VarChar(20)
+  service_areas                    Json              @default("[]")
+  pricing_tiers                    Json              @default("[]")
+  allows_generic_quotes            Boolean           @default(true)
+  generic_quote_disclaimer         String?           @default("Prices vary by property size. Address needed for exact quote.")
+  google_calendar_refresh_token    String?
+  google_calendar_access_token     String?
+  google_calendar_token_expires_at DateTime?         @db.Timestamptz(6)
+  calendar_id                      String?           @db.VarChar(255)
+  phone_number                     String?           @unique @db.VarChar(20)
+  phone_number_sid                 String?           @db.VarChar(255)
+  vapi_agent_id                    String?           @db.VarChar(255)
+  vapi_phone_number_id             String?           @db.VarChar(255)
+  stripe_customer_id               String?           @db.VarChar(255)
+  stripe_subscription_id           String?           @db.VarChar(255)
+  subscription_status              String            @default("trialing") @db.VarChar(50)
+  subscription_plan                String            @default("starter") @db.VarChar(50)
+  trial_ends_at                    DateTime?         @db.Timestamptz(6)
+  timezone                         String            @default("America/New_York") @db.VarChar(50)
+  business_hours                   Json              @default("{\"monday\": {\"end\": \"17:00\", \"start\": \"09:00\"}}")
+  notification_preferences         Json              @default("{\"sms_new_lead\": true, \"sms_new_booking\": true}")
+  status                           String            @default("active") @db.VarChar(50)
+  onboarding_completed             Boolean           @default(false)
+  onboarding_step                  String            @default("signup") @db.VarChar(50)
+  test_call_completed              Boolean           @default(false)
+  test_call_completed_at           DateTime?         @db.Timestamptz(6)
+  metadata                         Json              @default("{}")
+  analytics_daily                  analytics_daily[]
+  bookings                         bookings[]
+  calls                            calls[]
+  leads                            leads[]
+  notifications                    notifications[]
+  users                            users[]
+  webhooks                         webhooks[]
+
+  @@index([phone_number], map: "idx_tenants_phone_number")
+  @@index([stripe_customer_id], map: "idx_tenants_stripe_customer_id")
+  @@index([email])
+  @@index([status])
+}
+
+model users {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @db.Timestamptz(6)
+  tenant_id     String    @db.Uuid
+  email         String    @unique @db.VarChar(255)
+  role          String    @default("owner") @db.VarChar(50)
+  auth_user_id  String?   @unique @db.Uuid
+  full_name     String?   @db.VarChar(255)
+  avatar_url    String?
+  status        String    @default("active") @db.VarChar(50)
+  last_login_at DateTime? @db.Timestamptz(6)
+  tenants       tenants   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([auth_user_id], map: "idx_users_auth_user_id")
+  @@index([tenant_id], map: "idx_users_tenant_id")
+  @@index([email])
+}
+
+model webhooks {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  source        String    @db.VarChar(50)
+  event_type    String    @db.VarChar(100)
+  payload       Json
+  headers       Json?
+  processed     Boolean   @default(false)
+  processed_at  DateTime? @db.Timestamptz(6)
+  error_message String?
+  tenant_id     String?   @db.Uuid
+  call_id       String?   @db.Uuid
+  calls         calls?    @relation(fields: [call_id], references: [id])
+  tenants       tenants?  @relation(fields: [tenant_id], references: [id])
+
+  @@index([created_at(sort: Desc)], map: "idx_webhooks_created_at")
+  @@index([event_type], map: "idx_webhooks_event_type")
+  @@index([processed], map: "idx_webhooks_processed")
+  @@index([source], map: "idx_webhooks_source")
+}

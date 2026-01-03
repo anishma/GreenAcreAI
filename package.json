@@ -11,6 +11,9 @@
     "type-check": "tsc --noEmit",
     "test": "echo \"No tests yet\" && exit 0"
   },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/anishma/GreenAcreAI.git"
@@ -71,6 +74,7 @@
     "@types/node": "^20.19.27",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.2"
   }
 }
