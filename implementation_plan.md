@@ -715,7 +715,7 @@ Based on TAD Section 5.1 (lines 1392-1419):
 ### Epic 2.1: tRPC Setup
 
 #### Task 2.1.1: Initialize tRPC Server
-- [ ] **Subtask 2.1.1.1:** Create `src/lib/trpc/server.ts`:
+- [x] **Subtask 2.1.1.1:** Create `src/lib/trpc/server.ts`:
   ```typescript
   import { initTRPC, TRPCError } from '@trpc/server'
   import { Context } from './context'
@@ -739,10 +739,10 @@ Based on TAD Section 5.1 (lines 1392-1419):
     })
   })
   ```
-- [ ] **Subtask 2.1.1.2:** Install `superjson` for serialization: `npm install superjson`
+- [x] **Subtask 2.1.1.2:** Install `superjson` for serialization: `npm install superjson`
 
 #### Task 2.1.2: Create tRPC Context
-- [ ] **Subtask 2.1.2.1:** Create `src/lib/trpc/context.ts`:
+- [x] **Subtask 2.1.2.1:** Create `src/lib/trpc/context.ts`:
   ```typescript
   import { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch'
   import { createClient } from '@/lib/supabase/server'
@@ -773,7 +773,7 @@ Based on TAD Section 5.1 (lines 1392-1419):
   ```
 
 #### Task 2.1.3: Create Root Router
-- [ ] **Subtask 2.1.3.1:** Create `src/lib/trpc/root.ts`:
+- [x] **Subtask 2.1.3.1:** Create `src/lib/trpc/root.ts` (created as `src/lib/trpc/routers/_app.ts`):
   ```typescript
   import { router } from './server'
   import { authRouter } from './routers/auth'
@@ -796,7 +796,7 @@ Based on TAD Section 5.1 (lines 1392-1419):
   ```
 
 #### Task 2.1.4: Create Initial Routers (Stubs)
-- [ ] **Subtask 2.1.4.1:** Create `src/lib/trpc/routers/auth.ts` with basic signup/login procedures
+- [x] **Subtask 2.1.4.1:** Create `src/lib/trpc/routers/user.ts` with basic test procedures (hello, getProfile)
 - [ ] **Subtask 2.1.4.2:** Create `src/lib/trpc/routers/tenant.ts` (will be filled in Phase 3)
 - [ ] **Subtask 2.1.4.3:** Create `src/lib/trpc/routers/call.ts` (stub)
 - [ ] **Subtask 2.1.4.4:** Create `src/lib/trpc/routers/lead.ts` (stub)
@@ -804,7 +804,7 @@ Based on TAD Section 5.1 (lines 1392-1419):
 - [ ] **Subtask 2.1.4.6:** Create `src/lib/trpc/routers/analytics.ts` (stub)
 
 #### Task 2.1.5: Create tRPC API Route Handler
-- [ ] **Subtask 2.1.5.1:** Create `src/app/api/trpc/[trpc]/route.ts`:
+- [x] **Subtask 2.1.5.1:** Create `src/app/api/trpc/[trpc]/route.ts`:
   ```typescript
   import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
   import { appRouter } from '@/lib/trpc/root'
@@ -822,14 +822,14 @@ Based on TAD Section 5.1 (lines 1392-1419):
   ```
 
 #### Task 2.1.6: Create tRPC Client
-- [ ] **Subtask 2.1.6.1:** Create `src/lib/trpc/client.ts`:
+- [x] **Subtask 2.1.6.1:** Create `src/lib/trpc/client.ts`:
   ```typescript
   import { createTRPCReact } from '@trpc/react-query'
   import type { AppRouter } from './root'
 
   export const trpc = createTRPCReact<AppRouter>()
   ```
-- [ ] **Subtask 2.1.6.2:** Create `src/lib/trpc/provider.tsx` (React Query + tRPC Provider):
+- [x] **Subtask 2.1.6.2:** Create `src/lib/trpc/Provider.tsx` (React Query + tRPC Provider):
   ```typescript
   'use client'
 
@@ -863,7 +863,7 @@ Based on TAD Section 5.1 (lines 1392-1419):
 ### Epic 2.2: Layout & UI Components
 
 #### Task 2.2.1: Create Root Layout
-- [ ] **Subtask 2.2.1.1:** Update `src/app/layout.tsx`:
+- [x] **Subtask 2.2.1.1:** Update `src/app/layout.tsx` (TRPCProvider already added):
   ```typescript
   import type { Metadata } from 'next'
   import { Inter } from 'next/font/google'
