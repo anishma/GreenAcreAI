@@ -50,34 +50,37 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // TEMPORARY: All routes unprotected for UI testing while OAuth is being debugged
+  // TODO: Re-enable route protection once OAuth login is fixed
+
   // Protected routes: redirect to login if not authenticated
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/signup') &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    !request.nextUrl.pathname.startsWith('/api/trpc') &&
-    !request.nextUrl.pathname.startsWith('/api/webhooks') &&
-    !request.nextUrl.pathname.startsWith('/test-trpc') &&
-    request.nextUrl.pathname !== '/'
-  ) {
-    // Redirect to login page
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    url.searchParams.set('redirect', request.nextUrl.pathname)
-    return NextResponse.redirect(url)
-  }
+  // if (
+  //   !user &&
+  //   !request.nextUrl.pathname.startsWith('/login') &&
+  //   !request.nextUrl.pathname.startsWith('/signup') &&
+  //   !request.nextUrl.pathname.startsWith('/auth') &&
+  //   !request.nextUrl.pathname.startsWith('/api/trpc') &&
+  //   !request.nextUrl.pathname.startsWith('/api/webhooks') &&
+  //   !request.nextUrl.pathname.startsWith('/test-trpc') &&
+  //   request.nextUrl.pathname !== '/'
+  // ) {
+  //   // Redirect to login page
+  //   const url = request.nextUrl.clone()
+  //   url.pathname = '/login'
+  //   url.searchParams.set('redirect', request.nextUrl.pathname)
+  //   return NextResponse.redirect(url)
+  // }
 
   // Redirect authenticated users away from login/signup pages
-  if (
-    user &&
-    (request.nextUrl.pathname.startsWith('/login') ||
-      request.nextUrl.pathname.startsWith('/signup'))
-  ) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
+  // if (
+  //   user &&
+  //   (request.nextUrl.pathname.startsWith('/login') ||
+  //     request.nextUrl.pathname.startsWith('/signup'))
+  // ) {
+  //   const url = request.nextUrl.clone()
+  //   url.pathname = '/dashboard'
+  //   return NextResponse.redirect(url)
+  // }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:

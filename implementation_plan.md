@@ -891,10 +891,12 @@ Based on TAD Section 5.1 (lines 1392-1419):
     )
   }
   ```
-- [ ] **Subtask 2.2.1.2:** Update `src/app/globals.css` with Tailwind directives and custom styles
+- [x] **Subtask 2.2.1.2:** Update `src/styles/globals.css` with Tailwind directives, custom green theme, and scrollbar styles
 
 #### Task 2.2.2: Create Auth Layout
-- [ ] **Subtask 2.2.2.1:** Create `src/app/(auth)/layout.tsx`:
+- [x] **Subtask 2.2.2.1:** Create `src/app/(auth)/layout.tsx` with centered card design and GreenAcre branding
+- [x] **Subtask 2.2.2.2:** Update `src/app/(auth)/login/page.tsx` to use shadcn Button component
+- [x] **Subtask 2.2.2.3:** Create `src/app/(auth)/signup/page.tsx` with similar design
   ```typescript
   export default function AuthLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -908,9 +910,10 @@ Based on TAD Section 5.1 (lines 1392-1419):
   ```
 
 #### Task 2.2.3: Create Dashboard Layout
-- [ ] **Subtask 2.2.3.1:** Create `src/components/layout/header.tsx` (top navigation bar)
-- [ ] **Subtask 2.2.3.2:** Create `src/components/layout/sidebar.tsx` (side navigation with links)
-- [ ] **Subtask 2.2.3.3:** Create `src/app/(dashboard)/layout.tsx`:
+- [x] **Subtask 2.2.3.1:** Create `src/components/layout/header.tsx` (top navigation bar with notifications, settings, user menu)
+- [x] **Subtask 2.2.3.2:** Create `src/components/layout/sidebar.tsx` (side navigation with 7 nav links: Dashboard, Calls, Leads, Bookings, Messages, Analytics, Settings)
+- [x] **Subtask 2.2.3.3:** Create `src/app/(dashboard)/layout.tsx` with full-height flex layout
+- [x] **Subtask 2.2.3.4:** Update `src/app/(dashboard)/dashboard/page.tsx` with stat cards and account info
   ```typescript
   import { Header } from '@/components/layout/header'
   import { Sidebar } from '@/components/layout/sidebar'
@@ -958,7 +961,8 @@ Based on TAD Section 5.1 (lines 1392-1419):
 ### Epic 2.3: Global State Management
 
 #### Task 2.3.1: Create Zustand Store
-- [ ] **Subtask 2.3.1.1:** Create `src/store/app-state.ts`:
+- [x] **Subtask 2.3.1.1:** Create `src/store/app-state.ts` with sidebar toggle, tenant state, and user profile management
+- [x] **Subtask 2.3.1.2:** Integrate Zustand store into sidebar and header components for collapsible sidebar functionality
   ```typescript
   import { create } from 'zustand'
   import type { Tenant } from '@prisma/client'

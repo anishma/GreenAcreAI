@@ -13,16 +13,21 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login')
-  }
+  // TEMPORARY: Auth is disabled for UI testing
+  // if (!user) {
+  //   redirect('/login')
+  // }
 
-  // Fetch user's tenant information
-  const { data: dbUser } = await supabase
-    .from('users')
-    .select('tenant_id, email, role, full_name')
-    .eq('auth_user_id', user.id)
-    .single()
+  // Fetch user's tenant information (only if authenticated)
+  let dbUser = null
+  if (user) {
+    const result = await supabase
+      .from('users')
+      .select('tenant_id, email, role, full_name')
+      .eq('auth_user_id', user.id)
+      .single()
+    dbUser = result.data
+  }
 
   // Mock stats - will be replaced with real data later
   const stats = [
@@ -58,7 +63,7 @@ export default async function DashboardPage() {
       <div>
         <h2 className="text-3xl font-bold">Welcome back!</h2>
         <p className="text-muted-foreground mt-1">
-          {dbUser?.full_name || user.email}
+          {dbUser?.full_name || user?.email || 'Guest (Auth Disabled for Testing)'}
         </p>
       </div>
 
@@ -94,7 +99,7 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="font-medium">Email:</span>
-              <p className="text-muted-foreground">{user.email}</p>
+              <p className="text-muted-foreground">{user?.email || 'Not authenticated'}</p>
             </div>
             <div>
               <span className="font-medium">Role:</span>
@@ -109,7 +114,7 @@ export default async function DashboardPage() {
             <div>
               <span className="font-medium">Status:</span>
               <p className="text-muted-foreground">
-                {dbUser ? 'Active' : 'Needs onboarding'}
+                {user ? (dbUser ? 'Active' : 'Needs onboarding') : 'Testing mode (no auth)'}
               </p>
             </div>
           </div>

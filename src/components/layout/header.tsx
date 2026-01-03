@@ -9,11 +9,13 @@
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { Bell, Settings, User } from 'lucide-react'
+import { useAppState } from '@/store/app-state'
+import { Bell, Settings, User, Menu } from 'lucide-react'
 
 export function Header() {
   const router = useRouter()
   const supabase = createClient()
+  const { sidebarOpen, toggleSidebar } = useAppState()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -22,8 +24,13 @@ export function Header() {
 
   return (
     <header className="h-16 border-b bg-card px-6 flex items-center justify-between">
-      {/* Page Title / Breadcrumbs */}
-      <div>
+      {/* Left Side - Hamburger (when sidebar collapsed) + Page Title */}
+      <div className="flex items-center gap-4">
+        {!sidebarOpen && (
+          <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
         <h1 className="text-xl font-semibold">Dashboard</h1>
       </div>
 
