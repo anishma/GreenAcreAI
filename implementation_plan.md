@@ -475,7 +475,7 @@ NODE_ENV="development"
 #### Task 1.1.2: Define Prisma Schema - Core Tables
 Based on technical-architecture.md Section 5.1:
 
-- [ ] **Subtask 1.1.2.1:** Create `Tenant` model in `schema.prisma`
+- [x] **Subtask 1.1.2.1:** Create `Tenant` model in `schema.prisma`
   ```prisma
   model Tenant {
     id                              String   @id @default(uuid()) @db.Uuid
@@ -797,11 +797,11 @@ Based on TAD Section 5.1 (lines 1392-1419):
 
 #### Task 2.1.4: Create Initial Routers (Stubs)
 - [x] **Subtask 2.1.4.1:** Create `src/lib/trpc/routers/user.ts` with basic test procedures (hello, getProfile)
-- [ ] **Subtask 2.1.4.2:** Create `src/lib/trpc/routers/tenant.ts` (will be filled in Phase 3)
-- [ ] **Subtask 2.1.4.3:** Create `src/lib/trpc/routers/call.ts` (stub)
-- [ ] **Subtask 2.1.4.4:** Create `src/lib/trpc/routers/lead.ts` (stub)
-- [ ] **Subtask 2.1.4.5:** Create `src/lib/trpc/routers/booking.ts` (stub)
-- [ ] **Subtask 2.1.4.6:** Create `src/lib/trpc/routers/analytics.ts` (stub)
+- [x] **Subtask 2.1.4.2:** Create `src/lib/trpc/routers/tenant.ts` (will be filled in Phase 3)
+- [x] **Subtask 2.1.4.3:** Create `src/lib/trpc/routers/call.ts` (stub)
+- [x] **Subtask 2.1.4.4:** Create `src/lib/trpc/routers/lead.ts` (stub)
+- [x] **Subtask 2.1.4.5:** Create `src/lib/trpc/routers/booking.ts` (stub)
+- [x] **Subtask 2.1.4.6:** Create `src/lib/trpc/routers/analytics.ts` (stub)
 
 #### Task 2.1.5: Create tRPC API Route Handler
 - [x] **Subtask 2.1.5.1:** Create `src/app/api/trpc/[trpc]/route.ts`:

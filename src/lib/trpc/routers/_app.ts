@@ -7,15 +7,19 @@
 
 import { router } from '../server'
 import { userRouter } from './user'
+import { tenantRouter } from './tenant'
+import { callRouter } from './call'
+import { leadRouter } from './lead'
+import { bookingRouter } from './booking'
+import { analyticsRouter } from './analytics'
 
 export const appRouter = router({
   user: userRouter,
-  // Future routers will be added here:
-  // call: callRouter,
-  // lead: leadRouter,
-  // booking: bookingRouter,
-  // tenant: tenantRouter,
-  // analytics: analyticsRouter,
+  tenant: tenantRouter,
+  call: callRouter,
+  lead: leadRouter,
+  booking: bookingRouter,
+  analytics: analyticsRouter,
 })
 
 // Export type definition of API
