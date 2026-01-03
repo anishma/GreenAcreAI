@@ -56,7 +56,9 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/signup') &&
     !request.nextUrl.pathname.startsWith('/auth') &&
+    !request.nextUrl.pathname.startsWith('/api/trpc') &&
     !request.nextUrl.pathname.startsWith('/api/webhooks') &&
+    !request.nextUrl.pathname.startsWith('/test-trpc') &&
     request.nextUrl.pathname !== '/'
   ) {
     // Redirect to login page

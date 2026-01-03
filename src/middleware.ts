@@ -18,7 +18,9 @@
  * - /login
  * - /signup
  * - /auth/*
+ * - /api/trpc/* (tRPC API routes - auth handled by procedures)
  * - /api/webhooks/*
+ * - /test-trpc (testing endpoint)
  */
 
 import { updateSession } from '@/lib/supabase/middleware'
