@@ -347,16 +347,21 @@ npm install \
 - [x] **Subtask 0.3.1.5:** Set up Supabase Storage bucket: `call-recordings` (public: false)
 
 #### Task 0.3.2: Vercel Project Setup
-- [ ] **Subtask 0.3.2.1:** Create Vercel account and connect GitHub repository
-- [ ] **Subtask 0.3.2.2:** Configure Vercel project settings (Framework Preset: Next.js)
-- [ ] **Subtask 0.3.2.3:** Set up preview deployments for all branches
-- [ ] **Subtask 0.3.2.4:** Note down Vercel project URL
+- [x] **Subtask 0.3.2.1:** Create Vercel account and connect GitHub repository
+- [x] **Subtask 0.3.2.2:** Configure Vercel project settings (Framework Preset: Next.js)
+- [ ] **Subtask 0.3.2.3:** Set up preview deployments for all branches (PENDING)
+- [x] **Subtask 0.3.2.4:** Note down Vercel project URL
+- [x] **Subtask 0.3.2.5:** Added environment variables to Vercel
+- [x] **Subtask 0.3.2.6:** Generated application secrets (NEXTAUTH_SECRET, JWT_SECRET, ENCRYPTION_KEY)
+- [ ] **Subtask 0.3.2.7:** Add GitHub Secrets (VERCEL_TOKEN, PROJECT_ID, ORG_ID) (PENDING)
 
 #### Task 0.3.3: VAPI Account Setup
-- [ ] **Subtask 0.3.3.1:** Create VAPI account at vapi.ai
-- [ ] **Subtask 0.3.3.2:** Generate API key from dashboard
-- [ ] **Subtask 0.3.3.3:** Explore VAPI dashboard to understand agent configuration
-- [ ] **Subtask 0.3.3.4:** Note webhook endpoint requirements
+- [x] **Subtask 0.3.3.1:** Create VAPI account at vapi.ai
+- [x] **Subtask 0.3.3.2:** Generate API key from dashboard (use existing private key)
+- [x] **Subtask 0.3.3.3:** Understand VAPI's role in architecture (STT/TTS only)
+- [ ] **Subtask 0.3.3.4:** Copy webhook secret (PENDING)
+- [ ] **Subtask 0.3.3.5:** Add payment method (PENDING)
+- [ ] **Subtask 0.3.3.6:** Set up usage alerts (PENDING)
 
 #### Task 0.3.4: Stripe Account Setup
 - [ ] **Subtask 0.3.4.1:** Create Stripe account (Test mode)
@@ -365,23 +370,27 @@ npm install \
 - [ ] **Subtask 0.3.4.4:** Create product and pricing structure (Starter plan: $99/mo)
 
 #### Task 0.3.5: OpenAI API Setup
-- [ ] **Subtask 0.3.5.1:** Create OpenAI account and add payment method
-- [ ] **Subtask 0.3.5.2:** Generate API key for GPT-4 Turbo access
-- [ ] **Subtask 0.3.5.3:** Set up usage limits and alerts
+- [x] **Subtask 0.3.5.1:** Create OpenAI account and add payment method
+- [x] **Subtask 0.3.5.2:** Generate API key for GPT-4o access
+- [x] **Subtask 0.3.5.3:** Set up usage limits and alerts
+- [ ] **Subtask 0.3.5.4:** Verify GPT-4o model access (PENDING - CRITICAL)
 
 #### Task 0.3.6: Regrid API Setup (Property Data)
-- [ ] **Subtask 0.3.6.1:** Sign up for Regrid API access
-- [ ] **Subtask 0.3.6.2:** Generate API key
-- [ ] **Subtask 0.3.6.3:** Test API with sample address lookup
-- [ ] **Subtask 0.3.6.4:** Understand rate limits and pricing
+- [x] **Subtask 0.3.6.1:** Sign up for Regrid API access (30-day trial)
+- [x] **Subtask 0.3.6.2:** Generate API key
+- [x] **Subtask 0.3.6.3:** Test API with sample address lookup (Dallas County, TX)
+- [x] **Subtask 0.3.6.4:** Understand rate limits and pricing (2,000 parcels, 7 trial counties)
+- [x] **Subtask 0.3.6.5:** Verified ll_gissqft field returns lot size in square feet
 
 #### Task 0.3.7: Google Cloud Console Setup (Calendar API)
-- [ ] **Subtask 0.3.7.1:** Create Google Cloud project
-- [ ] **Subtask 0.3.7.2:** Enable Google Calendar API
-- [ ] **Subtask 0.3.7.3:** Configure OAuth 2.0 consent screen
-- [ ] **Subtask 0.3.7.4:** Create OAuth 2.0 credentials (Web application)
-- [ ] **Subtask 0.3.7.5:** Add authorized redirect URIs
-- [ ] **Subtask 0.3.7.6:** Note down Client ID and Client Secret
+- [x] **Subtask 0.3.7.1:** Create Google Cloud project (GreenAcreAI)
+- [x] **Subtask 0.3.7.2:** Enable Google Calendar API
+- [x] **Subtask 0.3.7.3:** Configure OAuth 2.0 consent screen (External, Testing mode)
+- [x] **Subtask 0.3.7.4:** Create OAuth 2.0 credentials (Web application)
+- [x] **Subtask 0.3.7.5:** Add authorized redirect URIs (localhost and Vercel)
+- [x] **Subtask 0.3.7.6:** Note down Client ID and Client Secret
+- [x] **Subtask 0.3.7.7:** Configure Google OAuth in Supabase
+- [x] **Subtask 0.3.7.8:** Add required Calendar API scopes
 
 #### Task 0.3.8: Sentry Setup (Error Tracking)
 - [ ] **Subtask 0.3.8.1:** Create Sentry account and project
