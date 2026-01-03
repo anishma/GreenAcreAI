@@ -631,14 +631,14 @@ Based on TAD Section 5.1 (lines 1392-1419):
 ### Epic 1.4: Authentication Setup
 
 #### Task 1.4.1: Create Supabase Client Utilities
-- [ ] **Subtask 1.4.1.1:** Create `src/lib/supabase/client.ts` (client-side):
+- [x] **Subtask 1.4.1.1:** Create `src/lib/supabase/client.ts` (client-side):
   ```typescript
   import { createClientComponentClient } from '@supabase/supabase-js'
   import type { Database } from '@/types/database.types'
 
   export const createClient = () => createClientComponentClient<Database>()
   ```
-- [ ] **Subtask 1.4.1.2:** Create `src/lib/supabase/server.ts` (server-side, for Server Components):
+- [x] **Subtask 1.4.1.2:** Create `src/lib/supabase/server.ts` (server-side, for Server Components):
   ```typescript
   import { createServerComponentClient } from '@supabase/supabase-js'
   import { cookies } from 'next/headers'
@@ -646,7 +646,7 @@ Based on TAD Section 5.1 (lines 1392-1419):
 
   export const createClient = () => createServerComponentClient<Database>({ cookies })
   ```
-- [ ] **Subtask 1.4.1.3:** Create `src/lib/supabase/middleware.ts` (for middleware auth):
+- [x] **Subtask 1.4.1.3:** Create `src/lib/supabase/middleware.ts` (for middleware auth):
   ```typescript
   import { createMiddlewareClient } from '@supabase/supabase-js'
   import { NextRequest, NextResponse } from 'next/server'
@@ -658,18 +658,18 @@ Based on TAD Section 5.1 (lines 1392-1419):
   ```
 
 #### Task 1.4.2: Create Auth Middleware
-- [ ] **Subtask 1.4.2.1:** Create `src/middleware.ts` for Next.js middleware
-- [ ] **Subtask 1.4.2.2:** Implement session refresh logic using Supabase middleware client
-- [ ] **Subtask 1.4.2.3:** Protect dashboard routes (redirect to login if not authenticated)
-- [ ] **Subtask 1.4.2.4:** Allow public routes: `/`, `/login`, `/signup`, `/api/webhooks/*`
+- [x] **Subtask 1.4.2.1:** Create `src/middleware.ts` for Next.js middleware
+- [x] **Subtask 1.4.2.2:** Implement session refresh logic using Supabase middleware client
+- [x] **Subtask 1.4.2.3:** Protect dashboard routes (redirect to login if not authenticated)
+- [x] **Subtask 1.4.2.4:** Allow public routes: `/`, `/login`, `/signup`, `/api/webhooks/*`
 
 #### Task 1.4.3: Create Auth API Routes
-- [ ] **Subtask 1.4.3.1:** Create `src/app/api/auth/callback/route.ts` (OAuth callback handler)
-- [ ] **Subtask 1.4.3.2:** Create `src/app/api/auth/signout/route.ts` (Sign out handler)
+- [x] **Subtask 1.4.3.1:** Create `src/app/api/auth/callback/route.ts` (OAuth callback handler)
+- [x] **Subtask 1.4.3.2:** Create `src/app/api/auth/signout/route.ts` (Sign out handler)
 - [ ] **Subtask 1.4.3.3:** Test OAuth flow with Google (using test Google account)
 
 #### Task 1.4.4: Create Auth Context & Hooks
-- [ ] **Subtask 1.4.4.1:** Create `src/lib/hooks/use-user.ts`:
+- [x] **Subtask 1.4.4.1:** Create `src/lib/hooks/use-user.ts`:
   ```typescript
   import { createClient } from '@/lib/supabase/client'
   import { useEffect, useState } from 'react'
@@ -692,7 +692,7 @@ Based on TAD Section 5.1 (lines 1392-1419):
     return { user, loading }
   }
   ```
-- [ ] **Subtask 1.4.4.2:** Create `src/lib/hooks/use-tenant.ts` to fetch tenant data based on user
+- [ ] **Subtask 1.4.4.2:** Create `src/lib/hooks/use-tenant.ts` to fetch tenant data based on user (DEFERRED - will create when needed)
 
 ---
 
