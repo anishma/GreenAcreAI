@@ -1098,18 +1098,18 @@ Based on TAD Section 6.2 (API Design):
 - [x] **Subtask 3.2.3.5:** On success: navigate to step 4
 
 #### Task 3.2.4: Step 4 - Phone Number Setup
-- [ ] **Subtask 3.2.4.1:** Create `src/app/(onboarding)/step-4-phone/page.tsx`
-- [ ] **Subtask 3.2.4.2:** Create `src/components/onboarding/phone-setup.tsx`:
+- [x] **Subtask 3.2.4.1:** Create `src/app/(onboarding)/step-4-phone/page.tsx`
+- [x] **Subtask 3.2.4.2:** Create `src/components/onboarding/phone-setup.tsx`:
   - Display: "We'll provision a phone number for you"
   - Area code preference input (optional)
   - "Provision Number" button
-- [ ] **Subtask 3.2.4.3:** Create VAPI client: `src/lib/vapi/client.ts`
-- [ ] **Subtask 3.2.4.4:** Implement `tenant.provisionPhoneNumber` procedure:
+- [x] **Subtask 3.2.4.3:** Create VAPI client: `src/lib/vapi/client.ts`
+- [x] **Subtask 3.2.4.4:** Implement `tenant.provisionPhoneNumber` procedure:
   - Call VAPI API to create phone number
   - Create VAPI agent (configured to use custom LLM endpoint)
   - Link phone number to agent
   - Save `phoneNumber`, `phoneNumberSid`, `vapiAgentId`, `vapiPhoneNumberId` to tenant
-- [ ] **Subtask 3.2.4.5:** On success: navigate to step 5
+- [x] **Subtask 3.2.4.5:** On success: navigate to step 5
 
 #### Task 3.2.5: Step 5 - Test Call & Go Live
 - [ ] **Subtask 3.2.5.1:** Create `src/app/(onboarding)/step-5-test/page.tsx`

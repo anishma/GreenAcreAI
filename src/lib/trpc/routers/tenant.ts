@@ -17,6 +17,7 @@ import {
 } from '@/lib/validations/tenant'
 import { exchangeCodeForTokens, getPrimaryCalendarId } from '@/lib/google/oauth'
 import { encrypt } from '@/lib/utils/encryption'
+import { purchasePhoneNumber, createAgent, linkPhoneNumberToAgent } from '@/lib/vapi/client'
 
 export const tenantRouter = router({
   /**
@@ -46,6 +47,11 @@ export const tenantRouter = router({
         status: true,
         onboarding_completed: true,
         onboarding_step: true,
+        phone_number: true,
+        phone_number_sid: true,
+        vapi_agent_id: true,
+        vapi_phone_number_id: true,
+        calendar_id: true,
         created_at: true,
         updated_at: true,
       },
@@ -294,4 +300,74 @@ export const tenantRouter = router({
 
     return { success: true }
   }),
+
+  /**
+   * Provision phone number
+   * Purchases phone number from VAPI, creates agent, and links them together
+   */
+  provisionPhoneNumber: protectedProcedure
+    .input(
+      z.object({
+        areaCode: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'No tenant associated with user',
+        })
+      }
+
+      try {
+        // Get current tenant info for agent name
+        const tenant = await ctx.prisma.tenants.findUnique({
+          where: { id: ctx.tenantId },
+          select: { business_name: true },
+        })
+
+        if (!tenant) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Tenant not found',
+          })
+        }
+
+        // Step 1: Purchase phone number from VAPI
+        const phoneNumber = await purchasePhoneNumber(input.areaCode)
+
+        // Step 2: Create VAPI agent
+        const agent = await createAgent({
+          name: `${tenant.business_name} AI Assistant`,
+          tenantId: ctx.tenantId,
+        })
+
+        // Step 3: Link phone number to agent
+        await linkPhoneNumberToAgent(phoneNumber.id, agent.id)
+
+        // Step 4: Update tenant with phone number and agent info
+        const updatedTenant = await ctx.prisma.tenants.update({
+          where: { id: ctx.tenantId },
+          data: {
+            phone_number: phoneNumber.number,
+            phone_number_sid: phoneNumber.id,
+            vapi_agent_id: agent.id,
+            vapi_phone_number_id: phoneNumber.id,
+            updated_at: new Date(),
+          },
+        })
+
+        return {
+          success: true,
+          phoneNumber: phoneNumber.number,
+          agentId: agent.id,
+        }
+      } catch (error) {
+        console.error('Error provisioning phone number:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to provision phone number',
+        })
+      }
+    }),
 })
