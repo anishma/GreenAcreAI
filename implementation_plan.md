@@ -1056,16 +1056,16 @@ Based on TAD Section 6.2 (API Design):
 - [x] **Subtask 3.2.1.4:** On submit: call `tenant.updateBusinessInfo`, then navigate to step 2
 
 #### Task 3.2.2: Step 2 - Pricing Configuration
-- [ ] **Subtask 3.2.2.1:** Create `src/app/(onboarding)/step-2-pricing/page.tsx`
-- [ ] **Subtask 3.2.2.2:** Create `src/components/onboarding/pricing-form.tsx`:
+- [x] **Subtask 3.2.2.1:** Create `src/app/(onboarding)/step-2-pricing/page.tsx`
+- [x] **Subtask 3.2.2.2:** Create `src/components/onboarding/pricing-form.tsx`:
   - Load default pricing template
   - Display pricing tier editor (min_sqft, max_sqft, weekly_price, biweekly_price)
   - Add/remove tier functionality
   - Validate no gaps in tiers
   - Toggle: "Allow generic quotes without address"
   - Generic quote disclaimer text
-- [ ] **Subtask 3.2.2.3:** Implement dynamic tier validation (ensure continuous coverage)
-- [ ] **Subtask 3.2.2.4:** On submit: call `tenant.updatePricing`, navigate to step 3
+- [x] **Subtask 3.2.2.3:** Implement dynamic tier validation (ensure continuous coverage)
+- [x] **Subtask 3.2.2.4:** On submit: call `tenant.updatePricing`, navigate to step 3
 
 #### Task 3.2.3: Step 3 - Google Calendar Integration
 - [ ] **Subtask 3.2.3.1:** Create `src/app/(onboarding)/step-3-calendar/page.tsx`
