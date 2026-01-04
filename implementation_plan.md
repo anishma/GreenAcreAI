@@ -1045,15 +1045,15 @@ Based on TAD Section 6.2 (API Design):
 ### Epic 3.2: Onboarding Flow Pages
 
 #### Task 3.2.1: Step 1 - Business Information
-- [ ] **Subtask 3.2.1.1:** Create `src/app/(onboarding)/step-1-business/page.tsx`
-- [ ] **Subtask 3.2.1.2:** Create `src/components/onboarding/business-form.tsx`:
+- [x] **Subtask 3.2.1.1:** Create `src/app/(onboarding)/step-1-business/page.tsx`
+- [x] **Subtask 3.2.1.2:** Create `src/components/onboarding/business-form.tsx`:
   - Business Name (required)
   - Owner Name (required)
   - Email (pre-filled from auth)
   - Phone (optional)
   - Service Areas (ZIP codes input, multi-select)
-- [ ] **Subtask 3.2.1.3:** Implement form validation with Zod + react-hook-form
-- [ ] **Subtask 3.2.1.4:** On submit: call `tenant.updateBusinessInfo`, then navigate to step 2
+- [x] **Subtask 3.2.1.3:** Implement form validation with Zod + react-hook-form
+- [x] **Subtask 3.2.1.4:** On submit: call `tenant.updateBusinessInfo`, then navigate to step 2
 
 #### Task 3.2.2: Step 2 - Pricing Configuration
 - [ ] **Subtask 3.2.2.1:** Create `src/app/(onboarding)/step-2-pricing/page.tsx`
