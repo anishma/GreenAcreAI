@@ -1112,16 +1112,16 @@ Based on TAD Section 6.2 (API Design):
 - [x] **Subtask 3.2.4.5:** On success: navigate to step 5
 
 #### Task 3.2.5: Step 5 - Test Call & Go Live
-- [ ] **Subtask 3.2.5.1:** Create `src/app/(onboarding)/step-5-test/page.tsx`
-- [ ] **Subtask 3.2.5.2:** Create `src/components/onboarding/test-call.tsx`:
+- [x] **Subtask 3.2.5.1:** Create `src/app/(onboarding)/step-5-test/page.tsx`
+- [x] **Subtask 3.2.5.2:** Create `src/components/onboarding/test-call.tsx`:
   - Display provisioned phone number
   - "Call this number to test" instructions
   - Real-time call status indicator (waiting for call → call detected → call completed)
   - "Mark as Complete" button (manual fallback)
-- [ ] **Subtask 3.2.5.3:** Implement real-time call detection:
+- [x] **Subtask 3.2.5.3:** Implement real-time call detection:
   - Subscribe to `calls` table changes via Supabase Realtime
   - When new call with tenant_id matches → show success
-- [ ] **Subtask 3.2.5.4:** On test call completion:
+- [x] **Subtask 3.2.5.4:** On test call completion:
   - Update tenant: `testCallCompleted = true`, `testCallCompletedAt = now()`, `onboardingCompleted = true`
   - Navigate to dashboard
 

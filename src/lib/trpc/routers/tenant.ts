@@ -370,4 +370,30 @@ export const tenantRouter = router({
         })
       }
     }),
+
+  /**
+   * Complete test call and onboarding
+   * Marks test call as completed and finalizes onboarding
+   */
+  completeTestCall: protectedProcedure.mutation(async ({ ctx }) => {
+    if (!ctx.tenantId) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'No tenant associated with user',
+      })
+    }
+
+    const tenant = await ctx.prisma.tenants.update({
+      where: { id: ctx.tenantId },
+      data: {
+        test_call_completed: true,
+        test_call_completed_at: new Date(),
+        onboarding_completed: true,
+        onboarding_step: 'complete',
+        updated_at: new Date(),
+      },
+    })
+
+    return { success: true }
+  }),
 })
