@@ -1068,34 +1068,14 @@ Based on TAD Section 6.2 (API Design):
 - [x] **Subtask 3.2.2.4:** On submit: call `tenant.updatePricing`, navigate to step 3
 
 #### Task 3.2.3: Step 3 - Google Calendar Integration
-- [ ] **Subtask 3.2.3.1:** Create `src/app/(onboarding)/step-3-calendar/page.tsx`
-- [ ] **Subtask 3.2.3.2:** Create `src/components/onboarding/calendar-connect.tsx`:
+- [x] **Subtask 3.2.3.1:** Create `src/app/(onboarding)/step-3-calendar/page.tsx`
+- [x] **Subtask 3.2.3.2:** Create `src/components/onboarding/calendar-connect.tsx`:
   - "Connect Google Calendar" button
   - OAuth flow trigger
   - Success state display (calendar name, disconnect option)
-- [ ] **Subtask 3.2.3.3:** Implement `tenant.connectCalendar` procedure in tRPC router:
-  ```typescript
-  connectCalendar: protectedProcedure
-    .input(z.object({ code: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      // Exchange OAuth code for tokens
-      const tokens = await getGoogleTokens(input.code)
-      // Encrypt refresh token
-      const encrypted = encrypt(tokens.refresh_token)
-      // Update tenant
-      return await ctx.prisma.tenant.update({
-        where: { id: ctx.tenantId },
-        data: {
-          googleCalendarRefreshToken: encrypted,
-          googleCalendarAccessToken: tokens.access_token,
-          googleCalendarTokenExpiresAt: new Date(tokens.expiry_date),
-          calendarId: tokens.calendar_id,
-        },
-      })
-    })
-  ```
-- [ ] **Subtask 3.2.3.4:** Create Google OAuth helper: `src/lib/google/oauth.ts`
-- [ ] **Subtask 3.2.3.5:** On success: navigate to step 4
+- [x] **Subtask 3.2.3.3:** Implement `tenant.connectCalendar` procedure in tRPC router
+- [x] **Subtask 3.2.3.4:** Create Google OAuth helper: `src/lib/google/oauth.ts`
+- [x] **Subtask 3.2.3.5:** On success: navigate to step 4
 
 #### Task 3.2.4: Step 4 - Phone Number Setup
 - [ ] **Subtask 3.2.4.1:** Create `src/app/(onboarding)/step-4-phone/page.tsx`

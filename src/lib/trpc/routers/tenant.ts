@@ -15,6 +15,8 @@ import {
   businessHoursSchema,
   notificationPreferencesSchema,
 } from '@/lib/validations/tenant'
+import { exchangeCodeForTokens, getPrimaryCalendarId } from '@/lib/google/oauth'
+import { encrypt } from '@/lib/utils/encryption'
 
 export const tenantRouter = router({
   /**
@@ -217,4 +219,79 @@ export const tenantRouter = router({
 
       return tenant
     }),
+
+  /**
+   * Connect Google Calendar
+   * Exchanges OAuth code for tokens and stores them securely
+   */
+  connectCalendar: protectedProcedure
+    .input(z.object({ code: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'No tenant associated with user',
+        })
+      }
+
+      try {
+        // Exchange authorization code for tokens
+        const tokens = await exchangeCodeForTokens(input.code)
+
+        // Get primary calendar ID
+        const calendarId = await getPrimaryCalendarId(tokens.access_token)
+
+        // Encrypt refresh token
+        const encryptedRefreshToken = encrypt(tokens.refresh_token)
+
+        // Update tenant with calendar credentials
+        const tenant = await ctx.prisma.tenants.update({
+          where: { id: ctx.tenantId },
+          data: {
+            google_calendar_refresh_token: encryptedRefreshToken,
+            google_calendar_access_token: tokens.access_token,
+            google_calendar_token_expires_at: new Date(tokens.expiry_date),
+            calendar_id: calendarId,
+            updated_at: new Date(),
+          },
+        })
+
+        return {
+          success: true,
+          calendarId,
+        }
+      } catch (error) {
+        console.error('Error connecting Google Calendar:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to connect Google Calendar',
+        })
+      }
+    }),
+
+  /**
+   * Disconnect Google Calendar
+   * Removes calendar credentials from tenant
+   */
+  disconnectCalendar: protectedProcedure.mutation(async ({ ctx }) => {
+    if (!ctx.tenantId) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'No tenant associated with user',
+      })
+    }
+
+    const tenant = await ctx.prisma.tenants.update({
+      where: { id: ctx.tenantId },
+      data: {
+        google_calendar_refresh_token: null,
+        google_calendar_access_token: null,
+        google_calendar_token_expires_at: null,
+        calendar_id: null,
+        updated_at: new Date(),
+      },
+    })
+
+    return { success: true }
+  }),
 })
