@@ -2,10 +2,19 @@
  * Tenant Router
  *
  * API routes for tenant-related operations.
- * Will be fully implemented in Phase 3.
+ * Fully implemented in Phase 3.
  */
 
 import { router, protectedProcedure } from '../server'
+import { TRPCError } from '@trpc/server'
+import { z } from 'zod'
+import {
+  businessInfoSchema,
+  serviceAreasSchema,
+  pricingConfigSchema,
+  businessHoursSchema,
+  notificationPreferencesSchema,
+} from '@/lib/validations/tenant'
 
 export const tenantRouter = router({
   /**
@@ -21,18 +30,191 @@ export const tenantRouter = router({
       where: { id: ctx.tenantId },
       select: {
         id: true,
-        businessName: true,
-        ownerName: true,
+        business_name: true,
+        owner_name: true,
         email: true,
         phone: true,
+        service_areas: true,
+        pricing_tiers: true,
+        allows_generic_quotes: true,
+        generic_quote_disclaimer: true,
+        business_hours: true,
+        notification_preferences: true,
+        timezone: true,
         status: true,
-        onboardingCompleted: true,
-        onboardingStep: true,
-        createdAt: true,
-        updatedAt: true,
+        onboarding_completed: true,
+        onboarding_step: true,
+        created_at: true,
+        updated_at: true,
       },
     })
 
     return tenant
   }),
+
+  /**
+   * Update business information
+   * Updates business name, owner name, email, and phone
+   */
+  updateBusinessInfo: protectedProcedure
+    .input(businessInfoSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'No tenant associated with user',
+        })
+      }
+
+      const tenant = await ctx.prisma.tenants.update({
+        where: { id: ctx.tenantId },
+        data: {
+          business_name: input.businessName,
+          owner_name: input.ownerName,
+          email: input.email,
+          phone: input.phone || null,
+          updated_at: new Date(),
+        },
+      })
+
+      return tenant
+    }),
+
+  /**
+   * Update service areas (ZIP codes)
+   * Replaces existing service areas with new list
+   */
+  updateServiceAreas: protectedProcedure
+    .input(serviceAreasSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'No tenant associated with user',
+        })
+      }
+
+      const tenant = await ctx.prisma.tenants.update({
+        where: { id: ctx.tenantId },
+        data: {
+          service_areas: input as any,
+          updated_at: new Date(),
+        },
+      })
+
+      return tenant
+    }),
+
+  /**
+   * Update pricing configuration
+   * Validates tier structure and updates pricing
+   */
+  updatePricing: protectedProcedure
+    .input(pricingConfigSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'No tenant associated with user',
+        })
+      }
+
+      const tenant = await ctx.prisma.tenants.update({
+        where: { id: ctx.tenantId },
+        data: {
+          pricing_tiers: input.tiers as any,
+          allows_generic_quotes: input.allowsGenericQuotes,
+          generic_quote_disclaimer: input.genericQuoteDisclaimer || null,
+          updated_at: new Date(),
+        },
+      })
+
+      return tenant
+    }),
+
+  /**
+   * Update business hours
+   * Sets operating hours for each day of the week
+   */
+  updateBusinessHours: protectedProcedure
+    .input(businessHoursSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'No tenant associated with user',
+        })
+      }
+
+      const tenant = await ctx.prisma.tenants.update({
+        where: { id: ctx.tenantId },
+        data: {
+          business_hours: input as any,
+          updated_at: new Date(),
+        },
+      })
+
+      return tenant
+    }),
+
+  /**
+   * Update notification preferences
+   * Configures SMS and email notification settings
+   */
+  updateNotificationPreferences: protectedProcedure
+    .input(notificationPreferencesSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'No tenant associated with user',
+        })
+      }
+
+      const tenant = await ctx.prisma.tenants.update({
+        where: { id: ctx.tenantId },
+        data: {
+          notification_preferences: input as any,
+          updated_at: new Date(),
+        },
+      })
+
+      return tenant
+    }),
+
+  /**
+   * Complete onboarding step
+   * Advances the user through onboarding flow
+   */
+  completeOnboardingStep: protectedProcedure
+    .input(
+      z.object({
+        step: z.enum(['signup', 'business-info', 'pricing', 'calendar', 'phone', 'complete']),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'No tenant associated with user',
+        })
+      }
+
+      const updateData: any = {
+        onboarding_step: input.step,
+        updated_at: new Date(),
+      }
+
+      // If completing the final step, mark onboarding as completed
+      if (input.step === 'complete') {
+        updateData.onboarding_completed = true
+      }
+
+      const tenant = await ctx.prisma.tenants.update({
+        where: { id: ctx.tenantId },
+        data: updateData,
+      })
+
+      return tenant
+    }),
 })

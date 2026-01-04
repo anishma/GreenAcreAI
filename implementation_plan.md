@@ -1034,13 +1034,13 @@ Based on TAD Section 5.1 (lines 1392-1419):
 #### Task 3.1.1: Implement Tenant Router Procedures
 Based on TAD Section 6.2 (API Design):
 
-- [ ] **Subtask 3.1.1.1:** Implement `tenant.getCurrent` procedure in `src/lib/trpc/routers/tenant.ts`
-- [ ] **Subtask 3.1.1.2:** Implement `tenant.updateBusinessInfo` procedure
-- [ ] **Subtask 3.1.1.3:** Implement `tenant.updateServiceAreas` procedure
-- [ ] **Subtask 3.1.1.4:** Implement `tenant.updatePricing` procedure with tier validation
-- [ ] **Subtask 3.1.1.5:** Implement `tenant.updateBusinessHours` procedure
-- [ ] **Subtask 3.1.1.6:** Implement `tenant.updateNotificationPreferences` procedure
-- [ ] **Subtask 3.1.1.7:** Implement `tenant.completeOnboardingStep` procedure
+- [x] **Subtask 3.1.1.1:** Implement `tenant.getCurrent` procedure in `src/lib/trpc/routers/tenant.ts`
+- [x] **Subtask 3.1.1.2:** Implement `tenant.updateBusinessInfo` procedure
+- [x] **Subtask 3.1.1.3:** Implement `tenant.updateServiceAreas` procedure
+- [x] **Subtask 3.1.1.4:** Implement `tenant.updatePricing` procedure with tier validation
+- [x] **Subtask 3.1.1.5:** Implement `tenant.updateBusinessHours` procedure
+- [x] **Subtask 3.1.1.6:** Implement `tenant.updateNotificationPreferences` procedure
+- [x] **Subtask 3.1.1.7:** Implement `tenant.completeOnboardingStep` procedure
 
 ### Epic 3.2: Onboarding Flow Pages
 
