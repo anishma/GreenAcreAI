@@ -934,8 +934,8 @@ Based on TAD Section 5.1 (lines 1392-1419):
   ```
 
 #### Task 2.2.4: Create Onboarding Layout
-- [ ] **Subtask 2.2.4.1:** Create `src/components/onboarding/progress-steps.tsx` (visual progress indicator)
-- [ ] **Subtask 2.2.4.2:** Create `src/app/(onboarding)/layout.tsx`:
+- [x] **Subtask 2.2.4.1:** Create `src/components/onboarding/progress-steps.tsx` (visual progress indicator)
+- [x] **Subtask 2.2.4.2:** Create `src/app/(onboarding)/layout.tsx`:
   ```typescript
   import { ProgressSteps } from '@/components/onboarding/progress-steps'
 
@@ -954,9 +954,9 @@ Based on TAD Section 5.1 (lines 1392-1419):
   ```
 
 #### Task 2.2.5: Install Additional shadcn/ui Components
-- [ ] **Subtask 2.2.5.1:** Install: `badge`, `dropdown-menu`, `avatar`, `separator`, `skeleton`, `tabs`, `alert`
-- [ ] **Subtask 2.2.5.2:** Install: `calendar`, `popover`, `scroll-area`, `tooltip`
-- [ ] **Subtask 2.2.5.3:** Verify all components are in `src/components/ui/`
+- [x] **Subtask 2.2.5.1:** Install: `badge`, `dropdown-menu`, `avatar`, `separator`, `skeleton`, `tabs`, `alert`
+- [x] **Subtask 2.2.5.2:** Install: `calendar`, `popover`, `scroll-area`, `tooltip`
+- [x] **Subtask 2.2.5.3:** Verify all components are in `src/components/ui/`
 
 ### Epic 2.3: Global State Management
 
@@ -985,16 +985,16 @@ Based on TAD Section 5.1 (lines 1392-1419):
 ### Epic 2.4: Utility Libraries
 
 #### Task 2.4.1: Create Validation Schemas
-- [ ] **Subtask 2.4.1.1:** Create `src/lib/validations/tenant.ts` with Zod schemas for tenant operations
-- [ ] **Subtask 2.4.1.2:** Create `src/lib/validations/call.ts`
-- [ ] **Subtask 2.4.1.3:** Create `src/lib/validations/lead.ts`
-- [ ] **Subtask 2.4.1.4:** Create `src/lib/validations/booking.ts`
+- [x] **Subtask 2.4.1.1:** Create `src/lib/validations/tenant.ts` with Zod schemas for tenant operations
+- [x] **Subtask 2.4.1.2:** Create `src/lib/validations/call.ts`
+- [x] **Subtask 2.4.1.3:** Create `src/lib/validations/lead.ts`
+- [x] **Subtask 2.4.1.4:** Create `src/lib/validations/booking.ts`
 
 #### Task 2.4.2: Create Utility Functions
-- [ ] **Subtask 2.4.2.1:** Create `src/lib/utils/formatting.ts` (currency, phone number formatting)
-- [ ] **Subtask 2.4.2.2:** Create `src/lib/utils/date.ts` (timezone conversion, formatting)
-- [ ] **Subtask 2.4.2.3:** Create `src/lib/utils/phone.ts` (phone validation, E.164 formatting)
-- [ ] **Subtask 2.4.2.4:** Create `src/lib/utils/encryption.ts` (for encrypting Google tokens):
+- [x] **Subtask 2.4.2.1:** Create `src/lib/utils/formatting.ts` (currency, phone number formatting)
+- [x] **Subtask 2.4.2.2:** Create `src/lib/utils/date.ts` (timezone conversion, formatting)
+- [x] **Subtask 2.4.2.3:** Create `src/lib/utils/phone.ts` (phone validation, E.164 formatting)
+- [x] **Subtask 2.4.2.4:** Create `src/lib/utils/encryption.ts` (for encrypting Google tokens):
   ```typescript
   import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
 
@@ -1021,7 +1021,7 @@ Based on TAD Section 5.1 (lines 1392-1419):
     return decrypted
   }
   ```
-- [ ] **Subtask 2.4.2.5:** Generate encryption key and add to `.env.local`: `ENCRYPTION_KEY=$(openssl rand -hex 32)`
+- [x] **Subtask 2.4.2.5:** Generate encryption key and add to `.env.local`: `ENCRYPTION_KEY=$(openssl rand -hex 32)`
 
 ---
 
