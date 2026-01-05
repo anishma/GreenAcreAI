@@ -1519,7 +1519,7 @@ Based on TAD Section 6.2 (API Design):
 ### Epic 4.4: MCP Client Implementation
 
 #### Task 4.4.1: Create MCP Client (Stdio Transport)
-- [ ] **Subtask 4.4.1.1:** Create `src/lib/mcp/client.ts`:
+- [x] **Subtask 4.4.1.1:** Create `src/lib/mcp/client.ts`:
   ```typescript
   import { Client } from '@modelcontextprotocol/sdk/client/index.js'
   import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
@@ -1627,10 +1627,10 @@ Based on TAD Section 6.2 (API Design):
   ```
 
 #### Task 4.4.2: Create MCP Types
-- [ ] **Subtask 4.4.2.1:** Create `src/lib/mcp/types.ts` with TypeScript interfaces for all MCP tool inputs/outputs
+- [x] **Subtask 4.4.2.1:** Create `src/lib/mcp/types.ts` with TypeScript interfaces for all MCP tool inputs/outputs
 
 #### Task 4.4.3: Create MCP Server Startup Script
-- [ ] **Subtask 4.4.3.1:** Create `scripts/start-mcp-servers.ts`:
+- [x] **Subtask 4.4.3.1:** Create `scripts/start-mcp-servers.ts`:
   ```typescript
   import { spawn } from 'child_process'
   import path from 'path'
@@ -1660,7 +1660,7 @@ Based on TAD Section 6.2 (API Design):
     console.log(`Started ${server} MCP server`)
   }
   ```
-- [ ] **Subtask 4.4.3.2:** Add script to `package.json`:
+- [x] **Subtask 4.4.3.2:** Add script to `package.json`:
   ```json
   {
     "scripts": {

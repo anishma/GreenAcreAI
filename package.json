@@ -7,6 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "build:mcp": "tsc src/lib/mcp/servers/**/*.ts --outDir dist/mcp --module commonjs --moduleResolution node --esModuleInterop --resolveJsonModule",
+    "mcp:start": "tsx scripts/start-mcp-servers.ts",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -93,6 +94,7 @@
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "prisma": "^5.22.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0"
   }
 }
