@@ -63,17 +63,82 @@ export const tenantRouter = router({
   /**
    * Update business information
    * Updates business name, owner name, email, and phone
+   * Creates tenant and user if they don't exist (for onboarding)
    */
   updateBusinessInfo: protectedProcedure
-    .input(businessInfoSchema)
+    .input(businessInfoSchema.extend({ timezone: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
-      if (!ctx.tenantId) {
+      console.log('[updateBusinessInfo] Called with input:', input)
+      console.log('[updateBusinessInfo] Context - user:', ctx.user?.id, 'tenantId:', ctx.tenantId)
+
+      if (!ctx.user) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
-          message: 'No tenant associated with user',
+          message: 'Not authenticated',
         })
       }
 
+      // If no tenant exists, create one (onboarding flow only)
+      if (!ctx.tenantId) {
+        console.log('[updateBusinessInfo] Creating new tenant for user:', ctx.user.id)
+
+        try {
+          // Check if a tenant with this email already exists
+          const existingTenant = await ctx.prisma.tenants.findUnique({
+            where: { email: input.email },
+          })
+
+          if (existingTenant) {
+            // Tenant already exists - this is an error in onboarding flow
+            throw new TRPCError({
+              code: 'CONFLICT',
+              message:
+                'An account with this email already exists. If this is your account, please contact support to regain access. Otherwise, please use a different email address.',
+            })
+          }
+
+          // Create new tenant
+          const tenant = await ctx.prisma.tenants.create({
+            data: {
+              email: input.email,
+              business_name: input.businessName,
+              owner_name: input.ownerName,
+              phone: input.phone || null,
+              timezone: input.timezone || 'America/New_York',
+              onboarding_completed: false,
+              onboarding_step: 'business-info',
+              updated_at: new Date(),
+            },
+          })
+
+          console.log('[updateBusinessInfo] Tenant created:', tenant.id)
+
+          // Create or update user to link to this tenant
+          await ctx.prisma.users.upsert({
+            where: { auth_user_id: ctx.user.id },
+            update: {
+              tenant_id: tenant.id,
+              updated_at: new Date(),
+            },
+            create: {
+              auth_user_id: ctx.user.id,
+              email: input.email,
+              tenant_id: tenant.id,
+              updated_at: new Date(),
+            },
+          })
+
+          console.log('[updateBusinessInfo] User linked to tenant')
+
+          return tenant
+        } catch (error) {
+          console.error('[updateBusinessInfo] Error creating tenant:', error)
+          throw error
+        }
+      }
+
+      // Update existing tenant
+      console.log('[updateBusinessInfo] Updating existing tenant:', ctx.tenantId)
       const tenant = await ctx.prisma.tenants.update({
         where: { id: ctx.tenantId },
         data: {
@@ -81,6 +146,7 @@ export const tenantRouter = router({
           owner_name: input.ownerName,
           email: input.email,
           phone: input.phone || null,
+          timezone: input.timezone || undefined,
           updated_at: new Date(),
         },
       })
@@ -308,7 +374,7 @@ export const tenantRouter = router({
   provisionPhoneNumber: protectedProcedure
     .input(
       z.object({
-        areaCode: z.string().optional(),
+        areaCode: z.string().min(3).max(3).regex(/^\d{3}$/, 'Area code must be 3 digits'),
       })
     )
     .mutation(async ({ ctx, input }) => {

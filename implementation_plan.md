@@ -1128,38 +1128,38 @@ Based on TAD Section 6.2 (API Design):
 ### Epic 3.3: Settings Pages
 
 #### Task 3.3.1: Settings Layout
-- [ ] **Subtask 3.3.1.1:** Create `src/app/(dashboard)/settings/layout.tsx` with tabs for: Business, Pricing, Calendar, Phone, Notifications
+- [x] **Subtask 3.3.1.1:** Create `src/app/(dashboard)/settings/layout.tsx` with tabs for: Business, Pricing, Calendar, Phone, Notifications
 
 #### Task 3.3.2: Business Settings
-- [ ] **Subtask 3.3.2.1:** Create `src/app/(dashboard)/settings/business/page.tsx`
-- [ ] **Subtask 3.3.2.2:** Reuse `BusinessForm` component from onboarding
-- [ ] **Subtask 3.3.2.3:** Add business hours editor (per day of week, start/end time)
-- [ ] **Subtask 3.3.2.4:** Add timezone selector
+- [x] **Subtask 3.3.2.1:** Create `src/app/(dashboard)/settings/business/page.tsx`
+- [x] **Subtask 3.3.2.2:** Reuse `BusinessForm` component from onboarding
+- [x] **Subtask 3.3.2.3:** Add business hours editor (per day of week, start/end time)
+- [x] **Subtask 3.3.2.4:** Add timezone selector
 
 #### Task 3.3.3: Pricing Settings
-- [ ] **Subtask 3.3.3.1:** Create `src/app/(dashboard)/settings/pricing/page.tsx`
-- [ ] **Subtask 3.3.3.2:** Reuse `PricingForm` component
-- [ ] **Subtask 3.3.3.3:** Add "Pricing History" section (audit log - future enhancement placeholder)
+- [x] **Subtask 3.3.3.1:** Create `src/app/(dashboard)/settings/pricing/page.tsx`
+- [x] **Subtask 3.3.3.2:** Reuse `PricingForm` component
+- [x] **Subtask 3.3.3.3:** Add "Pricing History" section (audit log - future enhancement placeholder)
 
 #### Task 3.3.4: Calendar Settings
-- [ ] **Subtask 3.3.4.1:** Create `src/app/(dashboard)/settings/calendar/page.tsx`
-- [ ] **Subtask 3.3.4.2:** Show connected calendar info
-- [ ] **Subtask 3.3.4.3:** "Disconnect" and "Reconnect" buttons
-- [ ] **Subtask 3.3.4.4:** Display recent calendar sync status
+- [x] **Subtask 3.3.4.1:** Create `src/app/(dashboard)/settings/calendar/page.tsx`
+- [x] **Subtask 3.3.4.2:** Show connected calendar info
+- [x] **Subtask 3.3.4.3:** "Disconnect" and "Reconnect" buttons
+- [x] **Subtask 3.3.4.4:** Display recent calendar sync status
 
 #### Task 3.3.5: Phone Settings
-- [ ] **Subtask 3.3.5.1:** Create `src/app/(dashboard)/settings/phone/page.tsx`
-- [ ] **Subtask 3.3.5.2:** Display current phone number
-- [ ] **Subtask 3.3.5.3:** Display VAPI agent status
-- [ ] **Subtask 3.3.5.4:** "Change Number" button (future enhancement placeholder)
+- [x] **Subtask 3.3.5.1:** Create `src/app/(dashboard)/settings/phone/page.tsx`
+- [x] **Subtask 3.3.5.2:** Display current phone number
+- [x] **Subtask 3.3.5.3:** Display VAPI agent status
+- [x] **Subtask 3.3.5.4:** "Change Number" button (future enhancement placeholder)
 
 #### Task 3.3.6: Notification Settings
-- [ ] **Subtask 3.3.6.1:** Create `src/app/(dashboard)/settings/notifications/page.tsx`
-- [ ] **Subtask 3.3.6.2:** Checkboxes for:
+- [x] **Subtask 3.3.6.1:** Create `src/app/(dashboard)/settings/notifications/page.tsx`
+- [x] **Subtask 3.3.6.2:** Checkboxes for:
   - SMS on new lead
   - SMS on new booking
   - Email daily summary (future)
-- [ ] **Subtask 3.3.6.3:** Implement `tenant.updateNotificationPreferences` procedure
+- [x] **Subtask 3.3.6.3:** Implement `tenant.updateNotificationPreferences` procedure (already exists in tenant router)
 
 ---
 

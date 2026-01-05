@@ -63,3 +63,6 @@ temp/
 
 # Debug screenshots and debugging artifacts
 Debug/
+
+# Blog posts (not ready for commit)
+Blogs/

@@ -33,9 +33,19 @@ export function PhoneSetup() {
   const isProvisioned = !!tenant?.phone_number
 
   const handleProvision = async () => {
+    // Validate area code is provided
+    if (!areaCode || areaCode.length !== 3) {
+      toast({
+        title: 'Area code required',
+        description: 'Please enter a 3-digit area code',
+        variant: 'destructive',
+      })
+      return
+    }
+
     try {
       const result = await provisionPhoneNumber.mutateAsync({
-        areaCode: areaCode || undefined,
+        areaCode: areaCode,
       })
 
       toast({
@@ -157,7 +167,7 @@ export function PhoneSetup() {
 
             {/* Area Code Input */}
             <div className="w-full max-w-xs space-y-2">
-              <Label htmlFor="areaCode">Preferred Area Code (Optional)</Label>
+              <Label htmlFor="areaCode">Area Code <span className="text-red-500">*</span></Label>
               <Input
                 id="areaCode"
                 type="text"
@@ -168,16 +178,17 @@ export function PhoneSetup() {
                   setAreaCode(value)
                 }}
                 maxLength={3}
+                required
                 disabled={provisionPhoneNumber.isLoading}
               />
               <p className="text-xs text-gray-500">
-                Enter your preferred area code, or leave blank for any available number
+                Enter a 3-digit US area code for your phone number
               </p>
             </div>
 
             <Button
               onClick={handleProvision}
-              disabled={provisionPhoneNumber.isLoading}
+              disabled={provisionPhoneNumber.isLoading || areaCode.length !== 3}
               size="lg"
             >
               <Phone className="h-4 w-4 mr-2" />

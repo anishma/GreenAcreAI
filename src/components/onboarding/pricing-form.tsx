@@ -90,12 +90,17 @@ export function PricingForm() {
   }
 
   const onSubmit = async (data: PricingFormData) => {
+    console.log('[PricingForm] onSubmit called with data:', data)
     try {
       // Update pricing configuration
+      console.log('[PricingForm] Calling updatePricing mutation...')
       await updatePricing.mutateAsync(data)
+      console.log('[PricingForm] Pricing updated successfully')
 
       // Mark this step as complete
+      console.log('[PricingForm] Marking onboarding step as complete...')
       await completeOnboardingStep.mutateAsync({ step: 'pricing' })
+      console.log('[PricingForm] Onboarding step marked complete')
 
       toast({
         title: 'Pricing configuration saved',
@@ -103,9 +108,10 @@ export function PricingForm() {
       })
 
       // Navigate to step 3
+      console.log('[PricingForm] Navigating to step-3-calendar')
       router.push('/step-3-calendar')
     } catch (error) {
-      console.error('Error saving pricing:', error)
+      console.error('[PricingForm] Error saving pricing:', error)
       toast({
         title: 'Error',
         description: 'Failed to save pricing configuration. Please try again.',
@@ -114,8 +120,17 @@ export function PricingForm() {
     }
   }
 
+  const onError = (errors: any) => {
+    console.error('[PricingForm] Validation errors:', errors)
+    toast({
+      title: 'Validation Error',
+      description: 'Please check the form for errors and try again.',
+      variant: 'destructive',
+    })
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white p-6 rounded-lg shadow">
+    <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6 bg-white p-6 rounded-lg shadow">
       {/* Pricing Tiers */}
       <div>
         <div className="flex items-center justify-between mb-4">

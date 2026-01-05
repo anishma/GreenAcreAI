@@ -4,6 +4,8 @@
  * React hook to get the current authenticated user and their tenant information.
  * Automatically subscribes to auth state changes and updates in real-time.
  *
+ * TEMPORARY: Auth disabled for testing. Returns mock user.
+ *
  * Usage:
  * 'use client'
  * import { useUser } from '@/lib/hooks/use-user'
@@ -31,18 +33,38 @@ interface UseUserReturn {
   error: Error | null
 }
 
+// TEMPORARY: Mock user for testing while OAuth is disabled
+const MOCK_USER_FOR_TESTING = {
+  id: '00000000-0000-0000-0000-000000000001', // Valid UUID format for mock user
+  email: 'test@greenacreai.com',
+  app_metadata: {},
+  user_metadata: {},
+  aud: 'authenticated',
+  created_at: new Date().toISOString(),
+} as User
+
 export function useUser(): UseUserReturn {
   const [user, setUser] = useState<User | null>(null)
   const [tenantId, setTenantId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
+  const USE_MOCK_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true'
   const supabase = createClient()
 
   useEffect(() => {
     // Get initial session
     const getUser = async () => {
       try {
+        if (USE_MOCK_AUTH) {
+          // Use mock user for testing
+          setUser(MOCK_USER_FOR_TESTING)
+          // Mock tenant ID will be handled by tRPC context
+          setTenantId('mock-tenant-id')
+          setIsLoading(false)
+          return
+        }
+
         const {
           data: { user },
           error: userError,
@@ -75,6 +97,11 @@ export function useUser(): UseUserReturn {
 
     getUser()
 
+    if (USE_MOCK_AUTH) {
+      // Skip subscription for mock auth
+      return
+    }
+
     // Subscribe to auth state changes
     const {
       data: { subscription },
@@ -100,7 +127,7 @@ export function useUser(): UseUserReturn {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [USE_MOCK_AUTH])
 
   return { user, tenantId, isLoading, error }
 }

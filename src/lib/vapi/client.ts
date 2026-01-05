@@ -81,24 +81,41 @@ export interface VapiAgent {
 /**
  * Purchase a phone number from VAPI
  *
+ * Uses VAPI's free phone number service (US numbers only).
+ * Up to 10 free numbers can be provisioned per account.
+ *
  * @param areaCode - Optional area code preference (e.g., "415")
  * @returns Phone number details
  */
 export async function purchasePhoneNumber(
-  areaCode?: string
+  areaCode: string
 ): Promise<VapiPhoneNumber> {
+  // Use VAPI's free phone number service
+  // This creates a US phone number at no cost
+  // Note: Area code is required for VAPI to provision a valid phone number
   const body: any = {
-    provider: 'twilio', // VAPI uses Twilio as the provider
+    provider: 'vapi',
+    name: 'AI Assistant Number',
+    numberDesiredAreaCode: areaCode,
   }
 
-  if (areaCode) {
-    body.areaCode = areaCode
-  }
-
-  return vapiRequest<VapiPhoneNumber>('/phone-number', {
+  const response = await vapiRequest<VapiPhoneNumber>('/phone-number', {
     method: 'POST',
     body: JSON.stringify(body),
   })
+
+  console.log('[VAPI] Phone number creation response:', JSON.stringify(response, null, 2))
+
+  // VAPI doesn't return the 'number' field immediately when using provider: 'vapi'
+  // We need to fetch the phone number details to get the actual number
+  if (!response.number && response.id) {
+    console.log('[VAPI] Number field missing, fetching phone number details...')
+    const detailedResponse = await getPhoneNumber(response.id)
+    console.log('[VAPI] Phone number details response:', JSON.stringify(detailedResponse, null, 2))
+    return detailedResponse
+  }
+
+  return response
 }
 
 /**
@@ -120,10 +137,10 @@ export async function deletePhoneNumber(phoneNumberId: string): Promise<void> {
 }
 
 /**
- * Create a VAPI agent
+ * Create a VAPI assistant (formerly called agent)
  *
- * @param config - Agent configuration
- * @returns Agent details
+ * @param config - Assistant configuration
+ * @returns Assistant details
  */
 export async function createAgent(config: {
   name: string
@@ -131,21 +148,42 @@ export async function createAgent(config: {
   customLlmUrl?: string
 }): Promise<VapiAgent> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const llmEndpoint = config.customLlmUrl || `${appUrl}/api/llm/completions`
+  // Include tenant ID in URL as query parameter
+  const llmEndpoint = config.customLlmUrl || `${appUrl}/api/llm/completions?tenantId=${config.tenantId}`
 
   const body = {
     name: config.name,
-    voice: {
-      provider: 'elevenlabs',
-      voiceId: 'rachel', // Default voice, can be customized later
+    // Transcriber configuration (required)
+    transcriber: {
+      provider: 'deepgram',
+      model: 'nova-2',
+      language: 'en',
     },
+    // Voice configuration - using ElevenLabs (works with VAPI's free tier)
+    voice: {
+      provider: '11labs',
+      voiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel - default female voice
+      stability: 0.5,
+      similarityBoost: 0.75,
+    },
+    // Model configuration - using OpenAI for now
+    // TODO: Switch to custom-llm once we implement the LLM endpoint
     model: {
-      provider: 'custom-llm',
-      url: llmEndpoint,
-      // Pass tenant ID in metadata so our LLM endpoint knows which tenant this is
-      metadata: {
-        tenantId: config.tenantId,
-      },
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a helpful AI assistant for a lawn care business.
+Help customers with:
+- Getting quotes for services
+- Scheduling appointments
+- Answering questions about services
+- Providing property information
+
+Be friendly, professional, and concise.`
+        }
+      ],
     },
     firstMessage: 'Hello! Thank you for calling. How can I help you today?',
     endCallFunctionEnabled: true,
@@ -153,39 +191,43 @@ export async function createAgent(config: {
     recordingEnabled: true,
   }
 
-  return vapiRequest<VapiAgent>('/agent', {
+  const response = await vapiRequest<VapiAgent>('/assistant', {
     method: 'POST',
     body: JSON.stringify(body),
   })
+
+  console.log('[VAPI] Agent creation response:', JSON.stringify(response, null, 2))
+
+  return response
 }
 
 /**
- * Get an agent by ID
+ * Get an assistant by ID
  */
 export async function getAgent(agentId: string): Promise<VapiAgent> {
-  return vapiRequest<VapiAgent>(`/agent/${agentId}`, {
+  return vapiRequest<VapiAgent>(`/assistant/${agentId}`, {
     method: 'GET',
   })
 }
 
 /**
- * Update an agent
+ * Update an assistant
  */
 export async function updateAgent(
   agentId: string,
   updates: Partial<VapiAgent>
 ): Promise<VapiAgent> {
-  return vapiRequest<VapiAgent>(`/agent/${agentId}`, {
+  return vapiRequest<VapiAgent>(`/assistant/${agentId}`, {
     method: 'PATCH',
     body: JSON.stringify(updates),
   })
 }
 
 /**
- * Delete an agent
+ * Delete an assistant
  */
 export async function deleteAgent(agentId: string): Promise<void> {
-  await vapiRequest(`/agent/${agentId}`, {
+  await vapiRequest(`/assistant/${agentId}`, {
     method: 'DELETE',
   })
 }
@@ -200,12 +242,18 @@ export async function linkPhoneNumberToAgent(
   phoneNumberId: string,
   agentId: string
 ): Promise<VapiPhoneNumber> {
-  return vapiRequest<VapiPhoneNumber>(`/phone-number/${phoneNumberId}`, {
+  console.log('[VAPI] Linking phone number to agent:', { phoneNumberId, agentId })
+
+  const response = await vapiRequest<VapiPhoneNumber>(`/phone-number/${phoneNumberId}`, {
     method: 'PATCH',
     body: JSON.stringify({
       assistantId: agentId,
     }),
   })
+
+  console.log('[VAPI] Link response:', JSON.stringify(response, null, 2))
+
+  return response
 }
 
 /**
