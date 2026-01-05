@@ -1325,8 +1325,8 @@ Based on TAD Section 6.2 (API Design):
 ### Epic 4.2: MCP Server - Calendar Management
 
 #### Task 4.2.1: Create Google Calendar API Client
-- [ ] **Subtask 4.2.1.1:** Install Google API client: `npm install googleapis`
-- [ ] **Subtask 4.2.1.2:** Create `src/lib/mcp/servers/calendar/integrations/google-calendar-client.ts`:
+- [x] **Subtask 4.2.1.1:** Install Google API client: `npm install googleapis`
+- [x] **Subtask 4.2.1.2:** Create `src/lib/mcp/servers/calendar/integrations/google-calendar-client.ts`:
   ```typescript
   import { google } from 'googleapis'
   import { decrypt } from '@/lib/utils/encryption'
@@ -1434,14 +1434,14 @@ Based on TAD Section 6.2 (API Design):
   ```
 
 #### Task 4.2.2: Create Calendar MCP Tools
-- [ ] **Subtask 4.2.2.1:** Create `src/lib/mcp/servers/calendar/tools/get-available-slots.ts`
-- [ ] **Subtask 4.2.2.2:** Create `src/lib/mcp/servers/calendar/tools/book-appointment.ts`
-- [ ] **Subtask 4.2.2.3:** Create `src/lib/mcp/servers/calendar/tools/cancel-appointment.ts` (optional, for future)
+- [x] **Subtask 4.2.2.1:** Create `src/lib/mcp/servers/calendar/tools/get-available-slots.ts`
+- [x] **Subtask 4.2.2.2:** Create `src/lib/mcp/servers/calendar/tools/book-appointment.ts`
+- [x] **Subtask 4.2.2.3:** Create `src/lib/mcp/servers/calendar/tools/cancel-appointment.ts` (optional, for future)
 
 #### Task 4.2.3: Create Calendar MCP Server (Standalone Process)
-- [ ] **Subtask 4.2.3.1:** Create `src/lib/mcp/servers/calendar/index.ts` (similar structure to property-lookup server)
-- [ ] **Subtask 4.2.3.2:** Register tools: `get_available_slots`, `book_appointment`
-- [ ] **Subtask 4.2.3.3:** Set up stdio transport and handlers
+- [x] **Subtask 4.2.3.1:** Create `src/lib/mcp/servers/calendar/index.ts` (similar structure to property-lookup server)
+- [x] **Subtask 4.2.3.2:** Register tools: `get_available_slots`, `book_appointment`
+- [x] **Subtask 4.2.3.3:** Set up stdio transport and handlers
 
 ### Epic 4.3: MCP Server - Business Logic
 
