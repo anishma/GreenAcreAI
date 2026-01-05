@@ -1812,13 +1812,13 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   - Handle "property not found" error
   - Fallback to generic quote if lookup fails
 
-- [ ] **Subtask 4.5.2.4:** Create `src/lib/agents/nodes/quote-calculation.ts`:
+- [x] **Subtask 4.5.2.4:** Create `src/lib/agents/nodes/quote-calculation.ts`:
   - Check service area first (MCP business logic tool)
   - If outside area: polite decline
   - If inside: call calculate_quote MCP tool
   - Generate friendly quote message
 
-- [ ] **Subtask 4.5.2.5:** Create `src/lib/agents/nodes/booking.ts`:
+- [x] **Subtask 4.5.2.5:** Create `src/lib/agents/nodes/booking.ts`:
   - Check if user wants to book (intent detection via LLM)
   - Get available slots (MCP calendar tool)
   - Present options to user
@@ -1827,13 +1827,13 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   - Save to database (calls, leads, bookings tables)
   - Trigger SMS notifications
 
-- [ ] **Subtask 4.5.2.6:** Create `src/lib/agents/nodes/closing.ts`:
+- [x] **Subtask 4.5.2.6:** Create `src/lib/agents/nodes/closing.ts`:
   - Thank user
   - Confirm next steps
   - End conversation
 
 #### Task 4.5.3: Create Conditional Edges
-- [ ] **Subtask 4.5.3.1:** Create `src/lib/agents/edges/conditional-edges.ts`:
+- [x] **Subtask 4.5.3.1:** Create conditional routing based on stage in conversation-graph.ts:
   - Address extracted? → property_lookup : retry_address
   - Property found? → quote_calculation : generic_quote
   - In service area? → quote_calculation : outside_area_decline
@@ -1841,7 +1841,7 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   - Time chosen? → book_appointment : closing
 
 #### Task 4.5.4: Build LangGraph Conversation Graph
-- [ ] **Subtask 4.5.4.1:** Create `src/lib/agents/conversation-graph.ts`:
+- [x] **Subtask 4.5.4.1:** Create `src/lib/agents/conversation-graph.ts`:
   ```typescript
   import { StateGraph } from '@langchain/langgraph'
   import { ConversationState } from './state'
@@ -1897,7 +1897,7 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   ```
 
 #### Task 4.5.5: Create VAPI Custom LLM Endpoint
-- [ ] **Subtask 4.5.5.1:** Create `src/app/api/vapi-llm/route.ts`:
+- [x] **Subtask 4.5.5.1:** Create `src/app/api/vapi-llm/route.ts`:
   ```typescript
   import { NextRequest, NextResponse } from 'next/server'
   import { createConversationGraph } from '@/lib/agents/conversation-graph'
