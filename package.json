@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:mcp": "tsc src/lib/mcp/servers/**/*.ts --outDir dist/mcp --module commonjs --moduleResolution node --esModuleInterop --resolveJsonModule",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -63,6 +64,7 @@
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
+    "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

@@ -1174,7 +1174,7 @@ Based on TAD Section 6.2 (API Design):
 ### Epic 4.1: MCP Server - Property Lookup
 
 #### Task 4.1.1: Create Regrid API Client
-- [ ] **Subtask 4.1.1.1:** Create `src/lib/mcp/servers/property-lookup/integrations/regrid-client.ts`:
+- [x] **Subtask 4.1.1.1:** Create `src/lib/mcp/servers/property-lookup/integrations/regrid-client.ts`:
   ```typescript
   import axios from 'axios'
 
@@ -1214,7 +1214,7 @@ Based on TAD Section 6.2 (API Design):
   ```
 
 #### Task 4.1.2: Create Property Lookup MCP Tool
-- [ ] **Subtask 4.1.2.1:** Create `src/lib/mcp/servers/property-lookup/tools/lookup-property.ts`:
+- [x] **Subtask 4.1.2.1:** Create `src/lib/mcp/servers/property-lookup/tools/lookup-property.ts`:
   ```typescript
   import { z } from 'zod'
   import { lookupProperty } from '../integrations/regrid-client'
@@ -1241,7 +1241,7 @@ Based on TAD Section 6.2 (API Design):
   ```
 
 #### Task 4.1.3: Create Property Lookup MCP Server (Standalone Process)
-- [ ] **Subtask 4.1.3.1:** Create `src/lib/mcp/servers/property-lookup/index.ts`:
+- [x] **Subtask 4.1.3.1:** Create `src/lib/mcp/servers/property-lookup/index.ts`:
   ```typescript
   #!/usr/bin/env node
   import { Server } from '@modelcontextprotocol/sdk/server/index.js'
@@ -1313,7 +1313,7 @@ Based on TAD Section 6.2 (API Design):
     process.exit(1)
   })
   ```
-- [ ] **Subtask 4.1.3.2:** Update `package.json` to add build script for MCP servers:
+- [x] **Subtask 4.1.3.2:** Update `package.json` to add build script for MCP servers:
   ```json
   {
     "scripts": {
