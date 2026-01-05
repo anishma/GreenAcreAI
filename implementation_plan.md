@@ -1446,7 +1446,7 @@ Based on TAD Section 6.2 (API Design):
 ### Epic 4.3: MCP Server - Business Logic
 
 #### Task 4.3.1: Create Business Logic MCP Tools
-- [ ] **Subtask 4.3.1.1:** Create `src/lib/mcp/servers/business-logic/tools/calculate-quote.ts`:
+- [x] **Subtask 4.3.1.1:** Create `src/lib/mcp/servers/business-logic/tools/calculate-quote.ts`:
   ```typescript
   import { z } from 'zod'
   import { prisma } from '@/lib/prisma'
@@ -1485,7 +1485,7 @@ Based on TAD Section 6.2 (API Design):
   }
   ```
 
-- [ ] **Subtask 4.3.1.2:** Create `src/lib/mcp/servers/business-logic/tools/validate-service-area.ts`:
+- [x] **Subtask 4.3.1.2:** Create `src/lib/mcp/servers/business-logic/tools/validate-service-area.ts`:
   ```typescript
   import { z } from 'zod'
   import { prisma } from '@/lib/prisma'
@@ -1509,12 +1509,12 @@ Based on TAD Section 6.2 (API Design):
   }
   ```
 
-- [ ] **Subtask 4.3.1.3:** Create `src/lib/mcp/servers/business-logic/tools/get-generic-price-range.ts`
+- [x] **Subtask 4.3.1.3:** Create `src/lib/mcp/servers/business-logic/tools/get-generic-price-range.ts`
 
 #### Task 4.3.2: Create Business Logic MCP Server (Standalone Process)
-- [ ] **Subtask 4.3.2.1:** Create `src/lib/mcp/servers/business-logic/index.ts` (similar structure to other servers)
-- [ ] **Subtask 4.3.2.2:** Register tools: `calculate_quote`, `validate_service_area`, `get_generic_price_range`
-- [ ] **Subtask 4.3.2.3:** Set up stdio transport and handlers
+- [x] **Subtask 4.3.2.1:** Create `src/lib/mcp/servers/business-logic/index.ts` (similar structure to other servers)
+- [x] **Subtask 4.3.2.2:** Register tools: `calculate_quote`, `validate_service_area`, `get_generic_price_range`
+- [x] **Subtask 4.3.2.3:** Set up stdio transport and handlers
 
 ### Epic 4.4: MCP Client Implementation
 
