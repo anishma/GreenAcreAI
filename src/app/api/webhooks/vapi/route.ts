@@ -7,6 +7,7 @@ import type {
   TranscriptUpdateEvent,
 } from '@/lib/vapi/types'
 import { sendNewLeadAlert, sendNewBookingAlert } from '@/lib/twilio/sms'
+import { uploadRecording } from '@/lib/supabase/storage'
 
 /**
  * VAPI Webhook Handler
@@ -231,6 +232,33 @@ async function handleCallEnded(event: CallEndedEvent) {
   console.log(`[VAPI Webhook] Outcome: ${outcome}`)
   console.log(`[VAPI Webhook] Booking made: ${bookingMade}`)
   console.log(`[VAPI Webhook] Lead captured: ${leadCaptured}`)
+
+  // Upload recording to Supabase Storage if available
+  if (call.recordingUrl) {
+    try {
+      console.log(`[VAPI Webhook] Uploading recording to Supabase`)
+      const signedUrl = await uploadRecording(
+        existingCall.tenant_id,
+        call.id,
+        call.recordingUrl
+      )
+
+      // Update call record with Supabase storage URL
+      await prisma.calls.update({
+        where: { id: existingCall.id },
+        data: {
+          recording_url: signedUrl,
+          updated_at: new Date(),
+        },
+      })
+
+      console.log(`[VAPI Webhook] Recording uploaded successfully`)
+    } catch (uploadError) {
+      console.error(`[VAPI Webhook] Failed to upload recording:`, uploadError)
+      // Don't fail the webhook if recording upload fails
+      // Keep the original VAPI recording URL
+    }
+  }
 
   // Send SMS notifications to owner if enabled
   await sendOwnerNotifications({

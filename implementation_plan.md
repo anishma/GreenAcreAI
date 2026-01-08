@@ -2280,7 +2280,7 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
 ### Epic 5.4: Supabase Storage Integration
 
 #### Task 5.4.1: Create Storage Utilities
-- [ ] **Subtask 5.4.1.1:** Create `src/lib/supabase/storage.ts`:
+- [x] **Subtask 5.4.1.1:** Create `src/lib/supabase/storage.ts`:
   ```typescript
   import { createClient } from '@supabase/supabase-js'
   import axios from 'axios'
