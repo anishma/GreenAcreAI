@@ -6,6 +6,7 @@ import type {
   CallEndedEvent,
   TranscriptUpdateEvent,
 } from '@/lib/vapi/types'
+import { sendNewLeadAlert, sendNewBookingAlert } from '@/lib/twilio/sms'
 
 /**
  * VAPI Webhook Handler
@@ -231,8 +232,103 @@ async function handleCallEnded(event: CallEndedEvent) {
   console.log(`[VAPI Webhook] Booking made: ${bookingMade}`)
   console.log(`[VAPI Webhook] Lead captured: ${leadCaptured}`)
 
-  // TODO: Send owner notification if booking was made or lead captured
-  // This will be implemented in Epic 5.3
+  // Send SMS notifications to owner if enabled
+  await sendOwnerNotifications({
+    call,
+    tenant: existingCall.tenants,
+    bookingMade,
+    leadCaptured,
+    quoteAmount,
+  })
+}
+
+/**
+ * Send SMS notifications to business owner
+ */
+async function sendOwnerNotifications(params: {
+  call: any
+  tenant: any
+  bookingMade: boolean
+  leadCaptured: boolean
+  quoteAmount: number | null
+}) {
+  const { call, tenant, bookingMade, leadCaptured, quoteAmount } = params
+
+  // Check if owner has phone number
+  if (!tenant.phone) {
+    console.log('[VAPI Webhook] Owner phone not configured, skipping SMS notifications')
+    return
+  }
+
+  // Parse notification preferences
+  const notificationPrefs = tenant.notification_preferences as any || {}
+
+  try {
+    // Send booking notification
+    if (bookingMade && notificationPrefs.sms_new_booking !== false) {
+      console.log('[VAPI Webhook] Sending new booking SMS to owner')
+
+      // Find the booking record that was created
+      const booking = await prisma.bookings.findFirst({
+        where: {
+          tenant_id: tenant.id,
+          call_id: call.id,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      })
+
+      if (booking) {
+        await sendNewBookingAlert({
+          ownerPhone: tenant.phone,
+          customerName: booking.customer_name || 'Customer',
+          customerAddress: booking.property_address || 'Address not provided',
+          scheduledAt: booking.scheduled_at,
+          quote: parseFloat(booking.estimated_price?.toString() || '0'),
+          tenantId: tenant.id,
+          bookingId: booking.id,
+          callId: call.id,
+          tenantBusinessName: tenant.business_name,
+        })
+        console.log('[VAPI Webhook] Booking SMS sent successfully')
+      }
+    }
+
+    // Send lead notification (if no booking was made)
+    if (leadCaptured && !bookingMade && notificationPrefs.sms_new_lead !== false) {
+      console.log('[VAPI Webhook] Sending new lead SMS to owner')
+
+      // Find the lead record
+      const lead = await prisma.leads.findFirst({
+        where: {
+          tenant_id: tenant.id,
+          call_id: call.id,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      })
+
+      if (lead && quoteAmount) {
+        const address = lead.address || `${lead.city || ''}, ${lead.state || ''}`.trim() || 'Address not provided'
+
+        await sendNewLeadAlert({
+          ownerPhone: tenant.phone,
+          leadName: lead.name || 'Customer',
+          leadAddress: address,
+          quote: quoteAmount,
+          tenantId: tenant.id,
+          callId: call.id,
+          tenantBusinessName: tenant.business_name,
+        })
+        console.log('[VAPI Webhook] Lead SMS sent successfully')
+      }
+    }
+  } catch (error) {
+    console.error('[VAPI Webhook] Error sending SMS notifications:', error)
+    // Don't throw - we don't want to fail the webhook if SMS fails
+  }
 }
 
 /**

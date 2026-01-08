@@ -2170,10 +2170,10 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   TWILIO_AUTH_TOKEN="..."
   TWILIO_PHONE_NUMBER="+1234567890" # Your Twilio number for sending SMS
   ```
-- [ ] **Subtask 5.3.1.3:** Install Twilio SDK: `npm install twilio`
+- [x] **Subtask 5.3.1.3:** Install Twilio SDK: `npm install twilio`
 
 #### Task 5.3.2: Create SMS Service
-- [ ] **Subtask 5.3.2.1:** Create `src/lib/twilio/sms.ts`:
+- [x] **Subtask 5.3.2.1:** Create `src/lib/twilio/sms.ts`:
   ```typescript
   import twilio from 'twilio'
   import { prisma } from '@/lib/prisma'
@@ -2273,9 +2273,9 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   ```
 
 #### Task 5.3.3: Integrate SMS into Booking Flow
-- [ ] **Subtask 5.3.3.1:** Update `booking.ts` node in LangGraph to call `sendBookingConfirmation` after successful booking
-- [ ] **Subtask 5.3.3.2:** Call `sendNewLeadAlert` when lead is captured
-- [ ] **Subtask 5.3.3.3:** Respect tenant notification preferences (`notificationPreferences` JSON field)
+- [x] **Subtask 5.3.3.1:** Update `booking.ts` node in LangGraph to call `sendBookingConfirmation` after successful booking
+- [x] **Subtask 5.3.3.2:** Call `sendNewLeadAlert` when lead is captured
+- [x] **Subtask 5.3.3.3:** Respect tenant notification preferences (`notificationPreferences` JSON field)
 
 ### Epic 5.4: Supabase Storage Integration
 

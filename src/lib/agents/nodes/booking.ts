@@ -2,6 +2,7 @@ import { mcpClient } from '@/lib/mcp/client'
 import { ConversationState } from '../state'
 import { ChatOpenAI } from '@langchain/openai'
 import { prisma } from '@/lib/prisma'
+import { sendBookingConfirmation } from '@/lib/twilio/sms'
 
 const llm = new ChatOpenAI({
   modelName: 'gpt-4o-mini',
@@ -153,9 +154,10 @@ Return ONLY valid JSON with this structure:
     )
 
     // Save booking to database
-    await prisma.bookings.create({
+    const bookingRecord = await prisma.bookings.create({
       data: {
         tenant_id: state.tenant_id,
+        call_id: state.call_id,
         updated_at: new Date(),
         customer_phone: state.customer_phone || '',
         customer_name: state.customer_name || 'Customer',
@@ -175,6 +177,38 @@ Return ONLY valid JSON with this structure:
           : null,
       },
     })
+
+    // Send booking confirmation SMS to customer
+    if (state.customer_phone) {
+      try {
+        const tenant = await prisma.tenants.findUnique({
+          where: { id: state.tenant_id },
+        })
+
+        if (tenant) {
+          await sendBookingConfirmation({
+            customerPhone: state.customer_phone,
+            customerName: state.customer_name || 'Customer',
+            scheduledAt: new Date(booking.scheduled_time),
+            tenantBusinessName: tenant.business_name,
+            tenantId: state.tenant_id,
+            bookingId: bookingRecord.id,
+            callId: state.call_id,
+          })
+
+          // Mark confirmation as sent
+          await prisma.bookings.update({
+            where: { id: bookingRecord.id },
+            data: { confirmation_sent: true },
+          })
+
+          console.log('[Booking Node] SMS confirmation sent to customer')
+        }
+      } catch (smsError) {
+        console.error('[Booking Node] Failed to send SMS confirmation:', smsError)
+        // Don't fail the booking if SMS fails
+      }
+    }
 
     // Format the scheduled time nicely
     const scheduledDate = new Date(booking.scheduled_time)
