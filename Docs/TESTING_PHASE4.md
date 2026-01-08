@@ -75,11 +75,21 @@ npm run mcp:start
 You should see:
 ```
 Starting MCP servers...
-✓ Property Lookup Server started
-✓ Calendar Server started
-✓ Business Logic Server started
-All MCP servers are running
+Started property-lookup MCP server
+Started calendar MCP server
+Started business-logic MCP server
+Property Lookup MCP Server running on stdio
+Calendar MCP Server running on stdio
+Business Logic MCP Server running on stdio
 ```
+
+**How It Works:**
+- MCP servers run TypeScript directly using `tsx` (no build step needed)
+- Each server runs as a separate Node.js child process
+- Communication via stdio (stdin/stdout) using MCP protocol (JSON-RPC)
+- TypeScript path aliases (`@/lib/...`) work automatically with `tsx`
+
+**Note:** MCP servers run as background processes. Use `Ctrl+C` to stop them.
 
 ### Run MCP Tests
 
@@ -97,6 +107,21 @@ This tests:
 - ✅ Book appointment
 - ✅ Cancel appointment
 
+**Important: Regrid API Trial Coverage**
+
+The Regrid API trial (30-day free) only supports **7 sample counties**:
+- Marion County, Indiana
+- Dallas County, Texas ✅ (used in tests)
+- Wilson County, Tennessee
+- Durham County, North Carolina
+- Fillmore County, Nebraska
+- Clark County, Wisconsin
+- Gurabo Municipio, Puerto Rico
+
+Test addresses use **Dallas, TX** (1200 Main Street, Dallas, TX 75202) to ensure they work with your trial API key.
+
+See: https://developer.regrid.com/reference/list-of-restricted-counties
+
 **Expected Output:**
 ```
 === Testing Property Lookup Server ===
@@ -104,7 +129,7 @@ This tests:
 {
   "lot_size_sqft": 5000,
   "parcel_id": "ABC123",
-  "address": "1600 Amphitheatre Parkway, Mountain View, CA 94043",
+  "address": "1200 Main Street, Dallas, TX 75202",
   "zoning": "Commercial"
 }
 

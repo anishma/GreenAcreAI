@@ -111,32 +111,53 @@ export async function bookAppointment(
   tenantId: string,
   booking: {
     start_time: string
+    end_time?: string
     customer_name: string
     customer_phone: string
     property_address: string
     estimated_price: number
+    service_type?: string
+    notes?: string
   }
 ) {
   const { calendar, calendarId, timezone } = await getCalendarClient(tenantId)
 
+  // Calculate end time: use provided end_time or default to 1 hour after start
+  const endTime = booking.end_time || new Date(new Date(booking.start_time).getTime() + 60 * 60 * 1000).toISOString()
+
+  // Build description with all available info
+  let description = `Address: ${booking.property_address}\nPhone: ${booking.customer_phone}\nEstimated: $${booking.estimated_price}`
+
+  if (booking.service_type) {
+    description += `\nService: ${booking.service_type}`
+  }
+
+  if (booking.notes) {
+    description += `\n\n${booking.notes}`
+  }
+
   const event = await calendar.events.insert({
     calendarId: calendarId!,
     requestBody: {
-      summary: `Lawn Mowing - ${booking.customer_name}`,
-      description: `Address: ${booking.property_address}\nPhone: ${booking.customer_phone}\nEstimated: $${booking.estimated_price}`,
+      summary: `${booking.service_type || 'Lawn Mowing'} - ${booking.customer_name}`,
+      description: description,
       start: {
         dateTime: booking.start_time,
         timeZone: timezone,
       },
       end: {
-        dateTime: new Date(new Date(booking.start_time).getTime() + 60 * 60 * 1000).toISOString(),
+        dateTime: endTime,
         timeZone: timezone,
       },
     },
   })
 
+  // Generate calendar link
+  const calendarLink = event.data.htmlLink || `https://calendar.google.com/calendar/event?eid=${event.data.id}`
+
   return {
-    calendar_event_id: event.data.id,
-    scheduled_at: booking.start_time,
+    event_id: event.data.id!,
+    scheduled_time: booking.start_time,
+    calendar_link: calendarLink,
   }
 }

@@ -2,6 +2,7 @@ import { StateGraph, END } from '@langchain/langgraph'
 import { ConversationState } from './state'
 import { greetingNode } from './nodes/greeting'
 import { addressExtractionNode } from './nodes/address-extraction'
+import { frequencyCollectionNode } from './nodes/frequency-collection'
 import { propertyLookupNode } from './nodes/property-lookup'
 import { quoteCalculationNode } from './nodes/quote-calculation'
 import { bookingNode } from './nodes/booking'
@@ -48,6 +49,11 @@ const workflow = new StateGraph<ConversationState>({
         prev: { lot_size_sqft: number; parcel_id: string } | undefined,
         next: { lot_size_sqft: number; parcel_id: string } | undefined
       ) => next ?? prev,
+      default: () => undefined,
+    },
+    preferred_frequency: {
+      value: (prev: string | undefined, next: string | undefined) =>
+        next ?? prev,
       default: () => undefined,
     },
     quote: {
@@ -100,9 +106,10 @@ const workflow = new StateGraph<ConversationState>({
 // Add nodes
 workflow.addNode('greeting', greetingNode)
 workflow.addNode('address_extraction', addressExtractionNode)
+workflow.addNode('frequency_collection', frequencyCollectionNode)
 workflow.addNode('property_lookup', propertyLookupNode)
 workflow.addNode('quote_calculation', quoteCalculationNode)
-workflow.addNode('booking', bookingNode)
+workflow.addNode('booking_appointment', bookingNode)
 workflow.addNode('closing', closingNode)
 
 // Conditional routing function
@@ -112,14 +119,24 @@ function routeBasedOnStage(state: ConversationState): string {
       return 'address_extraction'
     case 'address_collection':
       return 'address_extraction'
+    case 'WAITING_FOR_ADDRESS':
+      return END // PAUSE: Stop and wait for user to provide address
+    case 'frequency_collection':
+      return 'frequency_collection'
+    case 'WAITING_FOR_FREQUENCY':
+      return END // PAUSE: Stop and wait for user to provide frequency
     case 'property_lookup':
       return 'property_lookup'
     case 'quoting':
       return 'quote_calculation'
+    case 'WAITING_FOR_BOOKING_DECISION':
+      return END // PAUSE: Stop and wait for user to decide about booking
     case 'booking':
-      return 'booking'
+      return 'booking_appointment'
     case 'closing':
       return 'closing'
+    case 'END':
+      return END
     default:
       return END
   }
@@ -131,54 +148,70 @@ workflow.setEntryPoint('greeting')
 // Add conditional edges from each node
 workflow.addConditionalEdges('greeting', routeBasedOnStage, {
   address_extraction: 'address_extraction',
+  frequency_collection: 'frequency_collection',
   property_lookup: 'property_lookup',
   quote_calculation: 'quote_calculation',
-  booking: 'booking',
+  booking_appointment: 'booking_appointment',
   closing: 'closing',
   [END]: END,
 })
 
 workflow.addConditionalEdges('address_extraction', routeBasedOnStage, {
   address_extraction: 'address_extraction',
+  frequency_collection: 'frequency_collection',
   property_lookup: 'property_lookup',
   quote_calculation: 'quote_calculation',
-  booking: 'booking',
+  booking_appointment: 'booking_appointment',
+  closing: 'closing',
+  [END]: END,
+})
+
+workflow.addConditionalEdges('frequency_collection', routeBasedOnStage, {
+  address_extraction: 'address_extraction',
+  frequency_collection: 'frequency_collection',
+  property_lookup: 'property_lookup',
+  quote_calculation: 'quote_calculation',
+  booking_appointment: 'booking_appointment',
   closing: 'closing',
   [END]: END,
 })
 
 workflow.addConditionalEdges('property_lookup', routeBasedOnStage, {
   address_extraction: 'address_extraction',
+  frequency_collection: 'frequency_collection',
   property_lookup: 'property_lookup',
   quote_calculation: 'quote_calculation',
-  booking: 'booking',
+  booking_appointment: 'booking_appointment',
   closing: 'closing',
   [END]: END,
 })
 
 workflow.addConditionalEdges('quote_calculation', routeBasedOnStage, {
   address_extraction: 'address_extraction',
+  frequency_collection: 'frequency_collection',
   property_lookup: 'property_lookup',
   quote_calculation: 'quote_calculation',
-  booking: 'booking',
+  booking_appointment: 'booking_appointment',
   closing: 'closing',
   [END]: END,
 })
 
-workflow.addConditionalEdges('booking', routeBasedOnStage, {
+workflow.addConditionalEdges('booking_appointment', routeBasedOnStage, {
   address_extraction: 'address_extraction',
+  frequency_collection: 'frequency_collection',
   property_lookup: 'property_lookup',
   quote_calculation: 'quote_calculation',
-  booking: 'booking',
+  booking_appointment: 'booking_appointment',
   closing: 'closing',
   [END]: END,
 })
 
 workflow.addConditionalEdges('closing', routeBasedOnStage, {
   address_extraction: 'address_extraction',
+  frequency_collection: 'frequency_collection',
   property_lookup: 'property_lookup',
   quote_calculation: 'quote_calculation',
-  booking: 'booking',
+  booking_appointment: 'booking_appointment',
   closing: 'closing',
   [END]: END,
 })

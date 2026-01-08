@@ -38,6 +38,7 @@ This implementation plan breaks down the GreenAcre AI platform into **7 sequenti
 1. **Task Completion:** After completing any task or subtask, immediately mark it as completed with `[x]` in this implementation plan
 2. **Ask Before Proceeding:** Always ask for permission before moving to the next task
 3. **Commit Progress:** Commit changes to Git after each completed task with descriptive commit messages
+4. ** Push to Git: ** Use this command to push the changes to git - git push https://$(gh auth token)@github.com/anishma/GreenAcreAI.git main
 
 ---
 
@@ -1672,7 +1673,7 @@ Based on TAD Section 6.2 (API Design):
 ### Epic 4.5: LangGraph Agent - Conversation State Machine
 
 #### Task 4.5.1: Define Conversation State
-- [ ] **Subtask 4.5.1.1:** Create `src/lib/agents/state.ts`:
+- [x] **Subtask 4.5.1.1:** Create `src/lib/agents/state.ts`:
   ```typescript
   export interface ConversationState {
     messages: Array<{ role: 'user' | 'assistant'; content: string }>
@@ -1721,7 +1722,7 @@ Based on TAD Section 6.2 (API Design):
 #### Task 4.5.2: Create LangGraph Nodes
 Based on TAD Section 4.2.2 (LangGraph implementation):
 
-- [ ] **Subtask 4.5.2.1:** Create `src/lib/agents/nodes/greeting.ts`:
+- [x] **Subtask 4.5.2.1:** Create `src/lib/agents/nodes/greeting.ts`:
   ```typescript
   import { ConversationState } from '../state'
   import { prisma } from '@/lib/prisma'
@@ -1745,12 +1746,12 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   }
   ```
 
-- [ ] **Subtask 4.5.2.2:** Create `src/lib/agents/nodes/address-extraction.ts`:
+- [x] **Subtask 4.5.2.2:** Create `src/lib/agents/nodes/address-extraction.ts`:
   - Use GPT-4 to extract address components from user message
   - Validate extracted address
   - Retry logic if unclear (max 3 attempts)
 
-- [ ] **Subtask 4.5.2.3:** Create `src/lib/agents/nodes/property-lookup.ts`:
+- [x] **Subtask 4.5.2.3:** Create `src/lib/agents/nodes/property-lookup.ts`:
   ```typescript
   import { mcpClient } from '@/lib/mcp/client'
   import { ConversationState } from '../state'
@@ -1969,7 +1970,7 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
 - [ ] **Subtask 5.1.1.4:** Configure voice settings (ElevenLabs Turbo v2, Deepgram Nova 2)
 
 #### Task 5.1.2: Create VAPI Client
-- [ ] **Subtask 5.1.2.1:** Enhance `src/lib/vapi/client.ts`:
+- [x] **Subtask 5.1.2.1:** Enhance `src/lib/vapi/client.ts`:
   ```typescript
   import axios from 'axios'
 
@@ -2009,8 +2010,8 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   ```
 
 #### Task 5.1.3: Create VAPI Webhook Handler
-- [ ] **Subtask 5.1.3.1:** Create `src/lib/vapi/webhooks.ts` with event type definitions
-- [ ] **Subtask 5.1.3.2:** Create `src/app/api/webhooks/vapi/route.ts`:
+- [x] **Subtask 5.1.3.1:** Create `src/lib/vapi/webhooks.ts` with event type definitions
+- [x] **Subtask 5.1.3.2:** Create `src/app/api/webhooks/vapi/route.ts`:
   ```typescript
   import { NextRequest, NextResponse } from 'next/server'
   import { prisma } from '@/lib/prisma'
@@ -2106,7 +2107,7 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
 ### Epic 5.2: Call & Lead Management
 
 #### Task 5.2.1: Implement Call Router
-- [ ] **Subtask 5.2.1.1:** Implement `src/lib/trpc/routers/call.ts`:
+- [x] **Subtask 5.2.1.1:** Implement `src/lib/trpc/routers/call.ts`:
   ```typescript
   import { router, protectedProcedure } from '../server'
   import { z } from 'zod'
@@ -2151,13 +2152,13 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   ```
 
 #### Task 5.2.2: Implement Lead Router
-- [ ] **Subtask 5.2.2.1:** Implement `src/lib/trpc/routers/lead.ts` with CRUD operations
-- [ ] **Subtask 5.2.2.2:** Add `updateStatus` procedure
-- [ ] **Subtask 5.2.2.3:** Add `addNote` procedure
+- [x] **Subtask 5.2.2.1:** Implement `src/lib/trpc/routers/lead.ts` with CRUD operations
+- [x] **Subtask 5.2.2.2:** Add `updateStatus` procedure
+- [x] **Subtask 5.2.2.3:** Add `addNote` procedure
 
 #### Task 5.2.3: Implement Booking Router
-- [ ] **Subtask 5.2.3.1:** Implement `src/lib/trpc/routers/booking.ts`
-- [ ] **Subtask 5.2.3.2:** Add `list`, `getById`, `cancel` procedures
+- [x] **Subtask 5.2.3.1:** Implement `src/lib/trpc/routers/booking.ts`
+- [x] **Subtask 5.2.3.2:** Add `list`, `getById`, `cancel` procedures
 
 ### Epic 5.3: SMS Notifications (Twilio)
 

@@ -193,10 +193,20 @@ export const tenantRouter = router({
         })
       }
 
+      // Transform camelCase to snake_case for database storage
+      // This ensures compatibility with database functions
+      const pricingTiersForDb = input.tiers.map((tier) => ({
+        min_sqft: tier.minSqft,
+        max_sqft: tier.maxSqft,
+        weekly_price: tier.weeklyPrice,
+        biweekly_price: tier.biweeklyPrice,
+        monthly_price: tier.monthlyPrice,
+      }))
+
       const tenant = await ctx.prisma.tenants.update({
         where: { id: ctx.tenantId },
         data: {
-          pricing_tiers: input.tiers as any,
+          pricing_tiers: pricingTiersForDb as any,
           allows_generic_quotes: input.allowsGenericQuotes,
           generic_quote_disclaimer: input.genericQuoteDisclaimer || null,
           updated_at: new Date(),

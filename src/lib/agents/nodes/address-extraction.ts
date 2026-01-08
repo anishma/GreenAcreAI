@@ -29,15 +29,22 @@ export async function addressExtractionNode(
     }
   }
 
-  // Use GPT-4 to extract address components
-  const extractionPrompt = `Extract the address components from the following message. Return a JSON object with street, city, state (2-letter code), and zip (5 digits).
+  // Use GPT-4 to extract address components AND customer name
+  const extractionPrompt = `Extract the address components and customer name from the following message. Return a JSON object with street, city, state (2-letter code), zip (5 digits), and name.
 
 If any component is missing or unclear, return null for that field.
+
+Common patterns:
+- "Hi, I'm Sarah and I live at 123 Oak Street..." -> Extract "Sarah" as name
+- "This is John, my address is..." -> Extract "John" as name
+- "My name is Maria..." -> Extract "Maria" as name
+- "I'm at 123 Main St" -> name is null (no name mentioned)
 
 User message: "${lastUserMessage.content}"
 
 Return ONLY valid JSON with this exact structure:
 {
+  "name": "John Doe" or null,
   "street": "123 Main St" or null,
   "city": "Springfield" or null,
   "state": "IL" or null,
@@ -46,18 +53,29 @@ Return ONLY valid JSON with this exact structure:
 
   try {
     const response = await llm.invoke(extractionPrompt)
-    const extracted = JSON.parse(response.content as string)
 
-    // Validate all fields are present
+    // Clean up response - remove markdown code blocks if present
+    let jsonString = (response.content as string).trim()
+    if (jsonString.startsWith('```json')) {
+      jsonString = jsonString.replace(/```json\s*/, '').replace(/```\s*$/, '')
+    } else if (jsonString.startsWith('```')) {
+      jsonString = jsonString.replace(/```\s*/, '').replace(/```\s*$/, '')
+    }
+
+    const extracted = JSON.parse(jsonString)
+
+    // Validate all required address fields are present
     if (extracted.street && extracted.city && extracted.state && extracted.zip) {
       return {
+        // Use extracted name if provided, otherwise keep existing name from state
+        customer_name: extracted.name || state.customer_name || undefined,
         customer_address: {
           street: extracted.street,
           city: extracted.city,
           state: extracted.state,
           zip: extracted.zip,
         },
-        stage: 'property_lookup',
+        stage: 'frequency_collection', // Route to frequency collection first
         attempts: {
           ...state.attempts,
           address_extraction: 0, // Reset counter on success
@@ -65,7 +83,7 @@ Return ONLY valid JSON with this exact structure:
       }
     }
 
-    // Max 3 attempts
+    // Max 3 attempts - give up and close
     if (state.attempts.address_extraction >= 2) {
       return {
         messages: [
@@ -79,7 +97,7 @@ Return ONLY valid JSON with this exact structure:
       }
     }
 
-    // Ask for clarification
+    // Ask for clarification and WAIT for user response (don't loop)
     const missingFields = []
     if (!extracted.street) missingFields.push('street address')
     if (!extracted.city) missingFields.push('city')
@@ -94,6 +112,7 @@ Return ONLY valid JSON with this exact structure:
           content: `I need a bit more information. Could you provide your ${missingFields.join(', ')}?`,
         },
       ],
+      stage: 'WAITING_FOR_ADDRESS', // NEW: Pause here, don't loop
       attempts: {
         ...state.attempts,
         address_extraction: state.attempts.address_extraction + 1,

@@ -42,7 +42,16 @@ Return ONLY valid JSON with this structure:
 
   try {
     const response = await llm.invoke(intentPrompt)
-    const intent = JSON.parse(response.content as string)
+
+    // Clean up response - remove markdown code blocks if present
+    let jsonString = (response.content as string).trim()
+    if (jsonString.startsWith('```json')) {
+      jsonString = jsonString.replace(/```json\s*/, '').replace(/```\s*$/, '')
+    } else if (jsonString.startsWith('```')) {
+      jsonString = jsonString.replace(/```\s*/, '').replace(/```\s*$/, '')
+    }
+
+    const intent = JSON.parse(jsonString)
 
     // User declined booking
     if (intent.declined || !intent.wants_to_book) {
@@ -63,17 +72,18 @@ Return ONLY valid JSON with this structure:
     const twoWeeksLater = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
 
     const availableSlots = await mcpClient.callTool<{
-      slots: Array<{ start: string; end: string }>
+      available_slots: Array<{ start: string; end: string }>
     }>(
       'calendar',
       'get_available_slots',
       {
+        tenant_id: state.tenant_id,
         start_date: now.toISOString(),
         end_date: twoWeeksLater.toISOString(),
       }
     )
 
-    if (availableSlots.slots.length === 0) {
+    if (availableSlots.available_slots.length === 0) {
       return {
         stage: 'closing',
         messages: [
@@ -87,11 +97,11 @@ Return ONLY valid JSON with this structure:
     }
 
     // If user provided specific time preference, try to match it
-    let selectedSlot = availableSlots.slots[0]
+    let selectedSlot = availableSlots.available_slots[0]
 
     if (intent.specific_datetime) {
       // Try to find slot matching specific datetime
-      const preferredSlot = availableSlots.slots.find(
+      const preferredSlot = availableSlots.available_slots.find(
         (slot) => slot.start === intent.specific_datetime
       )
       if (preferredSlot) {
@@ -99,7 +109,7 @@ Return ONLY valid JSON with this structure:
       }
     } else if (intent.time_preference === 'morning') {
       // Find morning slot (before noon)
-      const morningSlot = availableSlots.slots.find((slot) => {
+      const morningSlot = availableSlots.available_slots.find((slot) => {
         const hour = new Date(slot.start).getHours()
         return hour < 12
       })
@@ -108,7 +118,7 @@ Return ONLY valid JSON with this structure:
       }
     } else if (intent.time_preference === 'afternoon') {
       // Find afternoon slot (after noon)
-      const afternoonSlot = availableSlots.slots.find((slot) => {
+      const afternoonSlot = availableSlots.available_slots.find((slot) => {
         const hour = new Date(slot.start).getHours()
         return hour >= 12
       })
@@ -126,16 +136,18 @@ Return ONLY valid JSON with this structure:
       'calendar',
       'book_appointment',
       {
+        tenant_id: state.tenant_id,
         start_time: selectedSlot.start,
         end_time: selectedSlot.end,
         customer_name: state.customer_name || 'Customer',
         customer_phone: state.customer_phone || '',
-        customer_address: state.customer_address
+        property_address: state.customer_address
           ? `${state.customer_address.street}, ${state.customer_address.city}, ${state.customer_address.state} ${state.customer_address.zip}`
           : '',
+        estimated_price: state.quote?.price || 0,
         service_type: 'lawn_mowing',
         notes: state.quote
-          ? `Quote: $${state.quote.price} per visit, ${state.quote.frequency}`
+          ? `Quote: $${state.quote.price} per visit, ${state.preferred_frequency || state.quote.frequency} frequency`
           : 'Initial consultation',
       }
     )
@@ -144,19 +156,23 @@ Return ONLY valid JSON with this structure:
     await prisma.bookings.create({
       data: {
         tenant_id: state.tenant_id,
+        updated_at: new Date(),
         customer_phone: state.customer_phone || '',
         customer_name: state.customer_name || 'Customer',
-        customer_address: state.customer_address
-          ? `${state.customer_address.street}, ${state.customer_address.city}, ${state.customer_address.state} ${state.customer_address.zip}`
+        property_address: state.customer_address
+          ? `${state.customer_address.street}`
           : null,
+        property_city: state.customer_address?.city || null,
+        property_state: state.customer_address?.state || null,
+        property_zip: state.customer_address?.zip || null,
         scheduled_at: new Date(booking.scheduled_time),
         service_type: 'lawn_mowing',
-        status: 'scheduled',
+        status: 'confirmed',
         google_calendar_event_id: booking.event_id,
-        quote_price: state.quote?.price || null,
-        quote_frequency: state.quote?.frequency || null,
-        property_lot_size_sqft: state.property_data?.lot_size_sqft || null,
-        property_parcel_id: state.property_data?.parcel_id || null,
+        estimated_price: state.quote?.price || null,
+        notes: state.quote
+          ? `${state.preferred_frequency || state.quote.frequency} service - $${state.quote.price} per visit. Property: ${state.property_data?.lot_size_sqft} sqft${state.property_data?.parcel_id ? `, Parcel: ${state.property_data.parcel_id}` : ''}`
+          : null,
       },
     })
 

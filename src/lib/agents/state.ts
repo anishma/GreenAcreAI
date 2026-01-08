@@ -19,6 +19,9 @@ export interface ConversationState {
     parcel_id: string
   }
 
+  // Service preferences
+  preferred_frequency?: 'weekly' | 'biweekly' | 'monthly' | 'one-time'
+
   // Quote
   quote?: {
     price: number
@@ -34,7 +37,7 @@ export interface ConversationState {
   }
 
   // State tracking
-  stage: 'greeting' | 'address_collection' | 'property_lookup' | 'quoting' | 'booking' | 'closing'
+  stage: 'greeting' | 'address_collection' | 'property_lookup' | 'frequency_collection' | 'quoting' | 'booking' | 'closing' | 'WAITING_FOR_ADDRESS' | 'WAITING_FOR_FREQUENCY' | 'WAITING_FOR_BOOKING_DECISION' | 'END'
   attempts: {
     address_extraction: number
     property_lookup: number

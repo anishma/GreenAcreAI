@@ -8,23 +8,38 @@ export const getGenericPriceRangeTool = {
     tenant_id: z.string().uuid(),
   }),
   handler: async (input: z.infer<typeof getGenericPriceRangeTool.input_schema>) => {
-    // Get all pricing tiers for the tenant
-    const pricingTiers = await prisma.pricing_tiers.findMany({
-      where: { tenant_id: input.tenant_id },
-      orderBy: { tier_min_sqft: 'asc' },
+    // Get tenant with pricing_tiers JSON column
+    const tenant = await prisma.tenants.findUnique({
+      where: { id: input.tenant_id },
+      select: {
+        pricing_tiers: true,
+        allows_generic_quotes: true,
+        generic_quote_disclaimer: true,
+      },
     })
 
-    if (pricingTiers.length === 0) {
-      throw new Error('No pricing tiers found for tenant')
+    if (!tenant) {
+      throw new Error('Tenant not found')
+    }
+
+    if (!tenant.allows_generic_quotes) {
+      throw new Error('Generic quotes are not enabled for this tenant')
+    }
+
+    // Parse pricing tiers from JSON
+    const pricingTiers = tenant.pricing_tiers as any[]
+
+    if (!pricingTiers || pricingTiers.length === 0) {
+      throw new Error('No pricing tiers configured for tenant')
     }
 
     // Get min and max weekly prices
-    const weeklyPrices = pricingTiers.map((tier) => tier.weekly_price)
+    const weeklyPrices = pricingTiers.map((tier) => Number(tier.weekly_price))
     const minWeekly = Math.min(...weeklyPrices)
     const maxWeekly = Math.max(...weeklyPrices)
 
     // Get min and max biweekly prices
-    const biweeklyPrices = pricingTiers.map((tier) => tier.biweekly_price)
+    const biweeklyPrices = pricingTiers.map((tier) => Number(tier.biweekly_price))
     const minBiweekly = Math.min(...biweeklyPrices)
     const maxBiweekly = Math.max(...biweeklyPrices)
 
@@ -39,7 +54,7 @@ export const getGenericPriceRangeTool = {
         max: maxBiweekly,
         range: `$${minBiweekly} - $${maxBiweekly}`,
       },
-      message: 'Pricing varies based on lot size. An exact quote requires property information.',
+      message: tenant.generic_quote_disclaimer || 'Pricing varies based on lot size. An exact quote requires property information.',
     }
   },
 }

@@ -5,7 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+// import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Phone, Users, Calendar, TrendingUp } from 'lucide-react'
 

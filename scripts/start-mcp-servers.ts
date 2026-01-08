@@ -8,14 +8,15 @@ console.log('Starting MCP servers...')
 for (const server of servers) {
   const serverPath = path.join(
     process.cwd(),
-    'dist',
+    'src',
+    'lib',
     'mcp',
     'servers',
     server,
-    'index.js'
+    'index.ts'
   )
 
-  const proc = spawn('node', [serverPath], {
+  const proc = spawn('npx', ['tsx', serverPath], {
     stdio: 'inherit',
   })
 

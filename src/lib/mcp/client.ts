@@ -1,13 +1,11 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
-import { spawn, ChildProcess } from 'child_process'
 import path from 'path'
 
 type ServerName = 'property-lookup' | 'calendar' | 'business-logic'
 
 class MCPClientManager {
   private clients: Map<ServerName, Client> = new Map()
-  private processes: Map<ServerName, ChildProcess> = new Map()
 
   async getClient(serverName: ServerName): Promise<Client> {
     // Return existing client if already connected
@@ -15,27 +13,21 @@ class MCPClientManager {
       return this.clients.get(serverName)!
     }
 
-    // Spawn MCP server as child process
+    // MCP server path
     const serverPath = path.join(
       process.cwd(),
-      'dist',
+      'src',
+      'lib',
       'mcp',
       'servers',
       serverName,
-      'index.js'
+      'index.ts'
     )
 
-    const serverProcess = spawn('node', [serverPath], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-    })
-
-    // Store process for cleanup
-    this.processes.set(serverName, serverProcess)
-
-    // Create stdio transport
+    // Create stdio transport with command and args
     const transport = new StdioClientTransport({
-      input: serverProcess.stdout,
-      output: serverProcess.stdin,
+      command: 'npx',
+      args: ['tsx', serverPath],
     })
 
     // Create MCP client
@@ -67,14 +59,12 @@ class MCPClientManager {
   ): Promise<T> {
     const client = await this.getClient(serverName)
 
-    const response = await client.request(
+    const response = await client.callTool(
       {
-        method: 'tools/call',
-        params: {
-          name: toolName,
-          arguments: args,
-        },
+        name: toolName,
+        arguments: args,
       },
+      undefined, // resultSchema
       { timeout: 30000 }
     )
 
@@ -87,10 +77,8 @@ class MCPClientManager {
   async shutdown() {
     for (const [serverName, client] of this.clients.entries()) {
       await client.close()
-      this.processes.get(serverName)?.kill()
     }
     this.clients.clear()
-    this.processes.clear()
   }
 }
 

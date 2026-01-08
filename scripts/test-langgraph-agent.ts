@@ -4,6 +4,7 @@
  * Simulates a complete conversation flow
  */
 
+import 'dotenv/config'
 import { conversationGraph } from '../src/lib/agents/conversation-graph'
 import { ConversationState } from '../src/lib/agents/state'
 import { prisma } from '../src/lib/prisma'
@@ -35,7 +36,11 @@ async function simulateConversation() {
     },
     {
       description: 'User provides address',
-      userMessage: '123 Main St, Springfield, IL 62701',
+      userMessage: '1200 Main Street, Dallas, TX 75202',
+    },
+    {
+      description: 'User chooses frequency',
+      userMessage: 'I would like biweekly service',
     },
     {
       description: 'User wants to book',
@@ -92,6 +97,9 @@ async function simulateConversation() {
         console.log(
           `📍 Address: ${result.customer_address.street}, ${result.customer_address.city}, ${result.customer_address.state} ${result.customer_address.zip}`
         )
+      }
+      if (result.preferred_frequency) {
+        console.log(`🔄 Frequency: ${result.preferred_frequency}`)
       }
       if (result.property_data) {
         console.log(
@@ -173,16 +181,16 @@ async function testEdgeCases() {
       messages: [
         { role: 'user', content: 'I just want a quote' },
         { role: 'assistant', content: 'Sure! What is your address?' },
-        { role: 'user', content: '123 Main St, Springfield, IL 62701' },
+        { role: 'user', content: '1200 Main Street, Dallas, TX 75202' },
       ],
       tenant_id: tenant.id,
       call_id: `test_decline_${Date.now()}`,
       stage: 'address_collection',
       customer_address: {
-        street: '123 Main St',
-        city: 'Springfield',
-        state: 'IL',
-        zip: '62701',
+        street: '1200 Main Street',
+        city: 'Dallas',
+        state: 'TX',
+        zip: '75202',
       },
       attempts: {
         address_extraction: 0,

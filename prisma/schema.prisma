@@ -185,6 +185,7 @@ model tenants {
   phone                            String?           @db.VarChar(20)
   service_areas                    Json              @default("[]")
   pricing_tiers                    Json              @default("[]")
+  supports_one_time_service        Boolean           @default(true)
   allows_generic_quotes            Boolean           @default(true)
   generic_quote_disclaimer         String?           @default("Prices vary by property size. Address needed for exact quote.")
   google_calendar_refresh_token    String?

@@ -24,12 +24,20 @@ export const calculateQuoteTool = {
     }
 
     const quote = result[0]
+
+    // Convert DECIMAL to number (Prisma returns Decimal as string)
+    const weeklyPrice = typeof quote.weekly_price === 'string'
+      ? parseFloat(quote.weekly_price)
+      : Number(quote.weekly_price)
+    const biweeklyPrice = typeof quote.biweekly_price === 'string'
+      ? parseFloat(quote.biweekly_price)
+      : Number(quote.biweekly_price)
+
     return {
-      price: input.frequency === 'weekly' ? quote.weekly_price : quote.biweekly_price,
+      price_per_visit: input.frequency === 'weekly' ? weeklyPrice : biweeklyPrice,
       frequency: input.frequency,
       service_inclusions: quote.service_inclusions,
-      pricing_type: quote.pricing_type,
-      tier_range: `${quote.tier_min_sqft}-${quote.tier_max_sqft} sqft`,
+      tier_name: quote.pricing_type || 'standard',
     }
   },
 }

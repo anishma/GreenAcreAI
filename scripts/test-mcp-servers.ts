@@ -4,7 +4,11 @@
  * Tests property lookup, calendar, and business logic servers
  */
 
+import 'dotenv/config'
 import { mcpClient } from '../src/lib/mcp/client'
+
+// Use the actual tenant ID from the database
+const TENANT_ID = '182557c2-22e6-4577-b2a6-9c6681361227'
 
 async function testPropertyLookup() {
   console.log('\n=== Testing Property Lookup Server ===')
@@ -13,10 +17,10 @@ async function testPropertyLookup() {
       'property-lookup',
       'lookup_property',
       {
-        street: '1600 Amphitheatre Parkway',
-        city: 'Mountain View',
-        state: 'CA',
-        zip: '94043',
+        street: '1200 Main Street',
+        city: 'Dallas',
+        state: 'TX',
+        zip: '75202',
       }
     )
     console.log('✓ Property lookup successful:')
@@ -36,10 +40,8 @@ async function testBusinessLogic() {
       'business-logic',
       'validate_service_area',
       {
-        street: '1600 Amphitheatre Parkway',
-        city: 'Mountain View',
-        state: 'CA',
-        zip: '94043',
+        tenant_id: TENANT_ID,
+        zip: '75202',
       }
     )
     console.log('✓ Service area validation successful:')
@@ -55,7 +57,9 @@ async function testBusinessLogic() {
       'business-logic',
       'calculate_quote',
       {
+        tenant_id: TENANT_ID,
         lot_size_sqft: 5000,
+        frequency: 'weekly',
       }
     )
     console.log('✓ Quote calculation successful:')
@@ -70,7 +74,9 @@ async function testBusinessLogic() {
     const priceRangeResult = await mcpClient.callTool(
       'business-logic',
       'get_generic_price_range',
-      {}
+      {
+        tenant_id: TENANT_ID,
+      }
     )
     console.log('✓ Generic price range successful:')
     console.log(JSON.stringify(priceRangeResult, null, 2))
@@ -92,6 +98,7 @@ async function testCalendar() {
       'calendar',
       'get_available_slots',
       {
+        tenant_id: TENANT_ID,
         start_date: now.toISOString(),
         end_date: twoWeeksLater.toISOString(),
       }
@@ -120,26 +127,26 @@ async function testCalendar() {
       'calendar',
       'book_appointment',
       {
+        tenant_id: TENANT_ID,
         start_time: tomorrow9am.toISOString(),
-        end_time: tomorrow10am.toISOString(),
         customer_name: 'Test Customer',
         customer_phone: '+15551234567',
-        customer_address: '123 Test St, Test City, CA 90001',
-        service_type: 'lawn_mowing',
-        notes: 'Test appointment - will be cancelled',
+        property_address: '1200 Main Street, Dallas, TX 75202',
+        estimated_price: 45,
       }
     )
     console.log('✓ Book appointment successful:')
     console.log(JSON.stringify(bookingResult, null, 2))
 
     // Cancel the test appointment
-    if (bookingResult.event_id) {
+    if (bookingResult.calendar_event_id) {
       console.log('\n3. Testing cancel appointment:')
       const cancelResult = await mcpClient.callTool(
         'calendar',
         'cancel_appointment',
         {
-          event_id: bookingResult.event_id,
+          tenant_id: TENANT_ID,
+          calendar_event_id: bookingResult.calendar_event_id,
         }
       )
       console.log('✓ Cancel appointment successful:')
