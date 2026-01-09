@@ -2348,48 +2348,48 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
 ### Epic 6.1: Dashboard Pages
 
 #### Task 6.1.1: Dashboard Home Page
-- [ ] **Subtask 6.1.1.1:** Create `src/app/(dashboard)/page.tsx`:
+- [x] **Subtask 6.1.1.1:** Create `src/app/(dashboard)/page.tsx`:
   - Overview cards: Total Calls (today), Leads Captured, Bookings Made, Conversion Rate
   - Recent calls list (last 10)
   - Quick actions: "View All Calls", "Manage Leads"
-- [ ] **Subtask 6.1.1.2:** Create `src/components/dashboard/metrics-card.tsx` (reusable metric display)
-- [ ] **Subtask 6.1.1.3:** Fetch data using tRPC `analytics.getDashboardMetrics` procedure
+- [x] **Subtask 6.1.1.2:** Create `src/components/dashboard/metrics-card.tsx` (reusable metric display)
+- [x] **Subtask 6.1.1.3:** Fetch data using tRPC `analytics.getDashboardMetrics` procedure
 
 #### Task 6.1.2: Calls Page
-- [ ] **Subtask 6.1.2.1:** Create `src/app/(dashboard)/calls/page.tsx`:
+- [x] **Subtask 6.1.2.1:** Create `src/app/(dashboard)/calls/page.tsx`:
   - Call list table with columns: Date/Time, Caller, Duration, Outcome, Quote, Actions
   - Filters: Date range, Outcome (quote_given, booking_made, etc.)
   - Pagination
   - Search by phone number
-- [ ] **Subtask 6.1.2.2:** Create `src/components/dashboard/call-list.tsx`
-- [ ] **Subtask 6.1.2.3:** Use tRPC `call.list` query
+- [x] **Subtask 6.1.2.2:** Create `src/components/dashboard/call-list.tsx`
+- [x] **Subtask 6.1.2.3:** Use tRPC `call.list` query
 
 #### Task 6.1.3: Call Detail Page
-- [ ] **Subtask 6.1.3.1:** Create `src/app/(dashboard)/calls/[id]/page.tsx`:
+- [x] **Subtask 6.1.3.1:** Create `src/app/(dashboard)/calls/[id]/page.tsx`:
   - Call metadata (date, duration, caller)
   - Full transcript (formatted conversation)
   - Audio player for recording
   - Associated lead/booking info
   - Actions: "Create Lead", "Book Appointment" (if not done)
-- [ ] **Subtask 6.1.3.2:** Create `src/components/dashboard/call-transcript.tsx`
-- [ ] **Subtask 6.1.3.3:** Create `src/components/dashboard/audio-player.tsx` (uses Supabase signed URL)
+- [x] **Subtask 6.1.3.2:** Create `src/components/dashboard/call-transcript.tsx`
+- [x] **Subtask 6.1.3.3:** Create `src/components/dashboard/audio-player.tsx` (uses Supabase signed URL)
 
 #### Task 6.1.4: Leads Page
-- [ ] **Subtask 6.1.4.1:** Create `src/app/(dashboard)/leads/page.tsx`:
+- [x] **Subtask 6.1.4.1:** Create `src/app/(dashboard)/leads/page.tsx`:
   - Lead cards/table: Name, Address, Phone, Quote, Status, Date
   - Filters: Status (new, contacted, quoted, booked, lost)
   - Search by name, address, phone
-- [ ] **Subtask 6.1.4.2:** Create `src/components/dashboard/lead-card.tsx`
-- [ ] **Subtask 6.1.4.3:** Add inline status update (dropdown)
-- [ ] **Subtask 6.1.4.4:** Add notes section
+- [x] **Subtask 6.1.4.2:** Create `src/components/dashboard/lead-card.tsx`
+- [x] **Subtask 6.1.4.3:** Add inline status update (dropdown)
+- [x] **Subtask 6.1.4.4:** Add notes section
 
 #### Task 6.1.5: Bookings Page
-- [ ] **Subtask 6.1.5.1:** Create `src/app/(dashboard)/bookings/page.tsx`:
+- [x] **Subtask 6.1.5.1:** Create `src/app/(dashboard)/bookings/page.tsx`:
   - Calendar view of upcoming appointments
   - List view with: Customer, Address, Date/Time, Status, Actions
   - Filter: Upcoming, Completed, Canceled
-- [ ] **Subtask 6.1.5.2:** Create `src/components/dashboard/booking-calendar.tsx` (use shadcn calendar)
-- [ ] **Subtask 6.1.5.3:** Add "Cancel Appointment" action (calls Google Calendar API)
+- [x] **Subtask 6.1.5.2:** Create `src/components/dashboard/booking-calendar.tsx` (use shadcn calendar)
+- [x] **Subtask 6.1.5.3:** Add "Cancel Appointment" action (calls Google Calendar API)
 
 #### Task 6.1.6: Analytics Page
 - [ ] **Subtask 6.1.6.1:** Create `src/app/(dashboard)/analytics/page.tsx`:

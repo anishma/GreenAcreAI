@@ -10,6 +10,69 @@ import { z } from 'zod'
 
 export const analyticsRouter = router({
   /**
+   * Get dashboard metrics for the current tenant
+   * Includes today's calls, total leads, bookings, and conversion rate
+   */
+  getDashboardMetrics: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.tenantId) {
+      return {
+        callsToday: 0,
+        totalLeads: 0,
+        totalBookings: 0,
+        conversionRate: 0,
+        recentCalls: [],
+      }
+    }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const [callsToday, totalLeads, totalBookings, recentCalls] = await Promise.all([
+      ctx.prisma.calls.count({
+        where: {
+          tenant_id: ctx.tenantId,
+          created_at: { gte: today },
+        },
+      }),
+      ctx.prisma.leads.count({
+        where: { tenant_id: ctx.tenantId },
+      }),
+      ctx.prisma.bookings.count({
+        where: { tenant_id: ctx.tenantId },
+      }),
+      ctx.prisma.calls.findMany({
+        where: { tenant_id: ctx.tenantId },
+        orderBy: { created_at: 'desc' },
+        take: 10,
+        select: {
+          id: true,
+          vapi_call_id: true,
+          created_at: true,
+          ended_at: true,
+          duration_seconds: true,
+          caller_phone_number: true,
+          outcome: true,
+          quote_amount: true,
+          booking_made: true,
+          lead_captured: true,
+          status: true,
+        },
+      }),
+    ])
+
+    // Calculate conversion rate (bookings / leads)
+    const conversionRate = totalLeads > 0 ? (totalBookings / totalLeads) * 100 : 0
+
+    return {
+      callsToday,
+      totalLeads,
+      totalBookings,
+      conversionRate: Math.round(conversionRate * 10) / 10, // Round to 1 decimal
+      recentCalls,
+    }
+  }),
+
+  /**
    * Get daily analytics for the current tenant
    * Requires authentication
    */
