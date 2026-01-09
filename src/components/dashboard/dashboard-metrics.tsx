@@ -11,9 +11,38 @@ import { Phone, Users, Calendar, TrendingUp, Clock, DollarSign } from 'lucide-re
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { useRealtimeCalls } from '@/lib/hooks/use-realtime'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export function DashboardMetrics() {
+  const [tenantId, setTenantId] = useState<string | undefined>()
   const { data: metrics, isLoading } = trpc.analytics.getDashboardMetrics.useQuery()
+
+  // Get tenant ID from Supabase auth
+  useEffect(() => {
+    const getTenantId = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (user) {
+        const { data } = await supabase
+          .from('users')
+          .select('tenant_id')
+          .eq('auth_user_id', user.id)
+          .single()
+
+        if (data) {
+          setTenantId(data.tenant_id)
+        }
+      }
+    }
+
+    getTenantId()
+  }, [])
+
+  // Enable realtime updates for calls
+  useRealtimeCalls(tenantId)
 
   if (isLoading) {
     return (

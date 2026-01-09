@@ -2324,20 +2324,12 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
   ```
 
 #### Task 5.4.2: Set Up Storage Bucket RLS
-- [ ] **Subtask 5.4.2.1:** Create RLS policy for `call-recordings` bucket in Supabase dashboard:
-  ```sql
-  -- Allow authenticated users to read recordings for their tenant's calls
-  CREATE POLICY "Tenant can read own recordings"
-  ON storage.objects FOR SELECT
-  USING (
-    bucket_id = 'call-recordings' AND
-    EXISTS (
-      SELECT 1 FROM calls
-      WHERE calls.vapi_call_id = (storage.objects.name)
-      AND calls.tenant_id = (SELECT tenant_id FROM users WHERE auth_user_id = auth.uid())
-    )
-  );
-  ```
+- [x] **Subtask 5.4.2.1:** Created comprehensive Storage RLS setup documentation in `Docs/SUPABASE_STORAGE_SETUP.md`:
+  - Step-by-step bucket creation guide
+  - RLS policies for tenant isolation using folder-based paths
+  - Testing procedures and troubleshooting
+  - Security best practices
+  - Lifecycle management examples
 
 ---
 
@@ -2392,60 +2384,33 @@ Based on TAD Section 4.2.2 (LangGraph implementation):
 - [x] **Subtask 6.1.5.3:** Add "Cancel Appointment" action (calls Google Calendar API)
 
 #### Task 6.1.6: Analytics Page
-- [ ] **Subtask 6.1.6.1:** Create `src/app/(dashboard)/analytics/page.tsx`:
-  - Date range selector
+- [x] **Subtask 6.1.6.1:** Created `src/app/(dashboard)/analytics/page.tsx`:
+  - Date range selector (7, 30, 90 days)
   - Charts:
-    - Calls over time (line chart)
-    - Call outcomes (pie chart)
-    - Quote-to-booking conversion (funnel)
-    - Average quote amount (stat)
+    - Calls over time (line chart with successful/failed breakdown)
+    - Call outcomes (pie chart with bookings, quotes, no interest, failed)
+    - Quote-to-booking conversion funnel
+    - Summary stats (Total Calls, Bookings, Leads, Cost)
   - Cost tracking: Total spend on VAPI
-- [ ] **Subtask 6.1.6.2:** Install chart library: `npm install recharts`
-- [ ] **Subtask 6.1.6.3:** Create `src/components/dashboard/charts/` with reusable chart components
-- [ ] **Subtask 6.1.6.4:** Implement `analytics.getMetrics` tRPC procedure
+- [x] **Subtask 6.1.6.2:** Installed chart library: `npm install recharts`
+- [x] **Subtask 6.1.6.3:** Implemented inline chart components using Recharts (LineChart, PieChart)
+- [x] **Subtask 6.1.6.4:** Using existing `analytics.getSummary` and `analytics.getDaily` tRPC procedures
 
 ### Epic 6.2: Real-time Updates
 
 #### Task 6.2.1: Set Up Supabase Realtime Subscriptions
-- [ ] **Subtask 6.2.1.1:** Create `src/lib/hooks/use-realtime.ts`:
-  ```typescript
-  import { useEffect } from 'react'
-  import { createClient } from '@/lib/supabase/client'
-  import { useQueryClient } from '@tanstack/react-query'
+- [x] **Subtask 6.2.1.1:** Created `src/lib/hooks/use-realtime.ts` with comprehensive realtime hooks:
+  - `useRealtimeCalls()` - Subscribe to call INSERT/UPDATE events with tenant filtering
+  - `useRealtimeLeads()` - Subscribe to lead changes
+  - `useRealtimeBookings()` - Subscribe to booking changes
+  - `useRealtimeUpdates()` - Convenience wrapper for all subscriptions
+  - Automatic tRPC query invalidation on changes
+  - Toast notifications for new bookings and leads
 
-  export function useRealtimeCalls(tenantId: string) {
-    const queryClient = useQueryClient()
-    const supabase = createClient()
-
-    useEffect(() => {
-      const channel = supabase
-        .channel('calls')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'calls',
-            filter: `tenant_id=eq.${tenantId}`,
-          },
-          (payload) => {
-            // Invalidate calls query to refetch
-            queryClient.invalidateQueries(['call', 'list'])
-
-            // Show toast notification
-            toast.success('New call received!')
-          }
-        )
-        .subscribe()
-
-      return () => {
-        supabase.removeChannel(channel)
-      }
-    }, [tenantId])
-  }
-  ```
-
-- [ ] **Subtask 6.2.1.2:** Use `useRealtimeCalls` hook in calls page and dashboard home
+- [x] **Subtask 6.2.1.2:** Integrated `useRealtimeCalls` hook in dashboard metrics component
+  - Added tenant ID extraction from Supabase auth
+  - Dashboard auto-refreshes on new calls
+  - Live updates for all dashboard metrics
 
 ### Epic 6.3: Analytics Router Implementation
 

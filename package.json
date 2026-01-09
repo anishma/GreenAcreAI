@@ -85,6 +85,7 @@
     "react-day-picker": "^9.13.0",
     "react-dom": "^18.3.0",
     "react-hook-form": "^7.69.0",
+    "recharts": "^3.6.0",
     "stripe": "^14.25.0",
     "superjson": "^2.2.6",
     "tailwind-merge": "^3.4.0",
