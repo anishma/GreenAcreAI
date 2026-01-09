@@ -5,6 +5,41 @@ This guide covers testing for:
 - **Phase 5**: VAPI Integration & Post-Call Processing
 - **Phase 6**: Dashboard & Analytics
 
+## Phone Number Architecture
+
+**Important**: Understand the difference between VAPI and Twilio phone numbers:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        Phone Number Flow                                 │
+└─────────────────────────────────────────────────────────────────────────┘
+
+1. Customer makes call:
+   Customer's Personal Phone (+1-555-123-4567)
+        ↓ CALLS
+   VAPI Phone Number (+1-XXX-XXX-XXXX)
+        ↓ stored in: tenants.vapi_phone_number_id
+        ↓ used to identify which tenant owns this call
+
+2. Voice conversation happens:
+   [LangGraph AI conversation]
+        ↓ extracts customer's phone number
+        ↓ creates booking
+
+3. System sends SMS notifications:
+   Twilio Phone Number (+1-YYY-YYY-YYYY)
+        ↓ FROM (stored in env: TWILIO_PHONE_NUMBER)
+        ↓ SENDS SMS TO:
+        ├─→ Customer's Personal Phone (+1-555-123-4567) [booking confirmation]
+        └─→ Owner's Personal Phone (tenants.phone_number) [lead/booking alert]
+```
+
+**Key Points**:
+- **VAPI number** (`tenants.vapi_phone_number_id`) = Inbound calls only (voice) + tenant identification
+- **Twilio number** (env: `TWILIO_PHONE_NUMBER`) = Outbound SMS only (text)
+- **Customer's personal number** = Extracted during call, receives booking confirmations
+- **Owner's personal number** (`tenants.phone_number`) = Receives lead/booking alerts
+
 ---
 
 ## Pre-Testing Setup
@@ -46,16 +81,47 @@ REGRID_API_KEY="..."
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-### 2. Supabase Storage Bucket
+### 2. Twilio Account Setup
+
+**IMPORTANT**: VAPI phone numbers are for RECEIVING calls only. To SEND SMS notifications, you need a separate Twilio account:
+
+1. **Sign up for Twilio**:
+   - Go to https://www.twilio.com/try-twilio
+   - Create a free trial account
+   - Get $15 free credit
+
+2. **Get a Twilio Phone Number**:
+   - Go to Phone Numbers → Buy a number
+   - Select a number with SMS capabilities
+   - This will be your SMS "FROM" number
+
+3. **Get Credentials**:
+   - Go to Console → Account Info
+   - Copy Account SID
+   - Copy Auth Token
+
+4. **Add to `.env.local`**:
+   ```bash
+   TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxx"
+   TWILIO_AUTH_TOKEN="your-auth-token"
+   TWILIO_PHONE_NUMBER="+1234567890"  # Your Twilio number
+   ```
+
+**Architecture Clarification**:
+- **VAPI Phone Number** (`tenants.vapi_phone_number_id`): Customers call this → handles voice conversation → identifies tenant
+- **Owner's Personal Phone** (`tenants.phone_number`): Receives SMS alerts from Twilio
+- **Twilio Phone Number** (env var): System uses this to SEND SMS → customers/owners receive SMS on their personal phones
+
+### 3. Supabase Storage Bucket
 
 Create the `call-recordings` bucket in Supabase:
 
 1. Go to Supabase Dashboard → Storage
 2. Create new bucket: `call-recordings`
 3. Set as **Private** (we use signed URLs)
-4. (Optional) Set up RLS policies for tenant isolation
+4. Follow setup guide in `Docs/SUPABASE_STORAGE_SETUP.md` for RLS policies
 
-### 3. Database Migration
+### 4. Database Migration
 
 Ensure all migrations are applied:
 
@@ -156,14 +222,29 @@ curl -X POST http://localhost:3000/api/webhooks/vapi \
 
 **Location**: `src/lib/twilio/sms.ts`
 
+**IMPORTANT - SMS Architecture**:
+- **VAPI Phone Number**: Used ONLY for receiving calls (voice conversation)
+- **Twilio Phone Number**: Used for SENDING SMS notifications
+- **Customer/Owner Personal Phones**: Receive SMS from Twilio number
+
+**Flow**:
+1. Customer calls VAPI number → voice conversation
+2. System extracts customer's personal phone during call
+3. After booking/quote, Twilio sends SMS FROM Twilio number TO customer's personal phone
+
 #### Test 5.2.1: Customer Booking Confirmation
 
 **Trigger**: Create a booking through the conversation graph
 
 **Expected**:
-- ✅ SMS sent to customer phone
+- ✅ SMS sent FROM Twilio phone number TO customer's personal phone (extracted during call)
 - ✅ Notification logged in `notifications` table
 - ✅ `confirmation_sent = true` in booking record
+- ✅ Customer receives SMS on their personal phone (NOT VAPI number)
+
+**Test Setup**:
+- Use your own phone number as the customer during testing
+- Ensure Twilio credentials are configured in `.env.local`
 
 **Verify SMS Content**:
 ```
@@ -175,8 +256,12 @@ Hi [Customer Name], your lawn mowing appointment with [Business Name] is confirm
 **Trigger**: Call ends with quote given but no booking
 
 **Expected**:
-- ✅ SMS sent to owner phone (from `tenants.phone`)
+- ✅ SMS sent FROM Twilio number TO owner's personal phone (from `tenants.phone_number`)
 - ✅ Notification logged with `template = new_lead_alert`
+
+**Test Setup**:
+- Set `tenants.phone_number` to YOUR phone number to receive owner alerts
+- This is the business owner's personal phone, NOT the VAPI number
 
 **Verify SMS Content**:
 ```
@@ -188,7 +273,7 @@ Hi [Customer Name], your lawn mowing appointment with [Business Name] is confirm
 **Trigger**: Call ends with booking made
 
 **Expected**:
-- ✅ SMS sent to owner phone
+- ✅ SMS sent FROM Twilio number TO owner's personal phone
 - ✅ Notification logged with `template = new_booking_alert`
 
 **Verify SMS Content**:
