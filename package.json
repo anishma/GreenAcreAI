@@ -15,7 +15,8 @@
     "test:mcp": "tsx scripts/test-mcp-servers.ts",
     "test:agent": "tsx scripts/test-langgraph-agent.ts",
     "test:vapi": "tsx scripts/test-vapi-endpoint.ts",
-    "test:phase4": "npm run test:mcp && npm run test:agent"
+    "test:phase4": "npm run test:mcp && npm run test:agent",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
