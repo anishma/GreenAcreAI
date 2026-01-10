@@ -27,7 +27,7 @@ export default function LeadsPage() {
   const leads = response?.leads || []
 
   // Filter leads
-  const filteredLeads = leads.filter((lead) => {
+  const filteredLeads = leads.filter((lead: typeof leads[number]) => {
     const matchesSearch =
       lead.name?.toLowerCase().includes(search.toLowerCase()) ||
       lead.phone_number?.includes(search) ||
@@ -104,7 +104,7 @@ export default function LeadsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredLeads.map((lead) => (
+          {filteredLeads.map((lead: typeof leads[number]) => (
             <Card key={lead.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">

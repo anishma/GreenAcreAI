@@ -26,7 +26,7 @@ export default function BookingsPage() {
   const bookings = response?.bookings || []
 
   // Filter bookings
-  const filteredBookings = bookings.filter((booking: any) => {
+  const filteredBookings = bookings.filter((booking: typeof bookings[number]) => {
     const bookingDate = new Date(booking.scheduled_at)
 
     if (filter === 'upcoming') {
@@ -102,7 +102,7 @@ export default function BookingsPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {sortedBookings.map((booking) => {
+          {sortedBookings.map((booking: typeof bookings[number]) => {
             const bookingDate = new Date(booking.scheduled_at)
             const isUpcoming = isFuture(bookingDate)
 

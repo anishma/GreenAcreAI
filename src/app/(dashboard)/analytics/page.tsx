@@ -41,11 +41,11 @@ export default function AnalyticsPage() {
   const callsOverTime = daily?.analytics
     .slice()
     .reverse()
-    .map((d: any) => ({
+    .map((d: NonNullable<typeof daily>['analytics'][number]) => ({
       date: format(new Date(d.date), 'MMM d'),
-      calls: d.totalCalls,
-      successful: d.successfulCalls,
-      failed: d.failedCalls,
+      calls: d.total_calls,
+      successful: d.successful_calls,
+      failed: d.failed_calls,
     })) || []
 
   const outcomeData = summary

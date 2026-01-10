@@ -46,7 +46,7 @@ export default function CallDetailPage({ params }: PageProps) {
   }
 
   // Parse transcript messages if available
-  const transcript = call.transcript as any[] | null
+  const transcript = call.transcript as Array<{ role: string; content?: string; message?: string }> | null
 
   return (
     <div className="space-y-6">
@@ -159,7 +159,7 @@ export default function CallDetailPage({ params }: PageProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {transcript.map((message: any, index: number) => (
+              {transcript.map((message, index: number) => (
                 <div
                   key={index}
                   className={`flex gap-3 ${

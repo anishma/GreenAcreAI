@@ -69,7 +69,7 @@ export default function CallsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredCalls.map((call) => (
+              {filteredCalls.map((call: typeof calls[number]) => (
                 <Link
                   key={call.id}
                   href={`/dashboard/calls/${call.id}`}
