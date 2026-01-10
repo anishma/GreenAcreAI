@@ -26,7 +26,7 @@ export default function BookingsPage() {
   const bookings = response?.bookings || []
 
   // Filter bookings
-  const filteredBookings = bookings.filter((booking) => {
+  const filteredBookings = bookings.filter((booking: any) => {
     const bookingDate = new Date(booking.scheduled_at)
 
     if (filter === 'upcoming') {

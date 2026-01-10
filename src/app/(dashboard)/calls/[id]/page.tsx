@@ -7,11 +7,10 @@
 
 import { trpc } from '@/lib/trpc/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Phone, Clock, DollarSign, MapPin, FileText } from 'lucide-react'
+import { Phone, Clock, DollarSign } from 'lucide-react'
 import { format } from 'date-fns'
 import { AudioPlayer } from '@/components/dashboard/audio-player'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 interface PageProps {
