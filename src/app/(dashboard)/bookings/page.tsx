@@ -21,10 +21,12 @@ import { useState } from 'react'
 
 export default function BookingsPage() {
   const [filter, setFilter] = useState<string>('upcoming')
-  const { data: bookings, isLoading } = trpc.booking.list.useQuery()
+  const { data: response, isLoading } = trpc.booking.getAll.useQuery()
+
+  const bookings = response?.bookings || []
 
   // Filter bookings
-  const filteredBookings = bookings?.filter((booking) => {
+  const filteredBookings = bookings.filter((booking) => {
     const bookingDate = new Date(booking.scheduled_at)
 
     if (filter === 'upcoming') {
