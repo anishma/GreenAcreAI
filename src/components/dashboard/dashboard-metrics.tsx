@@ -134,7 +134,7 @@ export function DashboardMetrics() {
             </div>
           ) : (
             <div className="space-y-4">
-              {metrics.recentCalls.map((call) => (
+              {metrics.recentCalls.map((call: NonNullable<typeof metrics>['recentCalls'][number]) => (
                 <Link
                   key={call.id}
                   href={`/dashboard/calls/${call.id}`}

@@ -77,7 +77,7 @@ export function BusinessForm() {
     }
 
     // Check for duplicates
-    if (serviceAreas.some((area) => area.zipCode === zipCode)) {
+    if (serviceAreas.some((area: typeof serviceAreas[number]) => area.zipCode === zipCode)) {
       toast({
         title: 'Duplicate ZIP code',
         description: 'This ZIP code has already been added',
@@ -95,7 +95,7 @@ export function BusinessForm() {
   }
 
   const handleRemoveZipCode = (zipCode: string) => {
-    const updatedAreas = serviceAreas.filter((area) => area.zipCode !== zipCode)
+    const updatedAreas = serviceAreas.filter((area: typeof serviceAreas[number]) => area.zipCode !== zipCode)
     setServiceAreas(updatedAreas)
     setValue('serviceAreas', updatedAreas)
   }
@@ -232,7 +232,7 @@ export function BusinessForm() {
         {/* Display added ZIP codes */}
         {serviceAreas.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
-            {serviceAreas.map((area) => (
+            {serviceAreas.map((area: typeof serviceAreas[number]) => (
               <div
                 key={area.zipCode}
                 className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-sm text-green-800"
