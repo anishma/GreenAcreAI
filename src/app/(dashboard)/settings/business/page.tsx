@@ -108,20 +108,20 @@ export default function BusinessSettingsPage() {
   useEffect(() => {
     if (tenant) {
       reset({
-        businessName: tenant.businessName || '',
-        ownerName: tenant.ownerName || '',
+        businessName: tenant.business_name || '',
+        ownerName: tenant.owner_name || '',
         email: tenant.email || '',
-        phone: tenant.phone || '',
+        phone: tenant.phone_number || '',
         timezone: tenant.timezone || 'America/New_York',
-        serviceAreas: tenant.serviceAreas as any[] || [],
-        businessHours: (tenant.businessHours as any[]) || DAYS_OF_WEEK.map((day) => ({
+        serviceAreas: tenant.service_areas as any[] || [],
+        businessHours: (tenant.business_hours as any[]) || DAYS_OF_WEEK.map((day) => ({
           day,
           isOpen: day !== 'Sunday',
           openTime: '09:00',
           closeTime: '17:00',
         })),
       })
-      setServiceAreas((tenant.serviceAreas as any[]) || [])
+      setServiceAreas((tenant.service_areas as any[]) || [])
     }
   }, [tenant, reset])
 

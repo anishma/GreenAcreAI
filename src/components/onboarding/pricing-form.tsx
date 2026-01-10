@@ -7,7 +7,6 @@
  * Includes: tier editor, add/remove tiers, generic quote settings.
  */
 
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'

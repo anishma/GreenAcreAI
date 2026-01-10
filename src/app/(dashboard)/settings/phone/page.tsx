@@ -29,9 +29,9 @@ export default function PhoneSettingsPage() {
   // Fetch current tenant data
   const { data: tenant, isLoading } = trpc.tenant.getCurrent.useQuery()
 
-  const phoneNumber = tenant?.phoneNumber
-  const vapiAgentId = tenant?.vapiAgentId
-  const vapiPhoneNumberId = tenant?.vapiPhoneNumberId
+  const phoneNumber = tenant?.phone_number
+  const vapiAgentId = tenant?.vapi_agent_id
+  const vapiPhoneNumberId = tenant?.vapi_phone_number_id
 
   const isPhoneNumberActive = Boolean(phoneNumber && vapiAgentId)
 

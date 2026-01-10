@@ -31,9 +31,9 @@ export default function CalendarSettingsPage() {
   // Fetch current tenant data
   const { data: tenant, isLoading, refetch } = trpc.tenant.getCurrent.useQuery()
 
-  const isConnected = Boolean(tenant?.googleCalendarRefreshToken)
-  const calendarId = tenant?.calendarId
-  const lastSyncedAt = tenant?.calendarLastSyncedAt
+  const isConnected = Boolean(tenant?.google_calendar_refresh_token)
+  const calendarId = tenant?.calendar_id
+  const lastSyncedAt = null // Field doesn't exist in schema yet
 
   const handleDisconnect = async () => {
     setIsDisconnecting(true)

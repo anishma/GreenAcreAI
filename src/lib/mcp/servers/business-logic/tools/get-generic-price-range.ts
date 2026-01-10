@@ -1,13 +1,15 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 
+const getGenericPriceRangeSchema = z.object({
+  tenant_id: z.string().uuid(),
+})
+
 export const getGenericPriceRangeTool = {
   name: 'get_generic_price_range',
   description: 'Get a generic price range for services when lot size is unknown',
-  input_schema: z.object({
-    tenant_id: z.string().uuid(),
-  }),
-  handler: async (input: z.infer<typeof getGenericPriceRangeTool.input_schema>) => {
+  input_schema: getGenericPriceRangeSchema,
+  handler: async (input: z.infer<typeof getGenericPriceRangeSchema>) => {
     // Get tenant with pricing_tiers JSON column
     const tenant = await prisma.tenants.findUnique({
       where: { id: input.tenant_id },

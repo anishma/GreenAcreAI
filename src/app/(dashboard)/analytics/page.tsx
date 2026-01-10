@@ -57,8 +57,8 @@ export default function AnalyticsPage() {
       ].filter((d) => d.value > 0)
     : []
 
-  const conversionRate = summary?.totalLeads
-    ? ((summary.bookingsMade / summary.totalLeads) * 100).toFixed(1)
+  const conversionRate = summary?.leadsCaptured
+    ? ((summary.bookingsMade / summary.leadsCaptured) * 100).toFixed(1)
     : '0'
 
   return (

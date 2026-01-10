@@ -32,34 +32,36 @@ export const bookingRouter = router({
       const { limit = 50, offset = 0, status, upcoming } = input || {}
 
       const where = {
-        tenantId: ctx.tenantId,
+        tenant_id: ctx.tenantId,
         ...(status && { status }),
-        ...(upcoming && { scheduledAt: { gte: new Date() } }),
+        ...(upcoming && { scheduled_at: { gte: new Date() } }),
       }
 
       const [bookings, total] = await Promise.all([
         ctx.prisma.bookings.findMany({
           where,
-          orderBy: { scheduledAt: 'desc' },
+          orderBy: { scheduled_at: 'desc' },
           take: limit,
           skip: offset,
           select: {
             id: true,
-            scheduledAt: true,
-            durationMinutes: true,
-            serviceType: true,
-            estimatedPrice: true,
-            customerName: true,
-            customerPhone: true,
-            customerEmail: true,
-            propertyAddress: true,
-            propertyCity: true,
-            propertyState: true,
-            propertyZip: true,
+            scheduled_at: true,
+            duration_minutes: true,
+            service_type: true,
+            estimated_price: true,
+            customer_name: true,
+            customer_phone: true,
+            customer_email: true,
+            property_address: true,
+            property_city: true,
+            property_state: true,
+            property_zip: true,
             status: true,
-            confirmationSent: true,
-            reminderSent: true,
-            createdAt: true,
+            confirmation_sent: true,
+            reminder_sent: true,
+            notes: true,
+            google_calendar_event_id: true,
+            created_at: true,
           },
         }),
         ctx.prisma.bookings.count({ where }),
@@ -82,7 +84,7 @@ export const bookingRouter = router({
       const booking = await ctx.prisma.bookings.findFirst({
         where: {
           id: input.id,
-          tenantId: ctx.tenantId,
+          tenant_id: ctx.tenantId,
         },
         include: {
           calls: true,

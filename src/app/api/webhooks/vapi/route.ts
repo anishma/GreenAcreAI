@@ -213,7 +213,7 @@ async function handleCallEnded(event: CallEndedEvent) {
       duration_seconds: durationSeconds,
       status: 'ended',
       end_reason: call.endedReason,
-      transcript: call.messages || null,
+      transcript: (call.messages as any) || undefined,
       transcript_text: call.transcript,
       summary: call.summary,
       outcome,
@@ -363,7 +363,7 @@ async function sendOwnerNotifications(params: {
  * Handle transcript update event
  * Updates call transcript in real-time (optional, for live monitoring)
  */
-async function handleTranscriptUpdate(event: TranscriptUpdateEvent) {
+async function handleTranscriptUpdate(_event: TranscriptUpdateEvent) {
   // For MVP, we'll skip real-time transcript updates
   // and rely on the final transcript in end-of-call-report
   console.log(`[VAPI Webhook] Transcript update received (skipping real-time update)`)

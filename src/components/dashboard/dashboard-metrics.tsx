@@ -30,7 +30,7 @@ export function DashboardMetrics() {
           .from('users')
           .select('tenant_id')
           .eq('auth_user_id', user.id)
-          .single()
+          .single() as { data: { tenant_id: string } | null }
 
         if (data) {
           setTenantId(data.tenant_id)

@@ -73,34 +73,45 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params
 
+  // Validate that arguments exist
+  if (!args) {
+    throw new Error(`Missing arguments for tool: ${name}`)
+  }
+
   if (name === 'get_available_slots') {
+    // Parse and validate arguments with Zod schema
+    const validatedArgs = getAvailableSlotsTool.input_schema.parse(args)
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(await getAvailableSlotsTool.handler(args)),
+          text: JSON.stringify(await getAvailableSlotsTool.handler(validatedArgs)),
         },
       ],
     }
   }
 
   if (name === 'book_appointment') {
+    // Parse and validate arguments with Zod schema
+    const validatedArgs = bookAppointmentTool.input_schema.parse(args)
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(await bookAppointmentTool.handler(args)),
+          text: JSON.stringify(await bookAppointmentTool.handler(validatedArgs)),
         },
       ],
     }
   }
 
   if (name === 'cancel_appointment') {
+    // Parse and validate arguments with Zod schema
+    const validatedArgs = cancelAppointmentTool.input_schema.parse(args)
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(await cancelAppointmentTool.handler(args)),
+          text: JSON.stringify(await cancelAppointmentTool.handler(validatedArgs)),
         },
       ],
     }

@@ -6,7 +6,7 @@
  */
 
 import { create } from 'zustand'
-import type { Tenant } from '@prisma/client'
+import type { tenants } from '@prisma/client'
 
 interface AppState {
   // Sidebar visibility state
@@ -15,8 +15,8 @@ interface AppState {
   toggleSidebar: () => void
 
   // Current tenant context (for multi-tenant switching)
-  currentTenant: Tenant | null
-  setCurrentTenant: (tenant: Tenant | null) => void
+  currentTenant: tenants | null
+  setCurrentTenant: (tenant: tenants | null) => void
 
   // User profile data (cached from DB)
   userProfile: {

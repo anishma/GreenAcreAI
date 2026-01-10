@@ -62,8 +62,8 @@ export default function NotificationSettingsPage() {
 
   // Load tenant notification preferences
   useEffect(() => {
-    if (tenant && tenant.notificationPreferences) {
-      const prefs = tenant.notificationPreferences as any
+    if (tenant && tenant.notification_preferences) {
+      const prefs = tenant.notification_preferences as any
       reset({
         smsOnNewLead: prefs.smsOnNewLead ?? true,
         smsOnNewBooking: prefs.smsOnNewBooking ?? true,
@@ -78,7 +78,11 @@ export default function NotificationSettingsPage() {
 
   const onSubmit = async (data: NotificationPreferences) => {
     try {
-      await updateNotificationPreferences.mutateAsync(data)
+      await updateNotificationPreferences.mutateAsync({
+        sms_new_lead: data.smsOnNewLead,
+        sms_new_booking: data.smsOnNewBooking,
+        email_daily_summary: data.emailDailySummary,
+      })
 
       toast({
         title: 'Preferences saved',

@@ -31,31 +31,34 @@ export const leadRouter = router({
       const { limit = 50, offset = 0, status } = input || {}
 
       const where = {
-        tenantId: ctx.tenantId,
+        tenant_id: ctx.tenantId,
         ...(status && { status }),
       }
 
       const [leads, total] = await Promise.all([
         ctx.prisma.leads.findMany({
           where,
-          orderBy: { createdAt: 'desc' },
+          orderBy: { created_at: 'desc' },
           take: limit,
           skip: offset,
           select: {
             id: true,
             name: true,
-            phoneNumber: true,
+            phone_number: true,
             email: true,
             address: true,
             city: true,
             state: true,
             zip: true,
-            quoteAmount: true,
+            lot_size_sqft: true,
+            quote_amount: true,
+            quote_frequency: true,
             status: true,
-            serviceType: true,
-            followUpNeeded: true,
-            followUpAt: true,
-            createdAt: true,
+            service_type: true,
+            follow_up_needed: true,
+            follow_up_at: true,
+            notes: true,
+            created_at: true,
           },
         }),
         ctx.prisma.leads.count({ where }),
@@ -78,7 +81,7 @@ export const leadRouter = router({
       const lead = await ctx.prisma.leads.findFirst({
         where: {
           id: input.id,
-          tenantId: ctx.tenantId,
+          tenant_id: ctx.tenantId,
         },
         include: {
           calls: true,

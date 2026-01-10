@@ -47,7 +47,7 @@ export async function updateSession(request: NextRequest) {
   // issues with users being randomly logged out.
 
   const {
-    data: { user },
+    data: { user: _user },
   } = await supabase.auth.getUser()
 
   // TEMPORARY: All routes unprotected for UI testing while OAuth is being debugged

@@ -80,6 +80,12 @@ export function TestCall() {
           console.log('Call updated:', payload)
           const call = payload.new as any
 
+          // Only track the specific detected call (if we have one)
+          // This prevents other calls from triggering completion
+          if (detectedCallId && call.id !== detectedCallId) {
+            return
+          }
+
           // If call has ended, mark as completed
           if (call.ended_at || call.status === 'completed' || call.status === 'ended') {
             setCallStatus('call-completed')

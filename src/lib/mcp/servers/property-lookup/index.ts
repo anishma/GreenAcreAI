@@ -44,12 +44,19 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params
 
+  // Validate that arguments exist
+  if (!args) {
+    throw new Error(`Missing arguments for tool: ${name}`)
+  }
+
   if (name === 'lookup_property') {
+    // Parse and validate arguments with Zod schema
+    const validatedArgs = lookupPropertyTool.input_schema.parse(args)
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(await lookupPropertyTool.handler(args)),
+          text: JSON.stringify(await lookupPropertyTool.handler(validatedArgs)),
         },
       ],
     }

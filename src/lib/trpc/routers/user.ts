@@ -12,17 +12,17 @@ export const userRouter = router({
    * Requires authentication
    */
   getProfile: protectedProcedure.query(async ({ ctx }) => {
-    const dbUser = await ctx.prisma.user.findUnique({
-      where: { authUserId: ctx.user.id },
+    const dbUser = await ctx.prisma.users.findUnique({
+      where: { auth_user_id: ctx.user.id },
       select: {
         id: true,
-        authUserId: true,
-        tenantId: true,
+        auth_user_id: true,
+        tenant_id: true,
         email: true,
-        fullName: true,
+        full_name: true,
         role: true,
-        createdAt: true,
-        updatedAt: true,
+        created_at: true,
+        updated_at: true,
       },
     })
 

@@ -147,9 +147,9 @@ export async function createAgent(config: {
   tenantId: string
   customLlmUrl?: string
 }): Promise<VapiAgent> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  // Include tenant ID in URL as query parameter
-  const llmEndpoint = config.customLlmUrl || `${appUrl}/api/llm/completions?tenantId=${config.tenantId}`
+  // const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  // Include tenant ID in URL as query parameter (for future use)
+  // const llmEndpoint = config.customLlmUrl || `${appUrl}/api/llm/completions?tenantId=${config.tenantId}`
 
   const body = {
     name: config.name,

@@ -52,6 +52,8 @@ export const tenantRouter = router({
         vapi_agent_id: true,
         vapi_phone_number_id: true,
         calendar_id: true,
+        google_calendar_refresh_token: true,
+        test_call_completed: true,
         created_at: true,
         updated_at: true,
       },
@@ -139,7 +141,7 @@ export const tenantRouter = router({
 
       // Update existing tenant
       console.log('[updateBusinessInfo] Updating existing tenant:', ctx.tenantId)
-      const tenant = await ctx.prisma.tenants.update({
+      await ctx.prisma.tenants.update({
         where: { id: ctx.tenantId },
         data: {
           business_name: input.businessName,
@@ -151,7 +153,7 @@ export const tenantRouter = router({
         },
       })
 
-      return tenant
+      return { success: true }
     }),
 
   /**
@@ -168,7 +170,7 @@ export const tenantRouter = router({
         })
       }
 
-      const tenant = await ctx.prisma.tenants.update({
+      await ctx.prisma.tenants.update({
         where: { id: ctx.tenantId },
         data: {
           service_areas: input as any,
@@ -176,7 +178,7 @@ export const tenantRouter = router({
         },
       })
 
-      return tenant
+      return { success: true }
     }),
 
   /**
@@ -327,7 +329,7 @@ export const tenantRouter = router({
         const encryptedRefreshToken = encrypt(tokens.refresh_token)
 
         // Update tenant with calendar credentials
-        const tenant = await ctx.prisma.tenants.update({
+        await ctx.prisma.tenants.update({
           where: { id: ctx.tenantId },
           data: {
             google_calendar_refresh_token: encryptedRefreshToken,
@@ -363,7 +365,7 @@ export const tenantRouter = router({
       })
     }
 
-    const tenant = await ctx.prisma.tenants.update({
+    await ctx.prisma.tenants.update({
       where: { id: ctx.tenantId },
       data: {
         google_calendar_refresh_token: null,
@@ -397,12 +399,12 @@ export const tenantRouter = router({
 
       try {
         // Get current tenant info for agent name
-        const tenant = await ctx.prisma.tenants.findUnique({
+        const currentTenant = await ctx.prisma.tenants.findUnique({
           where: { id: ctx.tenantId },
           select: { business_name: true },
         })
 
-        if (!tenant) {
+        if (!currentTenant) {
           throw new TRPCError({
             code: 'NOT_FOUND',
             message: 'Tenant not found',
@@ -414,7 +416,7 @@ export const tenantRouter = router({
 
         // Step 2: Create VAPI agent
         const agent = await createAgent({
-          name: `${tenant.business_name} AI Assistant`,
+          name: `${currentTenant.business_name} AI Assistant`,
           tenantId: ctx.tenantId,
         })
 
@@ -422,7 +424,7 @@ export const tenantRouter = router({
         await linkPhoneNumberToAgent(phoneNumber.id, agent.id)
 
         // Step 4: Update tenant with phone number and agent info
-        const updatedTenant = await ctx.prisma.tenants.update({
+        await ctx.prisma.tenants.update({
           where: { id: ctx.tenantId },
           data: {
             phone_number: phoneNumber.number,
@@ -459,7 +461,7 @@ export const tenantRouter = router({
       })
     }
 
-    const tenant = await ctx.prisma.tenants.update({
+    await ctx.prisma.tenants.update({
       where: { id: ctx.tenantId },
       data: {
         test_call_completed: true,

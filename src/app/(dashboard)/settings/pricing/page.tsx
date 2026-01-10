@@ -67,11 +67,11 @@ export default function PricingSettingsPage() {
 
   // Load tenant pricing data into form
   useEffect(() => {
-    if (tenant && tenant.pricingTiers) {
+    if (tenant && tenant.pricing_tiers) {
       reset({
-        tiers: (tenant.pricingTiers as any) || DEFAULT_TIERS,
-        allowsGenericQuotes: tenant.allowsGenericQuotes ?? true,
-        genericQuoteDisclaimer: tenant.genericQuoteDisclaimer || 'Prices vary by property size. Address needed for exact quote.',
+        tiers: (tenant.pricing_tiers as any) || DEFAULT_TIERS,
+        allowsGenericQuotes: tenant.allows_generic_quotes ?? true,
+        genericQuoteDisclaimer: tenant.generic_quote_disclaimer || 'Prices vary by property size. Address needed for exact quote.',
       })
     }
   }, [tenant, reset])

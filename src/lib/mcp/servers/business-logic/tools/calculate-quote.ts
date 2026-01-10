@@ -1,15 +1,17 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 
+const calculateQuoteSchema = z.object({
+  tenant_id: z.string().uuid(),
+  lot_size_sqft: z.number().int().positive(),
+  frequency: z.enum(['weekly', 'biweekly']).default('weekly'),
+})
+
 export const calculateQuoteTool = {
   name: 'calculate_quote',
   description: 'Calculate pricing quote based on lot size and tenant pricing tiers',
-  input_schema: z.object({
-    tenant_id: z.string().uuid(),
-    lot_size_sqft: z.number().int().positive(),
-    frequency: z.enum(['weekly', 'biweekly']).default('weekly'),
-  }),
-  handler: async (input: z.infer<typeof calculateQuoteTool.input_schema>) => {
+  input_schema: calculateQuoteSchema,
+  handler: async (input: z.infer<typeof calculateQuoteSchema>) => {
     // Use database function get_quote_for_lot_size
     const result: any = await prisma.$queryRaw`
       SELECT * FROM get_quote_for_lot_size(

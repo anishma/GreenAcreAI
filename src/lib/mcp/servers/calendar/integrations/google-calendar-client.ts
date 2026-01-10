@@ -51,7 +51,7 @@ export async function getAvailableSlots(
   startDate: Date,
   endDate: Date
 ) {
-  const { calendar, calendarId, timezone } = await getCalendarClient(tenantId)
+  const { calendar, calendarId } = await getCalendarClient(tenantId)
 
   // Fetch busy times
   const { data } = await calendar.freebusy.query({
@@ -120,7 +120,7 @@ export async function bookAppointment(
     notes?: string
   }
 ) {
-  const { calendar, calendarId, timezone } = await getCalendarClient(tenantId)
+  const { calendar, calendarId, timezone: _timezone } = await getCalendarClient(tenantId)
 
   // Calculate end time: use provided end_time or default to 1 hour after start
   const endTime = booking.end_time || new Date(new Date(booking.start_time).getTime() + 60 * 60 * 1000).toISOString()
@@ -143,11 +143,11 @@ export async function bookAppointment(
       description: description,
       start: {
         dateTime: booking.start_time,
-        timeZone: timezone,
+        timeZone: _timezone,
       },
       end: {
         dateTime: endTime,
-        timeZone: timezone,
+        timeZone: _timezone,
       },
     },
   })

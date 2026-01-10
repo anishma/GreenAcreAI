@@ -78,6 +78,11 @@ export function formatPhoneForDisplay(phoneNumber: string | null | undefined): s
 }
 
 /**
+ * Alias for formatPhoneForDisplay for backward compatibility
+ */
+export const formatPhoneNumber = formatPhoneForDisplay
+
+/**
  * Extract area code from phone number
  */
 export function getAreaCode(phoneNumber: string): string | null {

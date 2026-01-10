@@ -3,14 +3,16 @@ import { google } from 'googleapis'
 import { decrypt } from '@/lib/utils/encryption'
 import { prisma } from '@/lib/prisma'
 
+const cancelAppointmentSchema = z.object({
+  tenant_id: z.string().uuid().describe('Tenant ID'),
+  calendar_event_id: z.string().describe('Google Calendar event ID'),
+})
+
 export const cancelAppointmentTool = {
   name: 'cancel_appointment',
   description: 'Cancel an appointment in the calendar',
-  input_schema: z.object({
-    tenant_id: z.string().uuid().describe('Tenant ID'),
-    calendar_event_id: z.string().describe('Google Calendar event ID'),
-  }),
-  handler: async (input: z.infer<typeof cancelAppointmentTool.input_schema>) => {
+  input_schema: cancelAppointmentSchema,
+  handler: async (input: z.infer<typeof cancelAppointmentSchema>) => {
     // Get calendar client
     const tenant = await prisma.tenants.findUnique({
       where: { id: input.tenant_id },

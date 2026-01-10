@@ -31,27 +31,28 @@ export const callRouter = router({
 
       const [calls, total] = await Promise.all([
         ctx.prisma.calls.findMany({
-          where: { tenantId: ctx.tenantId },
-          orderBy: { createdAt: 'desc' },
+          where: { tenant_id: ctx.tenantId },
+          orderBy: { created_at: 'desc' },
           take: limit,
           skip: offset,
           select: {
             id: true,
-            vapiCallId: true,
-            callerPhoneNumber: true,
-            startedAt: true,
-            endedAt: true,
-            durationSeconds: true,
+            vapi_call_id: true,
+            phone_number_called: true,
+            caller_phone_number: true,
+            started_at: true,
+            ended_at: true,
+            duration_seconds: true,
             status: true,
             outcome: true,
-            quoteAmount: true,
-            bookingMade: true,
-            leadCaptured: true,
-            createdAt: true,
+            quote_amount: true,
+            booking_made: true,
+            lead_captured: true,
+            created_at: true,
           },
         }),
         ctx.prisma.calls.count({
-          where: { tenantId: ctx.tenantId },
+          where: { tenant_id: ctx.tenantId },
         }),
       ])
 
@@ -72,7 +73,7 @@ export const callRouter = router({
       const call = await ctx.prisma.calls.findFirst({
         where: {
           id: input.id,
-          tenantId: ctx.tenantId,
+          tenant_id: ctx.tenantId,
         },
         include: {
           leads: true,

@@ -1,5 +1,5 @@
 import { StateGraph, END } from '@langchain/langgraph'
-import { ConversationState } from './state'
+import { ConversationState, Frequency, ConversationStage } from './state'
 import { greetingNode } from './nodes/greeting'
 import { addressExtractionNode } from './nodes/address-extraction'
 import { frequencyCollectionNode } from './nodes/frequency-collection'
@@ -8,11 +8,44 @@ import { quoteCalculationNode } from './nodes/quote-calculation'
 import { bookingNode } from './nodes/booking'
 import { closingNode } from './nodes/closing'
 
-// Define the graph
-const workflow = new StateGraph<ConversationState>({
+/**
+ * Graph node names (workflow identifiers)
+ *
+ * IMPORTANT: These are separate from ConversationStage values.
+ * - Node names: Identify workflow steps (e.g., 'address_extraction')
+ * - Stage values: Track conversation state (e.g., 'address_collection', 'WAITING_FOR_ADDRESS')
+ *
+ * This separation allows nodes to update stage to different values for flow control.
+ *
+ * Architecture Alignment (Technical Doc Section 4.2.2):
+ * - greeting → greet node (initial greeting)
+ * - address_extraction → extract_address node (address collection)
+ * - property_lookup → lookup_property node (Regrid API call)
+ * - frequency_collection → frequency selection node (service frequency)
+ * - quote_calculation → calculate_quote node (pricing calculation)
+ * - booking_appointment → booking node (calendar integration)
+ * - closing → closing node (conversation end)
+ *
+ * Type Safety Strategy:
+ * - LangGraph infers node types progressively as we call .addNode()
+ * - We can't pre-declare the workflow type because nodes don't exist at initialization
+ * - Instead, we use GraphNode to enforce type safety in the routing function
+ * - This catches typos and ensures routing only uses valid node names
+ */
+type GraphNode =
+  | 'greeting'
+  | 'address_extraction'
+  | 'frequency_collection'
+  | 'property_lookup'
+  | 'quote_calculation'
+  | 'booking_appointment'
+  | 'closing'
+
+// Define the graph with explicit node types to enable setEntryPoint and routing
+const workflow = new StateGraph<ConversationState, Partial<ConversationState>, GraphNode>({
   channels: {
     messages: {
-      value: (prev: any[], next: any[]) => next,
+      value: (prev: any[], next: any[]) => prev.concat(next),
       default: () => [],
     },
     tenant_id: {
@@ -52,7 +85,7 @@ const workflow = new StateGraph<ConversationState>({
       default: () => undefined,
     },
     preferred_frequency: {
-      value: (prev: string | undefined, next: string | undefined) =>
+      value: (prev: Frequency | undefined, next: Frequency | undefined) =>
         next ?? prev,
       default: () => undefined,
     },
@@ -61,14 +94,14 @@ const workflow = new StateGraph<ConversationState>({
         prev:
           | {
               price: number
-              frequency: 'weekly' | 'biweekly'
+              frequency: Frequency
               service_inclusions: string[]
             }
           | undefined,
         next:
           | {
               price: number
-              frequency: 'weekly' | 'biweekly'
+              frequency: Frequency
               service_inclusions: string[]
             }
           | undefined
@@ -90,8 +123,8 @@ const workflow = new StateGraph<ConversationState>({
       default: () => undefined,
     },
     stage: {
-      value: (prev: string, next: string) => next ?? prev,
-      default: () => 'greeting',
+      value: (prev: ConversationStage, next: ConversationStage) => next ?? prev,
+      default: () => 'greeting' as ConversationStage,
     },
     attempts: {
       value: (
@@ -103,17 +136,18 @@ const workflow = new StateGraph<ConversationState>({
   },
 })
 
-// Add nodes
-workflow.addNode('greeting', greetingNode)
-workflow.addNode('address_extraction', addressExtractionNode)
-workflow.addNode('frequency_collection', frequencyCollectionNode)
-workflow.addNode('property_lookup', propertyLookupNode)
-workflow.addNode('quote_calculation', quoteCalculationNode)
-workflow.addNode('booking_appointment', bookingNode)
-workflow.addNode('closing', closingNode)
+// Add nodes - chain them so TypeScript tracks the accumulated node type union
+workflow
+  .addNode('greeting', greetingNode)
+  .addNode('address_extraction', addressExtractionNode)
+  .addNode('frequency_collection', frequencyCollectionNode)
+  .addNode('property_lookup', propertyLookupNode)
+  .addNode('quote_calculation', quoteCalculationNode)
+  .addNode('booking_appointment', bookingNode)
+  .addNode('closing', closingNode)
 
-// Conditional routing function
-function routeBasedOnStage(state: ConversationState): string {
+// Conditional routing function - enforces routing to valid nodes only
+function routeBasedOnStage(state: ConversationState): GraphNode | typeof END {
   switch (state.stage) {
     case 'greeting':
       return 'address_extraction'

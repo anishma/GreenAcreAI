@@ -80,7 +80,7 @@ export function useUser(): UseUserReturn {
             .from('users')
             .select('tenant_id')
             .eq('auth_user_id', user.id)
-            .single()
+            .single<{ tenant_id: string }>()
 
           if (dbError) {
             console.error('Error fetching tenant_id:', dbError)
@@ -105,7 +105,7 @@ export function useUser(): UseUserReturn {
     // Subscribe to auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null)
 
       if (session?.user) {
@@ -114,7 +114,7 @@ export function useUser(): UseUserReturn {
           .from('users')
           .select('tenant_id')
           .eq('auth_user_id', session.user.id)
-          .single()
+          .single<{ tenant_id: string }>()
 
         setTenantId(userData?.tenant_id ?? null)
       } else {

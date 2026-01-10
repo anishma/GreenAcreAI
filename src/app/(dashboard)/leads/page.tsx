@@ -23,12 +23,11 @@ export default function LeadsPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const { data: response, isLoading } = trpc.lead.getAll.useQuery()
-  const utils = trpc.useUtils()
 
   const leads = response?.leads || []
 
   // Filter leads
-  const filteredLeads = leads.filter((lead: any) => {
+  const filteredLeads = leads.filter((lead) => {
     const matchesSearch =
       lead.name?.toLowerCase().includes(search.toLowerCase()) ||
       lead.phone_number?.includes(search) ||

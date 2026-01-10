@@ -94,32 +94,32 @@ export const analyticsRouter = router({
       const { startDate, endDate, limit = 30 } = input || {}
 
       const where = {
-        tenantId: ctx.tenantId,
+        tenant_id: ctx.tenantId,
         ...(startDate && { date: { gte: new Date(startDate) } }),
         ...(endDate && { date: { lte: new Date(endDate) } }),
       }
 
       const [analytics, total] = await Promise.all([
-        ctx.prisma.analyticsDaily.findMany({
+        ctx.prisma.analytics_daily.findMany({
           where,
           orderBy: { date: 'desc' },
           take: limit,
           select: {
             id: true,
             date: true,
-            totalCalls: true,
-            successfulCalls: true,
-            failedCalls: true,
-            avgCallDurationSeconds: true,
-            quotesGiven: true,
-            bookingsMade: true,
-            leadsCaptured: true,
-            quoteToBookingRate: true,
-            totalCost: true,
-            avgCostPerCall: true,
+            total_calls: true,
+            successful_calls: true,
+            failed_calls: true,
+            avg_call_duration_seconds: true,
+            quotes_given: true,
+            bookings_made: true,
+            leads_captured: true,
+            quote_to_booking_rate: true,
+            total_cost: true,
+            avg_cost_per_call: true,
           },
         }),
-        ctx.prisma.analyticsDaily.count({ where }),
+        ctx.prisma.analytics_daily.count({ where }),
       ])
 
       return { analytics, total }
@@ -146,32 +146,40 @@ export const analyticsRouter = router({
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - days)
 
-      const analytics = await ctx.prisma.analyticsDaily.findMany({
+      const analytics = await ctx.prisma.analytics_daily.findMany({
         where: {
-          tenantId: ctx.tenantId,
+          tenant_id: ctx.tenantId,
           date: { gte: startDate },
         },
         select: {
-          totalCalls: true,
-          successfulCalls: true,
-          failedCalls: true,
-          quotesGiven: true,
-          bookingsMade: true,
-          leadsCaptured: true,
-          totalCost: true,
+          total_calls: true,
+          successful_calls: true,
+          failed_calls: true,
+          quotes_given: true,
+          bookings_made: true,
+          leads_captured: true,
+          total_cost: true,
         },
       })
 
       // Calculate summary statistics
       const summary = analytics.reduce(
-        (acc, day) => ({
-          totalCalls: acc.totalCalls + day.totalCalls,
-          successfulCalls: acc.successfulCalls + day.successfulCalls,
-          failedCalls: acc.failedCalls + day.failedCalls,
-          quotesGiven: acc.quotesGiven + day.quotesGiven,
-          bookingsMade: acc.bookingsMade + day.bookingsMade,
-          leadsCaptured: acc.leadsCaptured + day.leadsCaptured,
-          totalCost: acc.totalCost + (day.totalCost ? Number(day.totalCost) : 0),
+        (acc: {
+          totalCalls: number
+          successfulCalls: number
+          failedCalls: number
+          quotesGiven: number
+          bookingsMade: number
+          leadsCaptured: number
+          totalCost: number
+        }, day: any) => ({
+          totalCalls: acc.totalCalls + day.total_calls,
+          successfulCalls: acc.successfulCalls + day.successful_calls,
+          failedCalls: acc.failedCalls + day.failed_calls,
+          quotesGiven: acc.quotesGiven + day.quotes_given,
+          bookingsMade: acc.bookingsMade + day.bookings_made,
+          leadsCaptured: acc.leadsCaptured + day.leads_captured,
+          totalCost: acc.totalCost + (day.total_cost ? Number(day.total_cost) : 0),
         }),
         {
           totalCalls: 0,

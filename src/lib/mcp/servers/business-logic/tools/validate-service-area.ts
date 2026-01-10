@@ -1,17 +1,19 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 
+const validateServiceAreaSchema = z.object({
+  tenant_id: z.string().uuid(),
+  street: z.string(),
+  city: z.string(),
+  state: z.string(),
+  zip: z.string().length(5),
+})
+
 export const validateServiceAreaTool = {
   name: 'validate_service_area',
   description: 'Check if an address is in the tenant service area',
-  input_schema: z.object({
-    tenant_id: z.string().uuid(),
-    street: z.string(),
-    city: z.string(),
-    state: z.string(),
-    zip: z.string().length(5),
-  }),
-  handler: async (input: z.infer<typeof validateServiceAreaTool.input_schema>) => {
+  input_schema: validateServiceAreaSchema,
+  handler: async (input: z.infer<typeof validateServiceAreaSchema>) => {
     try {
       console.error('[validate-service-area] Starting query with:', input)
       const result: any = await prisma.$queryRaw`

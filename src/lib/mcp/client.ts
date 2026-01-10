@@ -4,6 +4,25 @@ import path from 'path'
 
 type ServerName = 'property-lookup' | 'calendar' | 'business-logic'
 
+// Type guard for MCP response content
+interface MCPTextContent {
+  type: 'text'
+  text: string
+}
+
+function isMCPTextContentArray(content: unknown): content is MCPTextContent[] {
+  return (
+    Array.isArray(content) &&
+    content.length > 0 &&
+    typeof content[0] === 'object' &&
+    content[0] !== null &&
+    'type' in content[0] &&
+    content[0].type === 'text' &&
+    'text' in content[0] &&
+    typeof content[0].text === 'string'
+  )
+}
+
 class MCPClientManager {
   private clients: Map<ServerName, Client> = new Map()
 
@@ -59,23 +78,37 @@ class MCPClientManager {
   ): Promise<T> {
     const client = await this.getClient(serverName)
 
-    const response = await client.callTool(
-      {
-        name: toolName,
-        arguments: args,
-      },
-      undefined, // resultSchema
-      { timeout: 30000 }
-    )
+    // Create AbortController for timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000)
 
-    // Parse response
-    const resultText = response.content[0].text
-    return JSON.parse(resultText) as T
+    try {
+      const response = await client.callTool(
+        {
+          name: toolName,
+          arguments: args,
+        },
+        undefined, // resultSchema
+        { signal: controller.signal }
+      )
+
+      // Validate and parse response
+      if (!isMCPTextContentArray(response.content)) {
+        throw new Error(
+          `Invalid MCP response format from ${serverName}.${toolName}: expected text content array`
+        )
+      }
+
+      const resultText = response.content[0].text
+      return JSON.parse(resultText) as T
+    } finally {
+      clearTimeout(timeoutId)
+    }
   }
 
   // Cleanup on shutdown
   async shutdown() {
-    for (const [serverName, client] of this.clients.entries()) {
+    for (const [_serverName, client] of this.clients.entries()) {
       await client.close()
     }
     this.clients.clear()

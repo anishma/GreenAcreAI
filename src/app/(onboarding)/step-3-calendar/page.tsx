@@ -4,9 +4,11 @@
  * Allows users to connect their Google Calendar for booking integration.
  */
 
+import { Suspense } from 'react'
 import { CalendarConnect } from '@/components/onboarding/calendar-connect'
+import { Skeleton } from '@/components/ui/skeleton'
 
-export default function Step3CalendarPage() {
+function CalendarStepContent() {
   return (
     <div className="space-y-6">
       <div>
@@ -18,5 +20,28 @@ export default function Step3CalendarPage() {
 
       <CalendarConnect />
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Skeleton className="h-9 w-64" />
+        <Skeleton className="h-5 w-96 mt-2" />
+      </div>
+      <div className="bg-white p-6 rounded-lg shadow space-y-6">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    </div>
+  )
+}
+
+export default function Step3CalendarPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CalendarStepContent />
+    </Suspense>
   )
 }

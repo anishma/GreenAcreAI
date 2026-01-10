@@ -25,7 +25,7 @@ const MOCK_USER_FOR_TESTING = {
   created_at: new Date().toISOString(),
 } as User
 
-export async function createContext(opts?: FetchCreateContextFnOptions) {
+export async function createContext(_opts?: FetchCreateContextFnOptions) {
   // TEMPORARY: Skip auth and use mock user for testing
   const USE_MOCK_AUTH = process.env.DISABLE_AUTH === 'true'
 

@@ -20,7 +20,7 @@ export default function CallsPage() {
   const calls = response?.calls || []
 
   // Filter calls by phone number search
-  const filteredCalls = calls.filter((call: any) =>
+  const filteredCalls = calls.filter((call) =>
     call.caller_phone_number?.includes(search) ||
     call.phone_number_called?.includes(search)
   )

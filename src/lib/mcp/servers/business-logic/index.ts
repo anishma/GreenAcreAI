@@ -73,34 +73,45 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params
 
+  // Validate that arguments exist
+  if (!args) {
+    throw new Error(`Missing arguments for tool: ${name}`)
+  }
+
   if (name === 'calculate_quote') {
+    // Parse and validate arguments with Zod schema
+    const validatedArgs = calculateQuoteTool.input_schema.parse(args)
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(await calculateQuoteTool.handler(args)),
+          text: JSON.stringify(await calculateQuoteTool.handler(validatedArgs)),
         },
       ],
     }
   }
 
   if (name === 'validate_service_area') {
+    // Parse and validate arguments with Zod schema
+    const validatedArgs = validateServiceAreaTool.input_schema.parse(args)
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(await validateServiceAreaTool.handler(args)),
+          text: JSON.stringify(await validateServiceAreaTool.handler(validatedArgs)),
         },
       ],
     }
   }
 
   if (name === 'get_generic_price_range') {
+    // Parse and validate arguments with Zod schema
+    const validatedArgs = getGenericPriceRangeTool.input_schema.parse(args)
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(await getGenericPriceRangeTool.handler(args)),
+          text: JSON.stringify(await getGenericPriceRangeTool.handler(validatedArgs)),
         },
       ],
     }
