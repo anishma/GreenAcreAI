@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Fetch user's tenant information (only if authenticated)
-  let dbUser = null
+  let dbUser: any = null
   if (user) {
     const result = await supabase
       .from('users')

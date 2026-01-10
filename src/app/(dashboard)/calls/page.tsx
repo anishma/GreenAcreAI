@@ -15,13 +15,15 @@ import { useState } from 'react'
 
 export default function CallsPage() {
   const [search, setSearch] = useState('')
-  const { data: calls, isLoading } = trpc.call.list.useQuery()
+  const { data: response, isLoading } = trpc.call.getAll.useQuery()
+
+  const calls = response?.calls || []
 
   // Filter calls by phone number search
-  const filteredCalls = calls?.filter((call) =>
+  const filteredCalls = calls.filter((call: any) =>
     call.caller_phone_number?.includes(search) ||
     call.phone_number_called?.includes(search)
-  ) || []
+  )
 
   return (
     <div className="space-y-6">
