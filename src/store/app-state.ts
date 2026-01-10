@@ -6,7 +6,10 @@
  */
 
 import { create } from 'zustand'
-import type { tenants } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
+
+// Use Prisma's generated payload type for tenants
+type Tenant = Prisma.tenantsGetPayload<Record<string, never>>
 
 interface AppState {
   // Sidebar visibility state
@@ -15,8 +18,8 @@ interface AppState {
   toggleSidebar: () => void
 
   // Current tenant context (for multi-tenant switching)
-  currentTenant: tenants | null
-  setCurrentTenant: (tenant: tenants | null) => void
+  currentTenant: Tenant | null
+  setCurrentTenant: (tenant: Tenant | null) => void
 
   // User profile data (cached from DB)
   userProfile: {
