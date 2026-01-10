@@ -3,11 +3,15 @@ import { conversationGraph } from '@/lib/agents/conversation-graph'
 import { ConversationState } from '@/lib/agents/state'
 import { prisma } from '@/lib/prisma'
 
+// Force Node.js runtime for Prisma compatibility
+export const runtime = 'nodejs'
+
 // VAPI Custom LLM Endpoint
 // Receives messages from VAPI and returns AI responses using our LangGraph agent
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('[VAPI LLM] Prisma client:', typeof prisma, prisma ? 'defined' : 'undefined')
     const body = await req.json()
 
     // VAPI sends messages in this format:

@@ -68,6 +68,28 @@ model bookings {
   @@index([tenant_id, scheduled_at], map: "idx_bookings_tenant_scheduled")
 }
 
+model conversations {
+  id                    String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at            DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime  @default(now()) @db.Timestamptz(6)
+  call_id               String    @unique @db.VarChar(255)
+  tenant_id             String    @db.Uuid
+  customer_phone        String?   @db.VarChar(20)
+  customer_name         String?   @db.VarChar(255)
+  customer_address      Json?
+  property_data         Json?
+  conversation_history  Json      @default("[]")
+  current_stage         String    @default("greeting") @db.VarChar(50)
+  quote_data            Json?
+  chosen_time           String?   @db.VarChar(100)
+  booking_data          Json?
+  attempts              Json      @default("{}")
+  tenants               tenants   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([call_id], map: "idx_conversations_call_id")
+  @@index([tenant_id], map: "idx_conversations_tenant_id")
+}
+
 model calls {
   id                  String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   created_at          DateTime        @default(now()) @db.Timestamptz(6)
@@ -213,6 +235,7 @@ model tenants {
   analytics_daily                  analytics_daily[]
   bookings                         bookings[]
   calls                            calls[]
+  conversations                    conversations[]
   leads                            leads[]
   notifications                    notifications[]
   users                            users[]
