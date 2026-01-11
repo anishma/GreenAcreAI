@@ -25,6 +25,15 @@ export async function POST(req: NextRequest) {
 
     const body: OpenAIChatCompletionRequest = await req.json()
 
+    // ========== DEBUG LOGGING: RAW VAPI REQUEST ==========
+    console.log('[VAPI LLM] ===== RAW REQUEST START =====')
+    console.log('[VAPI LLM] Request ID:', req.headers.get('x-request-id') || 'none')
+    console.log('[VAPI LLM] Timestamp:', new Date().toISOString())
+    console.log('[VAPI LLM] Full body.messages:', JSON.stringify(body.messages, null, 2))
+    console.log('[VAPI LLM] Body keys:', Object.keys(body))
+    console.log('[VAPI LLM] ===== RAW REQUEST END =====')
+    // ====================================================
+
     // VAPI sends OpenAI-compatible format:
     // {
     //   "model": "custom-model",
@@ -93,6 +102,12 @@ export async function POST(req: NextRequest) {
     // Extract the user's message from the messages array
     const userMessageContent = extractUserMessage(body.messages)
 
+    // ========== DEBUG LOGGING: EXTRACTED USER MESSAGE ==========
+    console.log('[VAPI LLM] Extracted user message:', userMessageContent)
+    console.log('[VAPI LLM] User message length:', userMessageContent?.length || 0)
+    console.log('[VAPI LLM] User message bytes:', Buffer.from(userMessageContent || '').length)
+    // ===========================================================
+
     if (!userMessageContent) {
       return NextResponse.json(
         formatOpenAIErrorResponse('No message provided'),
@@ -108,6 +123,16 @@ export async function POST(req: NextRequest) {
     let conversationRecord = await prisma.conversations.findUnique({
       where: { call_id: callId },
     })
+
+    // ========== DEBUG LOGGING: CONVERSATION STATE ==========
+    console.log('[VAPI LLM] Call ID:', callId)
+    console.log('[VAPI LLM] Conversation exists in DB:', !!conversationRecord)
+    if (conversationRecord) {
+      console.log('[VAPI LLM] Previous message count:', (conversationRecord.conversation_history as any[])?.length || 0)
+      console.log('[VAPI LLM] Current stage:', conversationRecord.current_stage)
+      console.log('[VAPI LLM] Has booking:', !!conversationRecord.booking_data)
+    }
+    // =======================================================
 
     let state: ConversationState
 
