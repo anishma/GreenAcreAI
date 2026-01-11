@@ -1,4 +1,4 @@
-import { StateGraph, END } from '@langchain/langgraph'
+import { StateGraph, END, START, Annotation } from '@langchain/langgraph'
 import { ConversationState, Frequency, ConversationStage } from './state'
 import { greetingNode } from './nodes/greeting'
 import { intentRouterNode } from './nodes/intent-router'
@@ -43,108 +43,85 @@ type GraphNode =
   | 'booking_appointment'
   | 'closing'
 
-// Define the graph with explicit node types to enable setEntryPoint and routing
-const workflow = new StateGraph<ConversationState, Partial<ConversationState>, GraphNode>({
-  channels: {
-    messages: {
-      value: (prev: any[], next: any[]) => prev.concat(next),
-      default: () => [],
-    },
-    system_context: {
-      value: (prev: string | undefined, next: string | undefined) =>
-        next ?? prev,
-      default: () => undefined,
-    },
-    tenant_id: {
-      value: (prev: string, next: string) => next ?? prev,
-      default: () => '',
-    },
-    call_id: {
-      value: (prev: string, next: string) => next ?? prev,
-      default: () => '',
-    },
-    customer_phone: {
-      value: (prev: string | undefined, next: string | undefined) =>
-        next ?? prev,
-      default: () => undefined,
-    },
-    customer_name: {
-      value: (prev: string | undefined, next: string | undefined) =>
-        next ?? prev,
-      default: () => undefined,
-    },
-    customer_address: {
-      value: (
-        prev:
-          | { street: string; city: string; state: string; zip: string }
-          | undefined,
-        next:
-          | { street: string; city: string; state: string; zip: string }
-          | undefined
-      ) => next ?? prev,
-      default: () => undefined,
-    },
-    property_data: {
-      value: (
-        prev: { lot_size_sqft: number; parcel_id: string } | undefined,
-        next: { lot_size_sqft: number; parcel_id: string } | undefined
-      ) => next ?? prev,
-      default: () => undefined,
-    },
-    preferred_frequency: {
-      value: (prev: Frequency | undefined, next: Frequency | undefined) =>
-        next ?? prev,
-      default: () => undefined,
-    },
-    quote: {
-      value: (
-        prev:
-          | {
-              price: number
-              frequency: Frequency
-              service_inclusions: string[]
-            }
-          | undefined,
-        next:
-          | {
-              price: number
-              frequency: Frequency
-              service_inclusions: string[]
-            }
-          | undefined
-      ) => next ?? prev,
-      default: () => undefined,
-    },
-    chosen_time: {
-      value: (prev: string | undefined, next: string | undefined) =>
-        next ?? prev,
-      default: () => undefined,
-    },
-    booking: {
-      value: (
-        prev:
-          | { scheduled_at: string; calendar_event_id: string }
-          | undefined,
-        next: { scheduled_at: string; calendar_event_id: string } | undefined
-      ) => next ?? prev,
-      default: () => undefined,
-    },
-    stage: {
-      value: (prev: ConversationStage, next: ConversationStage) => next ?? prev,
-      default: () => 'greeting' as ConversationStage,
-    },
-    attempts: {
-      value: (
-        prev: { address_extraction: number; property_lookup: number },
-        next: { address_extraction: number; property_lookup: number }
-      ) => next ?? prev,
-      default: () => ({ address_extraction: 0, property_lookup: 0 }),
-    },
-  },
+// Define state annotation using new LangGraph v1.0 API
+const StateAnnotation = Annotation.Root({
+  messages: Annotation<Array<{ role: 'system' | 'user' | 'assistant'; content: string }>>({
+    reducer: (prev, next) => prev.concat(next),
+    default: () => [],
+  }),
+  system_context: Annotation<string | undefined>({
+    reducer: (prev, next) => next ?? prev,
+    default: () => undefined,
+  }),
+  tenant_id: Annotation<string>({
+    reducer: (prev, next) => next ?? prev,
+    default: () => '',
+  }),
+  call_id: Annotation<string>({
+    reducer: (prev, next) => next ?? prev,
+    default: () => '',
+  }),
+  customer_phone: Annotation<string | undefined>({
+    reducer: (prev, next) => next ?? prev,
+    default: () => undefined,
+  }),
+  customer_name: Annotation<string | undefined>({
+    reducer: (prev, next) => next ?? prev,
+    default: () => undefined,
+  }),
+  customer_address: Annotation<
+    | { street: string; city: string; state: string; zip: string }
+    | undefined
+  >({
+    reducer: (prev, next) => next ?? prev,
+    default: () => undefined,
+  }),
+  property_data: Annotation<
+    | { lot_size_sqft: number; parcel_id: string }
+    | undefined
+  >({
+    reducer: (prev, next) => next ?? prev,
+    default: () => undefined,
+  }),
+  preferred_frequency: Annotation<Frequency | undefined>({
+    reducer: (prev, next) => next ?? prev,
+    default: () => undefined,
+  }),
+  quote: Annotation<
+    | {
+        price: number
+        frequency: Frequency
+        service_inclusions: string[]
+      }
+    | undefined
+  >({
+    reducer: (prev, next) => next ?? prev,
+    default: () => undefined,
+  }),
+  chosen_time: Annotation<string | undefined>({
+    reducer: (prev, next) => next ?? prev,
+    default: () => undefined,
+  }),
+  booking: Annotation<
+    | { scheduled_at: string; calendar_event_id: string }
+    | undefined
+  >({
+    reducer: (prev, next) => next ?? prev,
+    default: () => undefined,
+  }),
+  stage: Annotation<ConversationStage>({
+    reducer: (prev, next) => next ?? prev,
+    default: () => 'greeting' as ConversationStage,
+  }),
+  attempts: Annotation<{ address_extraction: number; property_lookup: number }>({
+    reducer: (prev, next) => next ?? prev,
+    default: () => ({ address_extraction: 0, property_lookup: 0 }),
+  }),
 })
 
-// Add nodes - chain them so TypeScript tracks the accumulated node type union
-workflow
+// Define the graph with explicit node types to enable setEntryPoint and routing
+// Chain all addNode calls first, then add edges - this ensures TypeScript tracks all node names
+const workflow = new StateGraph(StateAnnotation)
   .addNode('greeting', greetingNode)
   .addNode('intent_router', intentRouterNode) // NEW: Intent classification
   .addNode('address_extraction', addressExtractionNode)
@@ -153,6 +130,17 @@ workflow
   .addNode('quote_calculation', quoteCalculationNode)
   .addNode('booking_appointment', bookingNode)
   .addNode('closing', closingNode)
+  // Set entry point using new v1.0 API
+  .addEdge(START, 'greeting')
+  // Add conditional edges from each node
+  .addConditionalEdges('greeting', routeBasedOnStage)
+  .addConditionalEdges('intent_router', routeBasedOnStage)
+  .addConditionalEdges('address_extraction', routeBasedOnStage)
+  .addConditionalEdges('frequency_collection', routeBasedOnStage)
+  .addConditionalEdges('property_lookup', routeBasedOnStage)
+  .addConditionalEdges('quote_calculation', routeBasedOnStage)
+  .addConditionalEdges('booking_appointment', routeBasedOnStage)
+  .addConditionalEdges('closing', routeBasedOnStage)
 
 // Conditional routing function - enforces routing to valid nodes only
 function routeBasedOnStage(state: ConversationState): GraphNode | typeof END {
@@ -185,93 +173,6 @@ function routeBasedOnStage(state: ConversationState): GraphNode | typeof END {
       return END
   }
 }
-
-// Set entry point
-workflow.setEntryPoint('greeting')
-
-// Add conditional edges from each node
-workflow.addConditionalEdges('greeting', routeBasedOnStage, {
-  intent_router: 'intent_router', // NEW: Route to intent classification
-  address_extraction: 'address_extraction',
-  frequency_collection: 'frequency_collection',
-  property_lookup: 'property_lookup',
-  quote_calculation: 'quote_calculation',
-  booking_appointment: 'booking_appointment',
-  closing: 'closing',
-  [END]: END,
-})
-
-// NEW: Add edges for intent_router node
-workflow.addConditionalEdges('intent_router', routeBasedOnStage, {
-  intent_router: 'intent_router',
-  address_extraction: 'address_extraction',
-  frequency_collection: 'frequency_collection',
-  property_lookup: 'property_lookup',
-  quote_calculation: 'quote_calculation',
-  booking_appointment: 'booking_appointment',
-  closing: 'closing',
-  [END]: END,
-})
-
-workflow.addConditionalEdges('address_extraction', routeBasedOnStage, {
-  address_extraction: 'address_extraction',
-  frequency_collection: 'frequency_collection',
-  property_lookup: 'property_lookup',
-  quote_calculation: 'quote_calculation',
-  booking_appointment: 'booking_appointment',
-  closing: 'closing',
-  [END]: END,
-})
-
-workflow.addConditionalEdges('frequency_collection', routeBasedOnStage, {
-  address_extraction: 'address_extraction',
-  frequency_collection: 'frequency_collection',
-  property_lookup: 'property_lookup',
-  quote_calculation: 'quote_calculation',
-  booking_appointment: 'booking_appointment',
-  closing: 'closing',
-  [END]: END,
-})
-
-workflow.addConditionalEdges('property_lookup', routeBasedOnStage, {
-  address_extraction: 'address_extraction',
-  frequency_collection: 'frequency_collection',
-  property_lookup: 'property_lookup',
-  quote_calculation: 'quote_calculation',
-  booking_appointment: 'booking_appointment',
-  closing: 'closing',
-  [END]: END,
-})
-
-workflow.addConditionalEdges('quote_calculation', routeBasedOnStage, {
-  address_extraction: 'address_extraction',
-  frequency_collection: 'frequency_collection',
-  property_lookup: 'property_lookup',
-  quote_calculation: 'quote_calculation',
-  booking_appointment: 'booking_appointment',
-  closing: 'closing',
-  [END]: END,
-})
-
-workflow.addConditionalEdges('booking_appointment', routeBasedOnStage, {
-  address_extraction: 'address_extraction',
-  frequency_collection: 'frequency_collection',
-  property_lookup: 'property_lookup',
-  quote_calculation: 'quote_calculation',
-  booking_appointment: 'booking_appointment',
-  closing: 'closing',
-  [END]: END,
-})
-
-workflow.addConditionalEdges('closing', routeBasedOnStage, {
-  address_extraction: 'address_extraction',
-  frequency_collection: 'frequency_collection',
-  property_lookup: 'property_lookup',
-  quote_calculation: 'quote_calculation',
-  booking_appointment: 'booking_appointment',
-  closing: 'closing',
-  [END]: END,
-})
 
 // Compile the graph
 export const conversationGraph = workflow.compile()
