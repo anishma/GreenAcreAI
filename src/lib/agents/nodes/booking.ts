@@ -67,10 +67,20 @@ export async function bookingNode(
   // Use GPT-4 to detect booking intent and extract time preference
   const isChoosingTimeSlot = state.stage === 'WAITING_FOR_TIME_SLOT'
 
+  // Get current date/year to provide context to LLM
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentDate = format(now, 'EEEE, MMMM d, yyyy', { timeZone: 'America/Chicago' })
+
   const intentPrompt = isChoosingTimeSlot
     ? `Analyze the user's message to determine which time slot they're choosing.
 
+Today's date: ${currentDate}
+Current year: ${currentYear}
+
 User message: "${lastUserMessage.content}"
+
+IMPORTANT: If the user mentions a date without specifying a year, assume they mean ${currentYear}.
 
 Return ONLY valid JSON with this structure:
 {
@@ -80,10 +90,18 @@ Return ONLY valid JSON with this structure:
   "declined": false
 }
 
-If they mention a specific day/time like "Monday at 2pm" or "the first one" or "morning", extract that preference.`
+Examples:
+- If user says "January 13th at 1 PM" and current year is ${currentYear}, return "specific_datetime": "${currentYear}-01-13 13:00"
+- If user says "Tuesday at 2pm" and current year is ${currentYear}, extract the date as ${currentYear}-MM-DD based on context
+- If user says "the first one" or "morning", set "time_preference" accordingly and leave "specific_datetime" as null`
     : `Analyze the user's message to determine their intent regarding booking an appointment.
 
+Today's date: ${currentDate}
+Current year: ${currentYear}
+
 User message: "${lastUserMessage.content}"
+
+IMPORTANT: If the user mentions a date without specifying a year, assume they mean ${currentYear}.
 
 Return ONLY valid JSON with this structure:
 {
@@ -122,7 +140,6 @@ Return ONLY valid JSON with this structure:
     }
 
     // User wants to book - get available slots
-    const now = new Date()
     const twoWeeksLater = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
 
     // Call MCP calendar server via MCP client (select at runtime)
