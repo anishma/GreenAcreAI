@@ -81,7 +81,7 @@ Return ONLY valid JSON:
       jsonString = jsonString.replace(/```\s*/, '').replace(/```\s*$/, '')
     }
 
-    const { intent, confidence } = JSON.parse(jsonString)
+    const { intent, confidence: _confidence } = JSON.parse(jsonString)
 
     // Handle each intent type
     switch (intent) {
