@@ -123,15 +123,16 @@ const StateAnnotation = Annotation.Root({
 // Chain all addNode calls first, then add edges - this ensures TypeScript tracks all node names
 const workflow = new StateGraph(StateAnnotation)
   .addNode('greeting', greetingNode)
-  .addNode('intent_router', intentRouterNode) // NEW: Intent classification
+  .addNode('intent_router', intentRouterNode) // Intent classification - optimized as entry point
   .addNode('address_extraction', addressExtractionNode)
   .addNode('frequency_collection', frequencyCollectionNode)
   .addNode('property_lookup', propertyLookupNode)
   .addNode('quote_calculation', quoteCalculationNode)
   .addNode('booking_appointment', bookingNode)
   .addNode('closing', closingNode)
-  // Set entry point using new v1.0 API
-  .addEdge(START, 'greeting')
+  // Set entry point to intent_router to skip greeting (VAPI already greeted)
+  // This saves ~100ms by avoiding unnecessary greeting node passthrough
+  .addEdge(START, 'intent_router')
   // Add conditional edges from each node
   .addConditionalEdges('greeting', routeBasedOnStage)
   .addConditionalEdges('intent_router', routeBasedOnStage)
