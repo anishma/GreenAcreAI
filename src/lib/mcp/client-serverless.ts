@@ -19,6 +19,8 @@ import { lookupPropertyTool } from './servers/property-lookup/tools/lookup-prope
 import { calculateQuoteTool } from './servers/business-logic/tools/calculate-quote'
 import { validateServiceAreaTool } from './servers/business-logic/tools/validate-service-area'
 import { getGenericPriceRangeTool } from './servers/business-logic/tools/get-generic-price-range'
+import { getAvailableSlotsTool } from './servers/calendar/tools/get-available-slots'
+import { bookAppointmentTool } from './servers/calendar/tools/book-appointment'
 
 type ServerName = 'property-lookup' | 'calendar' | 'business-logic'
 
@@ -52,6 +54,18 @@ class MCPClientServerless {
     if (serverName === 'business-logic' && toolName === 'get_generic_price_range') {
       const validatedArgs = getGenericPriceRangeTool.input_schema.parse(args)
       const result = await getGenericPriceRangeTool.handler(validatedArgs)
+      return result as T
+    }
+
+    if (serverName === 'calendar' && toolName === 'get_available_slots') {
+      const validatedArgs = getAvailableSlotsTool.input_schema.parse(args)
+      const result = await getAvailableSlotsTool.handler(validatedArgs)
+      return result as T
+    }
+
+    if (serverName === 'calendar' && toolName === 'book_appointment') {
+      const validatedArgs = bookAppointmentTool.input_schema.parse(args)
+      const result = await bookAppointmentTool.handler(validatedArgs)
       return result as T
     }
 
