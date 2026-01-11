@@ -9,42 +9,23 @@ const llm = new ChatOpenAI({
 })
 
 export async function greetingNode(state: ConversationState): Promise<Partial<ConversationState>> {
-  console.log('[GREETING NODE] Entry - state:', {
-    stage: state.stage,
-    messageCount: state.messages.length,
-    hasAssistantMessage: state.messages.some((m) => m.role === 'assistant')
-  })
-
   // Check if we've already greeted - if messages contain an assistant message, skip greeting
   const hasGreeted = state.messages.some((m) => m.role === 'assistant')
   if (hasGreeted) {
-    console.log('[GREETING NODE] Already greeted, checking stage for routing...')
-
     // Already greeted - check what stage we should resume from
     if (state.stage === 'intent_routing') {
-      console.log('[GREETING NODE] Staying at intent_routing stage')
-      console.log('[GREETING NODE] Current state.messages:', state.messages)
-      console.log('[GREETING NODE] state.messages type:', typeof state.messages)
-      console.log('[GREETING NODE] state.messages is array:', Array.isArray(state.messages))
-      const result = { stage: 'intent_routing' as const }
-      console.log('[GREETING NODE] Returning result:', JSON.stringify(result))
-      console.log('[GREETING NODE] Result has messages property:', 'messages' in result)
-      return result
+      return { stage: 'intent_routing' as const }
     }
     if (state.stage === 'WAITING_FOR_ADDRESS') {
-      console.log('[GREETING NODE] Routing to address_collection')
-      return { stage: 'address_collection' } // Resume address extraction
+      return { stage: 'address_collection' }
     }
     if (state.stage === 'WAITING_FOR_FREQUENCY') {
-      console.log('[GREETING NODE] Routing to frequency_collection')
-      return { stage: 'frequency_collection' } // Resume frequency collection
+      return { stage: 'frequency_collection' }
     }
     if (state.stage === 'WAITING_FOR_BOOKING_DECISION') {
-      console.log('[GREETING NODE] Routing to booking')
-      return { stage: 'booking' } // Resume booking flow
+      return { stage: 'booking' }
     }
     // Default: continue address collection
-    console.log('[GREETING NODE] Default routing to address_collection')
     return { stage: 'address_collection' }
   }
 
@@ -93,7 +74,6 @@ Examples:
       }
     } catch (error) {
       // Name extraction failed - that's okay, continue without it
-      console.log('Name extraction in greeting failed:', error)
     }
   }
 
@@ -102,9 +82,7 @@ Examples:
     ? `Hi ${customerName}! Thanks for calling ${tenant?.business_name}. How can I help you today?`
     : `Thanks for calling ${tenant?.business_name}! How can I help you today?`
 
-  console.log('[GREETING NODE] Creating new greeting message:', greetingMessage)
-
-  const result = {
+  return {
     customer_name: customerName || state.customer_name,
     messages: [
       {
@@ -114,12 +92,4 @@ Examples:
     ],
     stage: 'intent_routing' as const, // Route to intent classification instead of forcing address
   }
-
-  console.log('[GREETING NODE] Returning new greeting:', {
-    customer_name: result.customer_name,
-    messageCount: result.messages.length,
-    stage: result.stage
-  })
-
-  return result
 }

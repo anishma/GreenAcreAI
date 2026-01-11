@@ -7,6 +7,8 @@ import {
   extractUserMessage,
   formatOpenAIResponse,
   formatOpenAIErrorResponse,
+  createStreamingChunk,
+  createStreamingDone,
 } from '@/lib/vapi/openai-adapter'
 
 // Force Node.js runtime for Prisma compatibility
@@ -18,14 +20,10 @@ export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('[VAPI LLM] Prisma client:', typeof prisma, prisma ? 'defined' : 'undefined')
-
     // Force Prisma to connect (helps with serverless cold starts)
     await prisma.$connect()
 
     const body: OpenAIChatCompletionRequest = await req.json()
-
-    //console.log('[VAPI LLM] Request body:', JSON.stringify(body, null, 2))
 
     // VAPI sends OpenAI-compatible format:
     // {
@@ -96,7 +94,6 @@ export async function POST(req: NextRequest) {
     const userMessageContent = extractUserMessage(body.messages)
 
     if (!userMessageContent) {
-      console.error('[VAPI LLM] No user message found in request')
       return NextResponse.json(
         formatOpenAIErrorResponse('No message provided'),
         { status: 400 }
@@ -104,21 +101,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract full system message from VAPI (personality + business rules)
-    // Nodes will prepend their task-specific instructions to this
     const systemPrompt = systemMessage?.content ||
       'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
-
-    console.log('[VAPI LLM] Processing message:', userMessageContent)
-    console.log('[VAPI LLM] Metadata extraction:')
-    console.log('  - Tenant ID:', tenantId)
-    console.log('  - Call ID:', callId)
-    console.log('  - Customer Phone:', customerPhone)
-    console.log('  - System Prompt:', systemPrompt.substring(0, 100) + '...')
-    console.log('  - Sources:')
-    console.log('    - body.call.id:', bodyCallId)
-    console.log('    - header x-vapi-call-id:', vapiCallId)
-    console.log('    - body.call.customer.number:', bodyCustomerNumber)
-    console.log('    - header x-vapi-customer-number:', vapiCustomerId)
 
     // Load or create conversation state from database
     let conversationRecord = await prisma.conversations.findUnique({
@@ -194,11 +178,6 @@ export async function POST(req: NextRequest) {
         },
       }
 
-      console.log('[VAPI LLM] Created new conversation state')
-      console.log('  - Initial messages from VAPI:', initialMessages.length)
-      console.log('  - Has assistant message:', hasAssistantMessage)
-      console.log('  - Starting stage:', state.stage)
-
       // Create conversation record
       await prisma.conversations.create({
         data: {
@@ -213,11 +192,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate state before invoking graph
-    console.log('[VAPI LLM] State validation before graph invocation:')
-    console.log('  - messages is array:', Array.isArray(state.messages))
-    console.log('  - messages length:', state.messages.length)
-    console.log('  - stage:', state.stage)
-
     if (!Array.isArray(state.messages) || state.messages.length === 0) {
       throw new Error('Invalid state: messages must be a non-empty array')
     }
@@ -225,44 +199,15 @@ export async function POST(req: NextRequest) {
     // Run the conversation graph with error handling
     let result: ConversationState
     try {
-      console.log('[VAPI LLM] Invoking conversation graph...')
-      console.log('[VAPI LLM] About to call conversationGraph.invoke with state:', {
-        messagesLength: state.messages.length,
-        stage: state.stage,
-        tenant_id: state.tenant_id,
-        call_id: state.call_id
-      })
-
       result = await conversationGraph.invoke(state, {
         recursionLimit: 25,
       })
-
-      console.log('[VAPI LLM] Graph invocation completed successfully')
-      console.log('[VAPI LLM] Result state:', {
-        messagesLength: result.messages?.length || 0,
-        stage: result.stage
-      })
     } catch (graphError: any) {
-      console.error('[VAPI LLM] Graph invocation error:', {
-        name: graphError?.name,
-        message: graphError?.message,
-        stack: graphError?.stack,
-        state: {
-          messages: state.messages.length,
-          stage: state.stage,
-        },
-      })
-      console.error('[VAPI LLM] Full error object:', graphError)
+      console.error('[VAPI LLM] Graph error:', graphError?.message || 'Unknown error')
       throw new Error(`Graph execution failed: ${graphError?.message || 'Unknown error'}`)
     }
 
-    // Validate result from graph
-    console.log('[VAPI LLM] Graph result validation:')
-    console.log('  - Result messages:', result.messages?.length || 0)
-    console.log('  - Result stage:', result.stage)
-
     if (!result.messages || !Array.isArray(result.messages)) {
-      console.error('[VAPI LLM] Graph returned invalid messages array')
       return NextResponse.json(
         formatOpenAIErrorResponse('Invalid response from conversation graph'),
         { status: 500 }
@@ -273,11 +218,7 @@ export async function POST(req: NextRequest) {
     const assistantMessages = result.messages.filter((m: any) => m.role === 'assistant')
     const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
 
-    console.log('[VAPI LLM] Assistant messages found:', assistantMessages.length)
-
     if (!lastAssistantMessage) {
-      console.error('[VAPI LLM] No assistant message generated')
-      console.error('[VAPI LLM] All messages:', JSON.stringify(result.messages, null, 2))
       return NextResponse.json(
         formatOpenAIErrorResponse('No response generated'),
         { status: 500 }
@@ -305,17 +246,64 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    console.log('[VAPI LLM] Response generated:', lastAssistantMessage.content.substring(0, 100))
+    // Log final response for monitoring
+    console.log('[VAPI LLM] Response:', lastAssistantMessage.content)
 
-    // Return response in OpenAI format (REQUIRED by VAPI)
-    const openAIResponse = formatOpenAIResponse(
-      lastAssistantMessage.content,
-      `chatcmpl-${callId}`
-    )
+    // Check if streaming is requested (VAPI requires streaming)
+    const isStreaming = body.stream === true
 
-    console.log('[VAPI LLM] OpenAI response format:', JSON.stringify(openAIResponse, null, 2))
+    if (isStreaming) {
+      // Return streaming response (SSE format required by VAPI)
+      const encoder = new TextEncoder()
+      const requestId = `chatcmpl-${callId}`
 
-    return NextResponse.json(openAIResponse)
+      const stream = new ReadableStream({
+        start(controller) {
+          try {
+            // Send first chunk with role
+            const firstChunk = createStreamingChunk(
+              lastAssistantMessage.content,
+              true,
+              false,
+              requestId
+            )
+            controller.enqueue(encoder.encode(firstChunk))
+
+            // Send final chunk with finish_reason
+            const finalChunk = createStreamingChunk(
+              '',
+              false,
+              true,
+              requestId
+            )
+            controller.enqueue(encoder.encode(finalChunk))
+
+            // Send [DONE] message
+            const done = createStreamingDone()
+            controller.enqueue(encoder.encode(done))
+
+            controller.close()
+          } catch (error) {
+            controller.error(error)
+          }
+        },
+      })
+
+      return new NextResponse(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      })
+    } else {
+      // Non-streaming fallback (for testing)
+      const openAIResponse = formatOpenAIResponse(
+        lastAssistantMessage.content,
+        `chatcmpl-${callId}`
+      )
+      return NextResponse.json(openAIResponse)
+    }
   } catch (error) {
     console.error('[VAPI LLM] Endpoint error:', error)
     return NextResponse.json(
