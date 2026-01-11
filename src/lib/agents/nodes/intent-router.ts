@@ -25,7 +25,7 @@ export async function intentRouterNode(
 
   if (!lastUserMessage) {
     // No user message - shouldn't happen, but safe fallback
-    return { stage: 'address_collection' }
+    return { stage: 'address_collection', messages: [] }
   }
 
   // Get tenant info for FAQ responses
@@ -93,7 +93,7 @@ Return ONLY valid JSON:
 
       case 'booking_intent':
         // Proceed to address extraction
-        return { stage: 'address_collection' }
+        return { stage: 'address_collection', messages: [] }
 
       case 'unclear':
         // Be helpful and ask an open-ended question
@@ -111,12 +111,12 @@ Return ONLY valid JSON:
 
       default:
         // Fallback
-        return { stage: 'address_collection' }
+        return { stage: 'address_collection', messages: [] }
     }
   } catch (error) {
     console.error('Intent classification error:', error)
     // Fallback to address collection on error
-    return { stage: 'address_collection' }
+    return { stage: 'address_collection', messages: [] }
   }
 }
 

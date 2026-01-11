@@ -12,7 +12,7 @@ export async function frequencyCollectionNode(
 ): Promise<Partial<ConversationState>> {
   // Check if we already have frequency
   if (state.preferred_frequency) {
-    return { stage: 'property_lookup' }
+    return { stage: 'property_lookup', messages: [] }
   }
 
   // Get tenant settings to see which frequencies they support
@@ -97,6 +97,7 @@ Return only the frequency value, nothing else.`
             | 'monthly'
             | 'one-time',
           stage: 'property_lookup',
+          messages: [],
         }
       }
     } catch (error) {

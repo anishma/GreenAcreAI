@@ -78,6 +78,7 @@ Return ONLY valid JSON with this exact structure:
           ...state.attempts,
           address_extraction: 0, // Reset counter on success
         },
+        messages: [],
       }
     }
 

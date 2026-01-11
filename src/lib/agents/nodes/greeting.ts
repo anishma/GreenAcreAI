@@ -12,17 +12,18 @@ export async function greetingNode(state: ConversationState): Promise<Partial<Co
   const hasGreeted = state.messages.some((m) => m.role === 'assistant')
   if (hasGreeted) {
     // Already greeted - check what stage we should resume from
+    // CRITICAL: Always return messages array (even if empty) to prevent EmptyChannelError
     if (state.stage === 'WAITING_FOR_ADDRESS') {
-      return { stage: 'address_collection' } // Resume address extraction
+      return { messages: [], stage: 'address_collection' } // Resume address extraction
     }
     if (state.stage === 'WAITING_FOR_FREQUENCY') {
-      return { stage: 'frequency_collection' } // Resume frequency collection
+      return { messages: [], stage: 'frequency_collection' } // Resume frequency collection
     }
     if (state.stage === 'WAITING_FOR_BOOKING_DECISION') {
-      return { stage: 'booking' } // Resume booking flow
+      return { messages: [], stage: 'booking' } // Resume booking flow
     }
     // Default: continue address collection
-    return { stage: 'address_collection' }
+    return { messages: [], stage: 'address_collection' }
   }
 
   const tenant = await prisma.tenants.findUnique({
