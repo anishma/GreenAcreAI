@@ -1,5 +1,25 @@
-import { mcpClient } from '@/lib/mcp/client'
+// Use serverless-compatible MCP client in production (Vercel), regular MCP client in development
+import { mcpClient as mcpClientServerless } from '@/lib/mcp/client-serverless'
+import { mcpClient as mcpClientStdio } from '@/lib/mcp/client'
 import { ConversationState } from '../state'
+
+// Runtime function to select appropriate client based on environment
+function getMcpClient() {
+  // Vercel sets multiple env vars, check for any of them
+  const isVercel = process.env.VERCEL === '1' ||
+                   process.env.VERCEL_ENV !== undefined ||
+                   process.env.NEXT_RUNTIME === 'edge' ||
+                   process.env.VERCEL_URL !== undefined
+
+  console.log('[Quote Calculation] Environment check:', {
+    VERCEL: process.env.VERCEL,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    NEXT_RUNTIME: process.env.NEXT_RUNTIME,
+    isVercel
+  })
+
+  return isVercel ? mcpClientServerless : mcpClientStdio
+}
 
 export async function quoteCalculationNode(
   state: ConversationState
@@ -7,6 +27,10 @@ export async function quoteCalculationNode(
   const address = state.customer_address!
 
   try {
+    // Call MCP business-logic server via MCP client (select at runtime)
+    const mcpClient = getMcpClient()
+    console.log('[Quote Calculation] Using client:', mcpClient.constructor.name)
+
     // First, validate service area
     const serviceAreaCheck = await mcpClient.callTool<{
       in_service_area: boolean

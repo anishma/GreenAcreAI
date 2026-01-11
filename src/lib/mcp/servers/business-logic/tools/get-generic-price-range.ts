@@ -46,6 +46,9 @@ export const getGenericPriceRangeTool = {
     const maxBiweekly = Math.max(...biweeklyPrices)
 
     return {
+      min_price: minWeekly,
+      max_price: maxWeekly,
+      typical_frequency: 'weekly' as const,
       weekly: {
         min: minWeekly,
         max: maxWeekly,

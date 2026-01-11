@@ -16,6 +16,9 @@
  */
 
 import { lookupPropertyTool } from './servers/property-lookup/tools/lookup-property'
+import { calculateQuoteTool } from './servers/business-logic/tools/calculate-quote'
+import { validateServiceAreaTool } from './servers/business-logic/tools/validate-service-area'
+import { getGenericPriceRangeTool } from './servers/business-logic/tools/get-generic-price-range'
 
 type ServerName = 'property-lookup' | 'calendar' | 'business-logic'
 
@@ -31,6 +34,24 @@ class MCPClientServerless {
       const validatedArgs = lookupPropertyTool.input_schema.parse(args)
       // Call handler directly (in-process, no subprocess)
       const result = await lookupPropertyTool.handler(validatedArgs)
+      return result as T
+    }
+
+    if (serverName === 'business-logic' && toolName === 'calculate_quote') {
+      const validatedArgs = calculateQuoteTool.input_schema.parse(args)
+      const result = await calculateQuoteTool.handler(validatedArgs)
+      return result as T
+    }
+
+    if (serverName === 'business-logic' && toolName === 'validate_service_area') {
+      const validatedArgs = validateServiceAreaTool.input_schema.parse(args)
+      const result = await validateServiceAreaTool.handler(validatedArgs)
+      return result as T
+    }
+
+    if (serverName === 'business-logic' && toolName === 'get_generic_price_range') {
+      const validatedArgs = getGenericPriceRangeTool.input_schema.parse(args)
+      const result = await getGenericPriceRangeTool.handler(validatedArgs)
       return result as T
     }
 
