@@ -14,6 +14,9 @@ export async function greetingNode(state: ConversationState): Promise<Partial<Co
   if (hasGreeted) {
     // Already greeted - check what stage we should resume from
     // ✅ FIXED: Removed messages: [] to prevent EmptyChannelError
+    if (state.stage === 'intent_routing') {
+      return { stage: 'intent_routing' } // Stay at intent routing
+    }
     if (state.stage === 'WAITING_FOR_ADDRESS') {
       return { stage: 'address_collection' } // Resume address extraction
     }
