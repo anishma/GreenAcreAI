@@ -55,6 +55,15 @@ export async function sendSMS(params: {
     })
 
     console.log(`[SMS] Message sent successfully: ${message.sid}`)
+    console.log(`[SMS] Message status: ${message.status}`)
+    console.log(`[SMS] Message details:`, {
+      sid: message.sid,
+      status: message.status,
+      errorCode: message.errorCode,
+      errorMessage: message.errorMessage,
+      to: message.to,
+      from: message.from,
+    })
 
     // Log notification to database
     await prisma.notifications.create({
