@@ -1,6 +1,7 @@
 import { google } from 'googleapis'
 import { decrypt } from '@/lib/utils/encryption'
 import { prisma } from '@/lib/prisma'
+import { fromZonedTime } from 'date-fns-tz'
 
 export async function getCalendarClient(tenantId: string) {
   const tenant = await prisma.tenants.findUnique({
@@ -51,7 +52,7 @@ export async function getAvailableSlots(
   startDate: Date,
   endDate: Date
 ) {
-  const { calendar, calendarId } = await getCalendarClient(tenantId)
+  const { calendar, calendarId, timezone } = await getCalendarClient(tenantId)
 
   // Fetch busy times
   const { data } = await calendar.freebusy.query({
@@ -72,13 +73,19 @@ export async function getAvailableSlots(
   while (currentDate <= endDate) {
     // Skip weekends (Saturday = 6, Sunday = 0)
     if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
-      // Generate hourly slots from 9am to 5pm
+      // Generate hourly slots from 9am to 5pm IN THE TENANT'S TIMEZONE
       for (let hour = 9; hour < 17; hour++) {
-        const slotStart = new Date(currentDate)
-        slotStart.setHours(hour, 0, 0, 0)
+        // Create a date object representing the local time in the tenant's timezone
+        const year = currentDate.getFullYear()
+        const month = currentDate.getMonth()
+        const day = currentDate.getDate()
 
-        const slotEnd = new Date(currentDate)
-        slotEnd.setHours(hour + 1, 0, 0, 0)
+        // Create local time (e.g., "9:00 AM on Jan 12, 2024" in tenant's timezone)
+        const localTime = new Date(year, month, day, hour, 0, 0)
+
+        // Convert from tenant's local time to UTC
+        const slotStart = fromZonedTime(localTime, timezone)
+        const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000) // +1 hour
 
         // Check if this slot overlaps with any busy time
         const isAvailable = !busySlots.some((busy) => {
@@ -104,7 +111,7 @@ export async function getAvailableSlots(
     currentDate.setDate(currentDate.getDate() + 1)
   }
 
-  return { available_slots: availableSlots }
+  return { available_slots: availableSlots, timezone }
 }
 
 export async function bookAppointment(

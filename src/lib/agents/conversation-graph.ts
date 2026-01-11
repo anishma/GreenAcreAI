@@ -164,6 +164,8 @@ function routeBasedOnStage(state: ConversationState): GraphNode | typeof END {
       return 'quote_calculation'
     case 'WAITING_FOR_BOOKING_DECISION':
       return END // PAUSE: Stop and wait for user to decide about booking
+    case 'WAITING_FOR_TIME_SLOT':
+      return END // PAUSE: Stop and wait for user to choose time slot
     case 'booking':
       return 'booking_appointment'
     case 'closing':

@@ -31,6 +31,8 @@ export async function propertyLookupNode(
   try {
     // Call MCP property lookup server via MCP client (select at runtime)
     const mcpClient = getMcpClient()
+    console.log('[Property Lookup] Using client:', mcpClient.constructor.name)
+
     const propertyData = await mcpClient.callTool<{
       lot_size_sqft: number
       parcel_id: string

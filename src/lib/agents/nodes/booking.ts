@@ -5,6 +5,7 @@ import { ConversationState } from '../state'
 import { ChatOpenAI } from '@langchain/openai'
 import { prisma } from '@/lib/prisma'
 import { sendBookingConfirmation } from '@/lib/twilio/sms'
+import { toZonedTime, format } from 'date-fns-tz'
 
 const llm = new ChatOpenAI({
   modelName: 'gpt-4o-mini',
@@ -110,6 +111,7 @@ Return ONLY valid JSON with this structure:
 
     const availableSlots = await mcpClient.callTool<{
       available_slots: Array<{ start: string; end: string }>
+      timezone: string
     }>(
       'calendar',
       'get_available_slots',
@@ -131,22 +133,21 @@ Return ONLY valid JSON with this structure:
       }
     }
 
+    // Get tenant's timezone from the MCP response
+    const tenantTimezone = availableSlots.timezone || 'America/Chicago'
+
     // Check if user already chose a time slot (has chosen_time in state)
     // If not, present available slots and ask them to choose
     if (!state.chosen_time && !intent.specific_datetime && !intent.time_preference) {
-      // Format available slots for presentation
+      // Format available slots for presentation IN THE TENANT'S TIMEZONE
       const slotOptions = availableSlots.available_slots.slice(0, 3).map((slot) => {
-        const date = new Date(slot.start)
-        const dateString = date.toLocaleDateString('en-US', {
-          weekday: 'long',
-          month: 'long',
-          day: 'numeric',
-        })
-        const timeString = date.toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true,
-        })
+        // Convert UTC time to tenant's local timezone
+        const utcDate = new Date(slot.start)
+        const zonedDate = toZonedTime(utcDate, tenantTimezone)
+
+        const dateString = format(zonedDate, 'EEEE, MMMM d', { timeZone: tenantTimezone })
+        const timeString = format(zonedDate, 'h:mm a', { timeZone: tenantTimezone })
+
         return `${dateString} at ${timeString}`
       }).join(', or ')
 
@@ -296,18 +297,12 @@ Return ONLY valid JSON with this structure:
       }
     }
 
-    // Format the scheduled time nicely
-    const scheduledDate = new Date(booking.scheduled_time)
-    const dateString = scheduledDate.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-    })
-    const timeString = scheduledDate.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    })
+    // Format the scheduled time nicely IN THE TENANT'S TIMEZONE
+    const scheduledUtcDate = new Date(booking.scheduled_time)
+    const scheduledZonedDate = toZonedTime(scheduledUtcDate, tenantTimezone)
+
+    const dateString = format(scheduledZonedDate, 'EEEE, MMMM d', { timeZone: tenantTimezone })
+    const timeString = format(scheduledZonedDate, 'h:mm a', { timeZone: tenantTimezone })
 
     return {
       booking: {
@@ -318,7 +313,7 @@ Return ONLY valid JSON with this structure:
       stage: 'closing',
       messages: [{
           role: 'assistant',
-          content: `Perfect! I've scheduled your appointment for ${dateString} at ${timeString}. You'll receive a confirmation text message shortly. Is there anything else I can help you with?`,
+          content: `Perfect! I've scheduled your appointment for ${dateString} at ${timeString}. You'll receive a confirmation text message shortly.`,
         },
       ],
     }
