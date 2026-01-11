@@ -190,18 +190,52 @@ Return ONLY valid JSON with this structure:
     console.log('[Booking Node] State chosen_time:', state.chosen_time)
 
     if (intent.specific_datetime) {
-      // Try to find slot matching specific datetime
-      const preferredSlot = availableSlots.available_slots.find(
-        (slot) => slot.start === intent.specific_datetime
-      )
-      if (preferredSlot) {
-        selectedSlot = preferredSlot
-        console.log('[Booking Node] Selected slot by specific datetime:', selectedSlot.start)
+      // Parse the user's requested time (e.g., "2024-01-12 15:00" = 3 PM)
+      // Extract hour from the user's request
+      const requestedTimeStr = intent.specific_datetime.trim()
+      let requestedHour: number | null = null
+      let requestedDate: string | null = null
+
+      // Try to parse various formats: "2024-01-12 15:00", "15:00", "3 PM", etc.
+      const hourMatch = requestedTimeStr.match(/(\d{1,2}):?(\d{2})?/)
+      if (hourMatch) {
+        requestedHour = parseInt(hourMatch[1])
+        console.log('[Booking Node] Extracted hour from intent:', requestedHour)
+      }
+
+      // Extract date if present (YYYY-MM-DD format)
+      const dateMatch = requestedTimeStr.match(/(\d{4})-(\d{2})-(\d{2})/)
+      if (dateMatch) {
+        requestedDate = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`
+        console.log('[Booking Node] Extracted date from intent:', requestedDate)
+      }
+
+      // Find slot matching the hour in the tenant's timezone
+      if (requestedHour !== null) {
+        const matchingSlot = availableSlots.available_slots.find((slot) => {
+          const utcDate = new Date(slot.start)
+          const zonedDate = toZonedTime(utcDate, tenantTimezone)
+          const slotHour = zonedDate.getHours()
+
+          console.log(`[Booking Node] Checking slot: ${slot.start} -> ${zonedDate.toISOString()} -> hour ${slotHour} in ${tenantTimezone}`)
+
+          // Match if the hour matches in the tenant's timezone
+          return slotHour === requestedHour
+        })
+
+        if (matchingSlot) {
+          selectedSlot = matchingSlot
+          console.log('[Booking Node] Selected slot by matching hour:', selectedSlot.start)
+        } else {
+          console.warn('[Booking Node] No slot found matching requested hour', requestedHour, '- using first available')
+        }
       }
     } else if (intent.time_preference === 'morning') {
-      // Find morning slot (before noon)
+      // Find morning slot (before noon in tenant's timezone)
       const morningSlot = availableSlots.available_slots.find((slot) => {
-        const hour = new Date(slot.start).getHours()
+        const utcDate = new Date(slot.start)
+        const zonedDate = toZonedTime(utcDate, tenantTimezone)
+        const hour = zonedDate.getHours()
         return hour < 12
       })
       if (morningSlot) {
@@ -209,9 +243,11 @@ Return ONLY valid JSON with this structure:
         console.log('[Booking Node] Selected morning slot:', selectedSlot.start)
       }
     } else if (intent.time_preference === 'afternoon') {
-      // Find afternoon slot (after noon)
+      // Find afternoon slot (after noon in tenant's timezone)
       const afternoonSlot = availableSlots.available_slots.find((slot) => {
-        const hour = new Date(slot.start).getHours()
+        const utcDate = new Date(slot.start)
+        const zonedDate = toZonedTime(utcDate, tenantTimezone)
+        const hour = zonedDate.getHours()
         return hour >= 12
       })
       if (afternoonSlot) {
