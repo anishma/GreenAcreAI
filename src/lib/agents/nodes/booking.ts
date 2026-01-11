@@ -225,13 +225,25 @@ Return ONLY valid JSON with this structure:
     )
 
     // Save booking to database
-    // Note: We don't set call_id here because state.call_id contains VAPI's call ID,
-    // but bookings.call_id references our database calls.id (which doesn't exist yet).
-    // The webhook handler will link the booking to the call record later.
+    // Note: state.call_id contains VAPI's call ID, but bookings.call_id references our database calls.id
+    // Look up the call record by vapi_call_id to get the database ID
+    let databaseCallId: string | null = null
+    if (state.call_id) {
+      const callRecord = await prisma.calls.findUnique({
+        where: { vapi_call_id: state.call_id },
+        select: { id: true }
+      })
+      databaseCallId = callRecord?.id || null
+
+      if (!callRecord) {
+        console.warn(`[Booking] Call record not found for vapi_call_id: ${state.call_id}`)
+      }
+    }
+
     const bookingRecord = await prisma.bookings.create({
       data: {
         tenant_id: state.tenant_id,
-        // call_id: null - Don't set this, let webhook link it later
+        call_id: databaseCallId, // Use our database call.id, not VAPI's call ID
         updated_at: new Date(),
         customer_phone: state.customer_phone || '',
         customer_name: state.customer_name || 'Customer',
