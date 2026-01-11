@@ -32,9 +32,7 @@ export async function propertyLookupNode(
         parcel_id: propertyData.parcel_id,
       },
       stage: 'quoting',
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: `Great! I found your property. It's about ${propertyData.lot_size_sqft.toLocaleString()} square feet.`,
         },
@@ -45,9 +43,7 @@ export async function propertyLookupNode(
     // Property not found - fallback to generic quote
     return {
       stage: 'quoting',
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: `I couldn't find the exact property details, but I can give you a general price range for your area.`,
         },

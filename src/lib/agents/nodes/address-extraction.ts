@@ -15,9 +15,7 @@ export async function addressExtractionNode(
 
   if (!lastUserMessage) {
     return {
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: 'I need your address to provide a quote. What is your street address, city, state, and ZIP code?',
         },
@@ -86,9 +84,7 @@ Return ONLY valid JSON with this exact structure:
     // Max 3 attempts - give up and close
     if (state.attempts.address_extraction >= 2) {
       return {
-        messages: [
-          ...state.messages,
-          {
+        messages: [{
             role: 'assistant',
             content: "I'm having trouble understanding your address. Could you please provide your full street address, city, state, and ZIP code? For example: 123 Main Street, Springfield, IL 62701",
           },
@@ -105,9 +101,7 @@ Return ONLY valid JSON with this exact structure:
     if (!extracted.zip) missingFields.push('ZIP code')
 
     return {
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: `I need a bit more information. Could you provide your ${missingFields.join(', ')}?`,
         },
@@ -121,9 +115,7 @@ Return ONLY valid JSON with this exact structure:
   } catch (error) {
     console.error('Address extraction error:', error)
     return {
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: 'Could you please repeat your address? I need your street, city, state, and ZIP code.',
         },

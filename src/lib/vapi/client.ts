@@ -166,11 +166,11 @@ export async function createAgent(config: {
       stability: 0.5,
       similarityBoost: 0.75,
     },
-    // Model configuration - using OpenAI for now
-    // TODO: Switch to custom-llm once we implement the LLM endpoint
+    // Model configuration - using custom LLM endpoint
     model: {
-      provider: 'openai',
-      model: 'gpt-4o-mini',
+      provider: 'custom-llm',
+      url: config.customLlmUrl || `${process.env.NEXT_PUBLIC_APP_URL || 'https://greenacreai.vercel.app'}/api/vapi-llm`,
+      model: 'custom-langgraph',
       messages: [
         {
           role: 'system',
@@ -181,7 +181,11 @@ Help customers with:
 - Answering questions about services
 - Providing property information
 
-Be friendly, professional, and concise.`
+Be friendly, professional, and concise.
+
+tenant_id: ${config.tenantId}
+call_id: {{call.id}}
+customer_phone: {{customer.number}}`
         }
       ],
     },

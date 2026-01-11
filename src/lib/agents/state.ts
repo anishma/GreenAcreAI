@@ -6,6 +6,7 @@ export type Frequency = 'weekly' | 'biweekly' | 'monthly' | 'one-time'
 // Conversation stage tracking (state values, not node names)
 export type ConversationStage =
   | 'greeting'
+  | 'intent_routing' // NEW: Classify user intent before forcing booking flow
   | 'address_collection'
   | 'property_lookup'
   | 'frequency_collection'

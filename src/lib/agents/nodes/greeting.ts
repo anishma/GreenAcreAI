@@ -69,15 +69,19 @@ Examples:
     }
   }
 
+  // More conversational greeting - don't immediately ask for address
+  const greetingMessage = customerName
+    ? `Hi ${customerName}! Thanks for calling ${tenant?.business_name}. How can I help you today?`
+    : `Thanks for calling ${tenant?.business_name}! How can I help you today?`
+
   return {
-    customer_name: customerName || state.customer_name, // Keep existing name if we had one
+    customer_name: customerName || state.customer_name,
     messages: [
-      ...state.messages,
       {
         role: 'assistant',
-        content: `Thanks for calling ${tenant?.business_name}! I can help you get a quote for lawn mowing service. What's your address?`,
+        content: greetingMessage,
       },
     ],
-    stage: 'address_collection',
+    stage: 'intent_routing', // Route to intent classification instead of forcing address
   }
 }

@@ -18,9 +18,7 @@ export async function bookingNode(
 
   if (!lastUserMessage) {
     return {
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: 'Would you like to schedule an appointment?',
         },
@@ -58,9 +56,7 @@ Return ONLY valid JSON with this structure:
     if (intent.declined || !intent.wants_to_book) {
       return {
         stage: 'closing',
-        messages: [
-          ...state.messages,
-          {
+        messages: [{
             role: 'assistant',
             content: "No problem! Feel free to call us back anytime you're ready to schedule. Thanks for your interest!",
           },
@@ -87,9 +83,7 @@ Return ONLY valid JSON with this structure:
     if (availableSlots.available_slots.length === 0) {
       return {
         stage: 'closing',
-        messages: [
-          ...state.messages,
-          {
+        messages: [{
             role: 'assistant',
             content: "I'm sorry, we don't have any available appointments in the next two weeks. Would you like me to have someone call you back to schedule further out?",
           },
@@ -230,9 +224,7 @@ Return ONLY valid JSON with this structure:
       },
       chosen_time: booking.scheduled_time,
       stage: 'closing',
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: `Perfect! I've scheduled your appointment for ${dateString} at ${timeString}. You'll receive a confirmation text message shortly. Is there anything else I can help you with?`,
         },
@@ -241,9 +233,7 @@ Return ONLY valid JSON with this structure:
   } catch (error) {
     console.error('Booking error:', error)
     return {
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: "I'm having trouble scheduling the appointment right now. Could you please call us back or visit our website to book?",
         },

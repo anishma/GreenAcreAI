@@ -15,6 +15,7 @@
     "test:mcp": "tsx scripts/test-mcp-servers.ts",
     "test:agent": "tsx scripts/test-langgraph-agent.ts",
     "test:vapi": "tsx scripts/test-vapi-endpoint.ts",
+    "test:custom-llm": "tsx scripts/test-custom-llm-endpoint.ts",
     "test:phase4": "npm run test:mcp && npm run test:agent",
     "postinstall": "prisma generate"
   },

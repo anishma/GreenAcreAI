@@ -27,9 +27,7 @@ export async function quoteCalculationNode(
     if (!serviceAreaCheck.in_service_area) {
       return {
         stage: 'closing',
-        messages: [
-          ...state.messages,
-          {
+        messages: [{
             role: 'assistant',
             content: `I appreciate your interest! Unfortunately, we currently only service properties within ${serviceAreaCheck.service_radius_miles} miles of our location, and your property is about ${serviceAreaCheck.distance_miles.toFixed(1)} miles away. We may be expanding our service area soon - would you like me to note your address for future reference?`,
           },
@@ -67,9 +65,7 @@ export async function quoteCalculationNode(
             service_inclusions: quote.service_inclusions,
           },
           stage: 'WAITING_FOR_BOOKING_DECISION', // NEW: Wait for user to decide
-          messages: [
-            ...state.messages,
-            {
+          messages: [{
               role: 'assistant',
               content: `Based on your property size, I can offer you ${frequencyDisplay} lawn mowing service for $${quote.price_per_visit} per visit. This includes: ${quote.service_inclusions.join(', ')}. Would you like to schedule your first appointment?`,
             },
@@ -83,9 +79,7 @@ export async function quoteCalculationNode(
 
         return {
           stage: 'closing',
-          messages: [
-            ...state.messages,
-            {
+          messages: [{
               role: 'assistant',
               content: `Your property is approximately ${acresEstimate} acres, which is larger than our standard pricing tiers. I'd like to have the owner call you directly to provide a custom quote for your property. This ensures you get accurate pricing for the size of your lawn. What's the best phone number to reach you?`,
             },
@@ -111,9 +105,7 @@ export async function quoteCalculationNode(
 
       return {
         stage: 'WAITING_FOR_BOOKING_DECISION', // NEW: Wait for user to decide
-        messages: [
-          ...state.messages,
-          {
+        messages: [{
             role: 'assistant',
             content: `For properties in your area, our ${frequencyDisplay} lawn mowing service typically ranges from $${priceRange.min_price} to $${priceRange.max_price} per visit, depending on lot size. This includes mowing, edging, and blowing. Would you like to schedule an appointment so we can give you an exact quote after seeing your property?`,
           },
@@ -124,9 +116,7 @@ export async function quoteCalculationNode(
     console.error('Quote calculation error:', error)
     return {
       stage: 'closing',
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: "I'm having trouble calculating a quote right now. Could you please call us back or visit our website to get pricing information?",
         },

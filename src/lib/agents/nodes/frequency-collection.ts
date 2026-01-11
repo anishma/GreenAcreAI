@@ -47,9 +47,7 @@ export async function frequencyCollectionNode(
     // No frequencies configured - error
     return {
       stage: 'closing',
-      messages: [
-        ...state.messages,
-        {
+      messages: [{
           role: 'assistant',
           content: "I'm sorry, but we're not able to provide service quotes at this time. Please contact us directly.",
         },
@@ -116,9 +114,7 @@ Return only the frequency value, nothing else.`
     .join(', ')
 
   return {
-    messages: [
-      ...state.messages,
-      {
+    messages: [{
         role: 'assistant',
         content: `Great! We offer ${frequencyOptionsText}. Which would you prefer?`,
       },

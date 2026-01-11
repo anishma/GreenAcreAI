@@ -1,6 +1,7 @@
 import { StateGraph, END } from '@langchain/langgraph'
 import { ConversationState, Frequency, ConversationStage } from './state'
 import { greetingNode } from './nodes/greeting'
+import { intentRouterNode } from './nodes/intent-router'
 import { addressExtractionNode } from './nodes/address-extraction'
 import { frequencyCollectionNode } from './nodes/frequency-collection'
 import { propertyLookupNode } from './nodes/property-lookup'
@@ -34,6 +35,7 @@ import { closingNode } from './nodes/closing'
  */
 type GraphNode =
   | 'greeting'
+  | 'intent_router' // NEW: Classifies user intent before forcing booking flow
   | 'address_extraction'
   | 'frequency_collection'
   | 'property_lookup'
@@ -139,6 +141,7 @@ const workflow = new StateGraph<ConversationState, Partial<ConversationState>, G
 // Add nodes - chain them so TypeScript tracks the accumulated node type union
 workflow
   .addNode('greeting', greetingNode)
+  .addNode('intent_router', intentRouterNode) // NEW: Intent classification
   .addNode('address_extraction', addressExtractionNode)
   .addNode('frequency_collection', frequencyCollectionNode)
   .addNode('property_lookup', propertyLookupNode)
@@ -150,7 +153,9 @@ workflow
 function routeBasedOnStage(state: ConversationState): GraphNode | typeof END {
   switch (state.stage) {
     case 'greeting':
-      return 'address_extraction'
+      return 'intent_router' // Route to intent classification first
+    case 'intent_routing':
+      return 'intent_router' // Run intent classification
     case 'address_collection':
       return 'address_extraction'
     case 'WAITING_FOR_ADDRESS':
@@ -181,6 +186,19 @@ workflow.setEntryPoint('greeting')
 
 // Add conditional edges from each node
 workflow.addConditionalEdges('greeting', routeBasedOnStage, {
+  intent_router: 'intent_router', // NEW: Route to intent classification
+  address_extraction: 'address_extraction',
+  frequency_collection: 'frequency_collection',
+  property_lookup: 'property_lookup',
+  quote_calculation: 'quote_calculation',
+  booking_appointment: 'booking_appointment',
+  closing: 'closing',
+  [END]: END,
+})
+
+// NEW: Add edges for intent_router node
+workflow.addConditionalEdges('intent_router', routeBasedOnStage, {
+  intent_router: 'intent_router',
   address_extraction: 'address_extraction',
   frequency_collection: 'frequency_collection',
   property_lookup: 'property_lookup',

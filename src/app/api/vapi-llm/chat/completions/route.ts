@@ -2,58 +2,93 @@ import { NextRequest, NextResponse } from 'next/server'
 import { conversationGraph } from '@/lib/agents/conversation-graph'
 import { ConversationState } from '@/lib/agents/state'
 import { prisma } from '@/lib/prisma'
+import {
+  OpenAIChatCompletionRequest,
+  extractUserMessage,
+  formatOpenAIResponse,
+  formatOpenAIErrorResponse,
+} from '@/lib/vapi/openai-adapter'
 
 // Force Node.js runtime for Prisma compatibility
 export const runtime = 'nodejs'
 
-// VAPI Custom LLM Endpoint
-// Receives messages from VAPI and returns AI responses using our LangGraph agent
+// VAPI Custom LLM Endpoint (OpenAI-Compatible)
+// Receives OpenAI-formatted chat completion requests from VAPI
+// Returns OpenAI-formatted responses using our LangGraph agent
 
 export async function POST(req: NextRequest) {
   try {
     console.log('[VAPI LLM] Prisma client:', typeof prisma, prisma ? 'defined' : 'undefined')
-    const body = await req.json()
+    const body: OpenAIChatCompletionRequest = await req.json()
 
-    // VAPI sends messages in this format:
+    console.log('[VAPI LLM] Request body:', JSON.stringify(body, null, 2))
+
+    // VAPI sends OpenAI-compatible format:
     // {
-    //   "message": {
-    //     "role": "user",
-    //     "content": "123 Main St, Springfield IL 62701"
-    //   },
-    //   "call": {
-    //     "id": "call_123",
-    //     "customer": {
-    //       "number": "+15551234567"
-    //     }
-    //   },
-    //   "model": {
-    //     "metadata": {
-    //       "tenant_id": "tenant_123"
-    //     }
-    //   }
+    //   "model": "custom-model",
+    //   "messages": [
+    //     { "role": "system", "content": "..." },
+    //     { "role": "user", "content": "123 Main St, Springfield IL 62701" }
+    //   ],
+    //   "temperature": 0.7,
+    //   "stream": true,
+    //   "max_tokens": 250
     // }
+    //
+    // VAPI also includes metadata in headers or custom fields
+    // We'll extract tenant_id and call_id from custom metadata
 
-    const userMessage = body.message
-    const call = body.call
-    const metadata = body.model?.metadata || {}
+    // Extract custom VAPI metadata (if passed in headers or body)
+    const vapiCallId = req.headers.get('x-vapi-call-id')
+    const vapiCustomerId = req.headers.get('x-vapi-customer-number')
 
-    if (!userMessage || !call) {
-      return NextResponse.json(
-        { error: 'Invalid request format' },
-        { status: 400 }
-      )
+    // Fallback: Check if metadata is in the messages (system message)
+    const systemMessage = body.messages.find(m => m.role === 'system')
+    let tenantId: string | null = null
+    let callId: string | null = vapiCallId
+    let customerPhone: string | null = vapiCustomerId
+
+    // Try to extract from system message if present
+    if (systemMessage?.content) {
+      const tenantMatch = systemMessage.content.match(/tenant_id:\s*(\S+)/)
+      const callMatch = systemMessage.content.match(/call_id:\s*(\S+)/)
+      const phoneMatch = systemMessage.content.match(/customer_phone:\s*(\S+)/)
+
+      if (tenantMatch) tenantId = tenantMatch[1]
+      if (callMatch) callId = callMatch[1]
+      if (phoneMatch) customerPhone = phoneMatch[1]
     }
-
-    const tenantId = metadata.tenant_id
-    const callId = call.id
-    const customerPhone = call.customer?.number
 
     if (!tenantId) {
+      console.error('[VAPI LLM] Missing tenant_id in request')
       return NextResponse.json(
-        { error: 'Missing tenant_id in metadata' },
+        formatOpenAIErrorResponse('Configuration error: Missing tenant identifier'),
         { status: 400 }
       )
     }
+
+    if (!callId) {
+      console.error('[VAPI LLM] Missing call_id in request')
+      return NextResponse.json(
+        formatOpenAIErrorResponse('Configuration error: Missing call identifier'),
+        { status: 400 }
+      )
+    }
+
+    // Extract the user's message from the messages array
+    const userMessageContent = extractUserMessage(body.messages)
+
+    if (!userMessageContent) {
+      console.error('[VAPI LLM] No user message found in request')
+      return NextResponse.json(
+        formatOpenAIErrorResponse('No message provided'),
+        { status: 400 }
+      )
+    }
+
+    console.log('[VAPI LLM] Processing message:', userMessageContent)
+    console.log('[VAPI LLM] Tenant ID:', tenantId)
+    console.log('[VAPI LLM] Call ID:', callId)
 
     // Load or create conversation state from database
     let conversationRecord = await prisma.conversations.findUnique({
@@ -93,7 +128,7 @@ export async function POST(req: NextRequest) {
       // Add new user message
       state.messages.push({
         role: 'user',
-        content: userMessage.content,
+        content: userMessageContent,
       })
     } else {
       // Create new conversation
@@ -101,12 +136,12 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: 'user',
-            content: userMessage.content,
+            content: userMessageContent,
           },
         ],
         tenant_id: tenantId,
         call_id: callId,
-        customer_phone: customerPhone,
+        customer_phone: customerPhone || undefined,
         stage: 'greeting',
         attempts: {
           address_extraction: 0,
@@ -136,8 +171,9 @@ export async function POST(req: NextRequest) {
       .pop()
 
     if (!lastAssistantMessage) {
+      console.error('[VAPI LLM] No assistant message generated')
       return NextResponse.json(
-        { error: 'No response generated' },
+        formatOpenAIErrorResponse('No response generated'),
         { status: 500 }
       )
     }
@@ -163,23 +199,23 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Return response in VAPI format
-    return NextResponse.json({
-      message: {
-        role: 'assistant',
-        content: lastAssistantMessage.content,
-      },
-    })
+    console.log('[VAPI LLM] Response generated:', lastAssistantMessage.content.substring(0, 100))
+
+    // Return response in OpenAI format (REQUIRED by VAPI)
+    const openAIResponse = formatOpenAIResponse(
+      lastAssistantMessage.content,
+      `chatcmpl-${callId}`
+    )
+
+    console.log('[VAPI LLM] OpenAI response format:', JSON.stringify(openAIResponse, null, 2))
+
+    return NextResponse.json(openAIResponse)
   } catch (error) {
-    console.error('VAPI LLM endpoint error:', error)
+    console.error('[VAPI LLM] Endpoint error:', error)
     return NextResponse.json(
-      {
-        message: {
-          role: 'assistant',
-          content:
-            "I'm having trouble processing your request right now. Could you please try again?",
-        },
-      },
+      formatOpenAIErrorResponse(
+        "I'm having trouble processing your request right now. Could you please try again?"
+      ),
       { status: 500 }
     )
   }
