@@ -191,43 +191,72 @@ Return ONLY valid JSON with this structure:
 
     if (intent.specific_datetime) {
       // Parse the user's requested time (e.g., "2024-01-12 15:00" = 3 PM)
-      // Extract hour from the user's request
+      // Extract hour and date from the user's request
       const requestedTimeStr = intent.specific_datetime.trim()
       let requestedHour: number | null = null
       let requestedDate: string | null = null
 
-      // Try to parse various formats: "2024-01-12 15:00", "15:00", "3 PM", etc.
-      const hourMatch = requestedTimeStr.match(/(\d{1,2}):?(\d{2})?/)
-      if (hourMatch) {
-        requestedHour = parseInt(hourMatch[1])
-        console.log('[Booking Node] Extracted hour from intent:', requestedHour)
-      }
-
-      // Extract date if present (YYYY-MM-DD format)
+      // Extract date first (YYYY-MM-DD format)
       const dateMatch = requestedTimeStr.match(/(\d{4})-(\d{2})-(\d{2})/)
       if (dateMatch) {
         requestedDate = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`
         console.log('[Booking Node] Extracted date from intent:', requestedDate)
       }
 
-      // Find slot matching the hour in the tenant's timezone
+      // Extract hour - MUST come after date and have time separator
+      // Match patterns like "15:00", " 15:00", "15:30" but NOT "2024" or "01-30"
+      // Look for hour after a space or at the end of date string
+      const hourMatch = requestedTimeStr.match(/[T\s](\d{1,2}):(\d{2})/)
+      if (hourMatch) {
+        requestedHour = parseInt(hourMatch[1])
+        console.log('[Booking Node] Extracted hour from intent:', requestedHour)
+      } else {
+        // If no time specified, user only gave a date
+        // We should ask for time or default to first available on that date
+        console.log('[Booking Node] No time specified in intent, only date:', requestedDate)
+      }
+
+      // Find slot matching the date and/or hour in the tenant's timezone
       if (requestedHour !== null) {
+        // User specified both date and time - match both
         const matchingSlot = availableSlots.available_slots.find((slot) => {
           const utcDate = new Date(slot.start)
           const zonedDate = toZonedTime(utcDate, tenantTimezone)
           const slotHour = zonedDate.getHours()
+          const slotDate = format(zonedDate, 'yyyy-MM-dd', { timeZone: tenantTimezone })
 
-          console.log(`[Booking Node] Checking slot: ${slot.start} -> ${zonedDate.toISOString()} -> hour ${slotHour} in ${tenantTimezone}`)
+          console.log(`[Booking Node] Checking slot: ${slot.start} -> ${slotDate} ${slotHour}:00 in ${tenantTimezone}`)
 
-          // Match if the hour matches in the tenant's timezone
-          return slotHour === requestedHour
+          // Match by hour (and optionally date if specified)
+          const hourMatches = slotHour === requestedHour
+          const dateMatches = !requestedDate || slotDate === requestedDate
+
+          return hourMatches && dateMatches
         })
 
         if (matchingSlot) {
           selectedSlot = matchingSlot
-          console.log('[Booking Node] Selected slot by matching hour:', selectedSlot.start)
+          console.log('[Booking Node] Selected slot by matching hour and date:', selectedSlot.start)
         } else {
-          console.warn('[Booking Node] No slot found matching requested hour', requestedHour, '- using first available')
+          console.warn('[Booking Node] No slot found matching hour', requestedHour, 'and date', requestedDate, '- using first available')
+        }
+      } else if (requestedDate) {
+        // User only specified date, no time - use first available slot on that date
+        const matchingSlot = availableSlots.available_slots.find((slot) => {
+          const utcDate = new Date(slot.start)
+          const zonedDate = toZonedTime(utcDate, tenantTimezone)
+          const slotDate = format(zonedDate, 'yyyy-MM-dd', { timeZone: tenantTimezone })
+
+          console.log(`[Booking Node] Checking slot for date match: ${slot.start} -> ${slotDate} in ${tenantTimezone}`)
+
+          return slotDate === requestedDate
+        })
+
+        if (matchingSlot) {
+          selectedSlot = matchingSlot
+          console.log('[Booking Node] Selected first available slot on requested date:', selectedSlot.start)
+        } else {
+          console.warn('[Booking Node] No slot found on date', requestedDate, '- using first available overall')
         }
       }
     } else if (intent.time_preference === 'morning') {
