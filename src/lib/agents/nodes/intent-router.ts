@@ -146,7 +146,18 @@ Be conversational and helpful. Don't list everything - just answer their specifi
 
   try {
     const response = await llm.invoke(faqPrompt)
-    const answer = (response.content as string).trim()
+    let answer = (response.content as string).trim()
+
+    // Personalize with customer name if available
+    if (state.customer_name) {
+      // Add name to the call-to-action if it doesn't already include it
+      if (!answer.includes(state.customer_name)) {
+        answer = answer.replace(
+          /Would you like a quote for your lawn\?/i,
+          `Would you like a quote for your lawn, ${state.customer_name}?`
+        )
+      }
+    }
 
     return {
       messages: [
@@ -159,12 +170,16 @@ Be conversational and helpful. Don't list everything - just answer their specifi
     }
   } catch (error) {
     console.error('FAQ generation error:', error)
-    // Fallback response
+    // Fallback response with personalization
+    const fallbackMessage = state.customer_name
+      ? `We offer lawn mowing, edging, and blowing services. Would you like a quote for your property, ${state.customer_name}?`
+      : `We offer lawn mowing, edging, and blowing services. Would you like a quote for your property?`
+
     return {
       messages: [
         {
           role: 'assistant',
-          content: `We offer lawn mowing, edging, and blowing services. Would you like a quote for your property?`,
+          content: fallbackMessage,
         },
       ],
       stage: 'WAITING_FOR_ADDRESS',
