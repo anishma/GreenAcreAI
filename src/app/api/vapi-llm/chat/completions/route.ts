@@ -119,9 +119,13 @@ export async function POST(req: NextRequest) {
 
     if (conversationRecord) {
       // Restore existing conversation
+      // CRITICAL: Ensure messages array is always valid (not null/undefined)
+      const existingMessages = Array.isArray(conversationRecord.conversation_history)
+        ? conversationRecord.conversation_history as any[]
+        : []
+
       state = {
-        messages:
-          (conversationRecord.conversation_history as any[]) || [],
+        messages: existingMessages,
         tenant_id: conversationRecord.tenant_id,
         call_id: conversationRecord.call_id,
         customer_phone: conversationRecord.customer_phone || undefined,
@@ -150,6 +154,11 @@ export async function POST(req: NextRequest) {
         role: 'user',
         content: userMessageContent,
       })
+
+      console.log('[VAPI LLM] Restored conversation state:')
+      console.log('  - Message count:', state.messages.length)
+      console.log('  - Current stage:', state.stage)
+      console.log('  - Customer name:', state.customer_name || 'not set')
     } else {
       // Create new conversation
       state = {
@@ -169,6 +178,8 @@ export async function POST(req: NextRequest) {
         },
       }
 
+      console.log('[VAPI LLM] Created new conversation state')
+
       // Create conversation record
       await prisma.conversations.create({
         data: {
@@ -182,16 +193,61 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Run the conversation graph
-    const result = await conversationGraph.invoke(state)
+    // Validate state before invoking graph
+    console.log('[VAPI LLM] State validation before graph invocation:')
+    console.log('  - messages is array:', Array.isArray(state.messages))
+    console.log('  - messages length:', state.messages.length)
+    console.log('  - tenant_id:', state.tenant_id)
+    console.log('  - call_id:', state.call_id)
+    console.log('  - stage:', state.stage)
+
+    if (!Array.isArray(state.messages) || state.messages.length === 0) {
+      throw new Error('Invalid state: messages must be a non-empty array')
+    }
+
+    // Run the conversation graph with error handling
+    let result: ConversationState
+    try {
+      console.log('[VAPI LLM] Invoking conversation graph...')
+      result = await conversationGraph.invoke(state, {
+        recursionLimit: 25,
+      })
+      console.log('[VAPI LLM] Graph invocation completed successfully')
+    } catch (graphError: any) {
+      console.error('[VAPI LLM] Graph invocation error:', {
+        name: graphError?.name,
+        message: graphError?.message,
+        stack: graphError?.stack,
+        state: {
+          messages: state.messages.length,
+          stage: state.stage,
+        },
+      })
+      throw new Error(`Graph execution failed: ${graphError?.message || 'Unknown error'}`)
+    }
+
+    // Validate result from graph
+    console.log('[VAPI LLM] Graph result validation:')
+    console.log('  - Result messages:', result.messages?.length || 0)
+    console.log('  - Result stage:', result.stage)
+
+    if (!result.messages || !Array.isArray(result.messages)) {
+      console.error('[VAPI LLM] Graph returned invalid messages array')
+      return NextResponse.json(
+        formatOpenAIErrorResponse('Invalid response from conversation graph'),
+        { status: 500 }
+      )
+    }
 
     // Get the last assistant message
-    const lastAssistantMessage = result.messages
-      .filter((m: any) => m.role === 'assistant')
-      .pop()
+    const assistantMessages = result.messages.filter((m: any) => m.role === 'assistant')
+    const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
+
+    console.log('[VAPI LLM] Assistant messages found:', assistantMessages.length)
 
     if (!lastAssistantMessage) {
       console.error('[VAPI LLM] No assistant message generated')
+      console.error('[VAPI LLM] All messages:', JSON.stringify(result.messages, null, 2))
       return NextResponse.json(
         formatOpenAIErrorResponse('No response generated'),
         { status: 500 }

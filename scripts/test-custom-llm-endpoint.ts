@@ -1,7 +1,12 @@
 /**
  * Test Script for VAPI Custom LLM Endpoint
  *
- * Tests the OpenAI-compatible custom LLM endpoint locally before production deployment.
+ * Tests the OpenAI-compatible custom LLM endpoint to verify EmptyChannelError fix.
+ *
+ * This tests:
+ * 1. State initialization with valid messages array
+ * 2. Graph invocation doesn't throw EmptyChannelError
+ * 3. Response generation works correctly
  *
  * Usage:
  *   npm run dev (in another terminal)
@@ -12,6 +17,8 @@ import { prisma } from '../src/lib/prisma'
 
 const ENDPOINT_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const CUSTOM_LLM_URL = `${ENDPOINT_URL}/api/vapi-llm/chat/completions`
+
+console.log(`🎯 Testing VAPI endpoint at: ${CUSTOM_LLM_URL}`)
 
 interface TestResult {
   name: string
