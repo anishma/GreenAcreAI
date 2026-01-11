@@ -29,6 +29,27 @@ const faqLLM = new ChatOpenAI({
 export async function intentRouterNode(
   state: ConversationState
 ): Promise<Partial<ConversationState>> {
+  // CRITICAL FIX: Only run intent classification for initial messages or intent_routing stage
+  // If we're already in a specific collection stage (WAITING_FOR_ADDRESS, WAITING_FOR_FREQUENCY, etc.),
+  // skip intent routing and continue with that stage's logic
+  if (state.stage === 'WAITING_FOR_ADDRESS') {
+    return { stage: 'address_collection' as const }
+  }
+  if (state.stage === 'WAITING_FOR_FREQUENCY') {
+    return { stage: 'frequency_collection' as const }
+  }
+  if (state.stage === 'WAITING_FOR_BOOKING_DECISION') {
+    return { stage: 'booking' as const }
+  }
+  // If we have customer_address but no frequency, go to frequency collection
+  if (state.customer_address && !state.preferred_frequency) {
+    return { stage: 'frequency_collection' as const }
+  }
+  // If we have both address and frequency, proceed to property lookup
+  if (state.customer_address && state.preferred_frequency) {
+    return { stage: 'property_lookup' as const }
+  }
+
   const lastUserMessage = state.messages
     .filter((m) => m.role === 'user')
     .pop()
