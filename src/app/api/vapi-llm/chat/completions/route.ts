@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     const body: OpenAIChatCompletionRequest = await req.json()
 
-    console.log('[VAPI LLM] Request body:', JSON.stringify(body, null, 2))
+    //console.log('[VAPI LLM] Request body:', JSON.stringify(body, null, 2))
 
     // VAPI sends OpenAI-compatible format:
     // {
@@ -216,8 +216,6 @@ export async function POST(req: NextRequest) {
     console.log('[VAPI LLM] State validation before graph invocation:')
     console.log('  - messages is array:', Array.isArray(state.messages))
     console.log('  - messages length:', state.messages.length)
-    console.log('  - tenant_id:', state.tenant_id)
-    console.log('  - call_id:', state.call_id)
     console.log('  - stage:', state.stage)
 
     if (!Array.isArray(state.messages) || state.messages.length === 0) {
@@ -228,10 +226,22 @@ export async function POST(req: NextRequest) {
     let result: ConversationState
     try {
       console.log('[VAPI LLM] Invoking conversation graph...')
+      console.log('[VAPI LLM] About to call conversationGraph.invoke with state:', {
+        messagesLength: state.messages.length,
+        stage: state.stage,
+        tenant_id: state.tenant_id,
+        call_id: state.call_id
+      })
+
       result = await conversationGraph.invoke(state, {
         recursionLimit: 25,
       })
+
       console.log('[VAPI LLM] Graph invocation completed successfully')
+      console.log('[VAPI LLM] Result state:', {
+        messagesLength: result.messages?.length || 0,
+        stage: result.stage
+      })
     } catch (graphError: any) {
       console.error('[VAPI LLM] Graph invocation error:', {
         name: graphError?.name,
@@ -242,6 +252,7 @@ export async function POST(req: NextRequest) {
           stage: state.stage,
         },
       })
+      console.error('[VAPI LLM] Full error object:', graphError)
       throw new Error(`Graph execution failed: ${graphError?.message || 'Unknown error'}`)
     }
 

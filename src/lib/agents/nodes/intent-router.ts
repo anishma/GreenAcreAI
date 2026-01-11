@@ -20,13 +20,26 @@ const llm = new ChatOpenAI({
 export async function intentRouterNode(
   state: ConversationState
 ): Promise<Partial<ConversationState>> {
+  console.log('[INTENT ROUTER NODE] ===== ENTRY =====')
+  console.log('[INTENT ROUTER NODE] Entry - state:', {
+    stage: state.stage,
+    messageCount: state.messages.length,
+    messagesArray: Array.isArray(state.messages),
+    tenant_id: state.tenant_id,
+    call_id: state.call_id
+  })
+  console.log('[INTENT ROUTER NODE] All messages:', JSON.stringify(state.messages, null, 2))
+
   const lastUserMessage = state.messages
     .filter((m) => m.role === 'user')
     .pop()
 
+  console.log('[INTENT ROUTER NODE] Last user message:', lastUserMessage?.content || 'none')
+
   if (!lastUserMessage) {
     // No user message - shouldn't happen, but safe fallback
-    return { stage: 'address_collection' } // ✅ FIXED: Removed messages: []
+    console.log('[INTENT ROUTER NODE] No user message found, returning address_collection stage')
+    return { stage: 'address_collection' }
   }
 
   // Get tenant info for FAQ responses
@@ -73,12 +86,16 @@ Return ONLY valid JSON:
 }`
 
   try {
+    console.log('[INTENT ROUTER NODE] Invoking LLM for intent classification...')
+
     // ✅ OPTION A: Use LangChain message classes
     const response = await llm.invoke([
       new SystemMessage(`${systemPrompt}\n\n${taskInstructions}`),
       new HumanMessage(lastUserMessage.content) // Actual user message
     ])
     let jsonString = (response.content as string).trim()
+
+    console.log('[INTENT ROUTER NODE] LLM response:', jsonString)
 
     // Clean markdown
     if (jsonString.startsWith('```json')) {
@@ -88,20 +105,28 @@ Return ONLY valid JSON:
     }
 
     const { intent, confidence: _confidence } = JSON.parse(jsonString)
+    console.log('[INTENT ROUTER NODE] Parsed intent:', intent, 'confidence:', _confidence)
 
     // Handle each intent type
     switch (intent) {
       case 'general_question':
+        console.log('[INTENT ROUTER NODE] Handling general_question...')
         return await handleGeneralQuestion(state, lastUserMessage.content, tenant)
 
       case 'introduction':
+        console.log('[INTENT ROUTER NODE] Handling introduction...')
         return await handleIntroduction(state, lastUserMessage.content)
 
       case 'booking_intent':
+        console.log('[INTENT ROUTER NODE] Handling booking_intent, routing to address_collection')
         // Proceed to address extraction
-        return { stage: 'address_collection' } // ✅ FIXED: Removed messages: []
+        const bookingResult = { stage: 'address_collection' as const }
+        console.log('[INTENT ROUTER NODE] Returning booking result:', JSON.stringify(bookingResult))
+        console.log('[INTENT ROUTER NODE] Result has messages property:', 'messages' in bookingResult)
+        return bookingResult
 
       case 'unclear':
+        console.log('[INTENT ROUTER NODE] Handling unclear intent')
         // Be helpful and ask an open-ended question
         return {
           messages: [
@@ -116,13 +141,14 @@ Return ONLY valid JSON:
         }
 
       default:
+        console.log('[INTENT ROUTER NODE] Unknown intent, defaulting to address_collection')
         // Fallback
-        return { stage: 'address_collection' } // ✅ FIXED: Removed messages: []
+        return { stage: 'address_collection' }
     }
   } catch (error) {
-    console.error('Intent classification error:', error)
+    console.error('[INTENT ROUTER NODE] Intent classification error:', error)
     // Fallback to address collection on error
-    return { stage: 'address_collection' } // ✅ FIXED: Removed messages: []
+    return { stage: 'address_collection' }
   }
 }
 
@@ -134,6 +160,7 @@ async function handleGeneralQuestion(
   question: string,
   tenant: any
 ): Promise<Partial<ConversationState>> {
+  console.log('[INTENT ROUTER - handleGeneralQuestion] ===== ENTRY =====')
   // Option A: Use message array format
   const systemPrompt = state.system_context ||
     'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
@@ -170,15 +197,19 @@ Be conversational and helpful. Don't list everything - just answer their specifi
       }
     }
 
-    return {
+    const result = {
       messages: [
         {
-          role: 'assistant',
+          role: 'assistant' as const,
           content: answer,
         },
       ],
-      stage: 'WAITING_FOR_ADDRESS', // Wait for them to respond
+      stage: 'WAITING_FOR_ADDRESS' as const, // Wait for them to respond
     }
+    console.log('[INTENT ROUTER - handleGeneralQuestion] Returning result:', JSON.stringify(result))
+    console.log('[INTENT ROUTER - handleGeneralQuestion] Result.messages is array:', Array.isArray(result.messages))
+    console.log('[INTENT ROUTER - handleGeneralQuestion] Result.messages length:', result.messages.length)
+    return result
   } catch (error) {
     console.error('FAQ generation error:', error)
     // Fallback response with personalization
@@ -205,6 +236,7 @@ async function handleIntroduction(
   state: ConversationState,
   message: string
 ): Promise<Partial<ConversationState>> {
+  console.log('[INTENT ROUTER - handleIntroduction] ===== ENTRY =====')
   // Option A: Use message array format
   const systemPrompt = state.system_context ||
     'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
@@ -239,18 +271,22 @@ Examples:
     const extracted = JSON.parse(jsonString)
     const customerName = extracted.name || state.customer_name
 
-    return {
+    const result = {
       customer_name: customerName,
       messages: [
         {
-          role: 'assistant',
+          role: 'assistant' as const,
           content: customerName
             ? `Nice to meet you, ${customerName}! Are you looking for a lawn mowing quote?`
             : `How can I help you today?`,
         },
       ],
-      stage: 'WAITING_FOR_ADDRESS', // Wait for their response
+      stage: 'WAITING_FOR_ADDRESS' as const, // Wait for their response
     }
+    console.log('[INTENT ROUTER - handleIntroduction] Returning result:', JSON.stringify(result))
+    console.log('[INTENT ROUTER - handleIntroduction] Result.messages is array:', Array.isArray(result.messages))
+    console.log('[INTENT ROUTER - handleIntroduction] Result.messages length:', result.messages.length)
+    return result
   } catch (error) {
     console.error('Name extraction error:', error)
     return {
