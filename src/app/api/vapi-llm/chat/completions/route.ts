@@ -38,15 +38,20 @@ export async function POST(req: NextRequest) {
     // VAPI also includes metadata in headers or custom fields
     // We'll extract tenant_id and call_id from custom metadata
 
-    // Extract custom VAPI metadata (if passed in headers or body)
+    // Extract custom VAPI metadata from multiple sources
+    // Priority: 1. Request body (body.call), 2. Headers, 3. System message
     const vapiCallId = req.headers.get('x-vapi-call-id')
     const vapiCustomerId = req.headers.get('x-vapi-customer-number')
+
+    // VAPI may send call metadata in the request body
+    const bodyCallId = (body as any).call?.id
+    const bodyCustomerNumber = (body as any).call?.customer?.number
 
     // Fallback: Check if metadata is in the messages (system message)
     const systemMessage = body.messages.find(m => m.role === 'system')
     let tenantId: string | null = null
-    let callId: string | null = vapiCallId
-    let customerPhone: string | null = vapiCustomerId
+    let callId: string | null = bodyCallId || vapiCallId
+    let customerPhone: string | null = bodyCustomerNumber || vapiCustomerId
 
     // Try to extract from system message if present
     if (systemMessage?.content) {
@@ -55,8 +60,16 @@ export async function POST(req: NextRequest) {
       const phoneMatch = systemMessage.content.match(/customer_phone:\s*(\S+)/)
 
       if (tenantMatch) tenantId = tenantMatch[1]
-      if (callMatch) callId = callMatch[1]
-      if (phoneMatch) customerPhone = phoneMatch[1]
+
+      // Only use system message call_id if it's not a template variable
+      if (callMatch && !callMatch[1].includes('{{')) {
+        callId = callId || callMatch[1]
+      }
+
+      // Only use system message phone if it's not a template variable
+      if (phoneMatch && !phoneMatch[1].includes('{{')) {
+        customerPhone = customerPhone || phoneMatch[1]
+      }
     }
 
     if (!tenantId) {
@@ -87,8 +100,15 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('[VAPI LLM] Processing message:', userMessageContent)
-    console.log('[VAPI LLM] Tenant ID:', tenantId)
-    console.log('[VAPI LLM] Call ID:', callId)
+    console.log('[VAPI LLM] Metadata extraction:')
+    console.log('  - Tenant ID:', tenantId)
+    console.log('  - Call ID:', callId)
+    console.log('  - Customer Phone:', customerPhone)
+    console.log('  - Sources:')
+    console.log('    - body.call.id:', bodyCallId)
+    console.log('    - header x-vapi-call-id:', vapiCallId)
+    console.log('    - body.call.customer.number:', bodyCustomerNumber)
+    console.log('    - header x-vapi-customer-number:', vapiCustomerId)
 
     // Load or create conversation state from database
     let conversationRecord = await prisma.conversations.findUnique({
