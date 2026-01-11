@@ -172,18 +172,22 @@ export async function POST(req: NextRequest) {
       console.log('  - Customer name:', state.customer_name || 'not set')
     } else {
       // Create new conversation
+      // IMPORTANT: Include ALL non-system messages from VAPI (including their firstMessage if present)
+      const initialMessages = body.messages
+        .filter(m => m.role !== 'system')
+        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+
+      // Check if VAPI already sent an assistant message (firstMessage)
+      const hasAssistantMessage = initialMessages.some(m => m.role === 'assistant')
+
       state = {
-        messages: [
-          {
-            role: 'user',
-            content: userMessageContent,
-          },
-        ],
+        messages: initialMessages,
         system_context: systemPrompt, // Store system prompt for nodes to use
         tenant_id: tenantId,
         call_id: callId,
         customer_phone: customerPhone || undefined,
-        stage: 'greeting',
+        // If VAPI already greeted, skip greeting node and go to intent routing
+        stage: hasAssistantMessage ? 'intent_routing' : 'greeting',
         attempts: {
           address_extraction: 0,
           property_lookup: 0,
@@ -191,6 +195,9 @@ export async function POST(req: NextRequest) {
       }
 
       console.log('[VAPI LLM] Created new conversation state')
+      console.log('  - Initial messages from VAPI:', initialMessages.length)
+      console.log('  - Has assistant message:', hasAssistantMessage)
+      console.log('  - Starting stage:', state.stage)
 
       // Create conversation record
       await prisma.conversations.create({
