@@ -33,6 +33,23 @@ function getMcpClient() {
 export async function bookingNode(
   state: ConversationState
 ): Promise<Partial<ConversationState>> {
+  console.log('[Booking Node] Called with stage:', state.stage)
+  console.log('[Booking Node] Existing booking:', state.booking)
+
+  // CRITICAL: Prevent duplicate bookings
+  // If a booking already exists in state, don't create another one
+  if (state.booking) {
+    console.log('[Booking Node] Booking already exists, skipping to closing')
+    return {
+      stage: 'closing',
+      messages: [{
+          role: 'assistant',
+          content: 'Your appointment has already been scheduled.',
+        },
+      ],
+    }
+  }
+
   const lastUserMessage = state.messages
     .filter((m) => m.role === 'user')
     .pop()
@@ -88,6 +105,9 @@ Return ONLY valid JSON with this structure:
     }
 
     const intent = JSON.parse(jsonString)
+
+    console.log('[Booking Node] Intent detected:', JSON.stringify(intent))
+    console.log('[Booking Node] User message:', lastUserMessage.content)
 
     // User declined booking
     if (intent.declined || !intent.wants_to_book) {
@@ -164,6 +184,11 @@ Return ONLY valid JSON with this structure:
     // User has provided time preference or already chose - find matching slot
     let selectedSlot = availableSlots.available_slots[0]
 
+    console.log('[Booking Node] Selecting slot from', availableSlots.available_slots.length, 'available slots')
+    console.log('[Booking Node] Intent specific_datetime:', intent.specific_datetime)
+    console.log('[Booking Node] Intent time_preference:', intent.time_preference)
+    console.log('[Booking Node] State chosen_time:', state.chosen_time)
+
     if (intent.specific_datetime) {
       // Try to find slot matching specific datetime
       const preferredSlot = availableSlots.available_slots.find(
@@ -171,6 +196,7 @@ Return ONLY valid JSON with this structure:
       )
       if (preferredSlot) {
         selectedSlot = preferredSlot
+        console.log('[Booking Node] Selected slot by specific datetime:', selectedSlot.start)
       }
     } else if (intent.time_preference === 'morning') {
       // Find morning slot (before noon)
@@ -180,6 +206,7 @@ Return ONLY valid JSON with this structure:
       })
       if (morningSlot) {
         selectedSlot = morningSlot
+        console.log('[Booking Node] Selected morning slot:', selectedSlot.start)
       }
     } else if (intent.time_preference === 'afternoon') {
       // Find afternoon slot (after noon)
@@ -189,6 +216,7 @@ Return ONLY valid JSON with this structure:
       })
       if (afternoonSlot) {
         selectedSlot = afternoonSlot
+        console.log('[Booking Node] Selected afternoon slot:', selectedSlot.start)
       }
     } else if (state.chosen_time) {
       // Find the slot matching the chosen time from previous interaction
@@ -197,8 +225,12 @@ Return ONLY valid JSON with this structure:
       )
       if (chosenSlot) {
         selectedSlot = chosenSlot
+        console.log('[Booking Node] Selected slot from state.chosen_time:', selectedSlot.start)
       }
     }
+
+    console.log('[Booking Node] Final selected slot:', selectedSlot.start)
+    console.log('[Booking Node] Booking appointment now...')
 
     // Book the appointment
     const booking = await mcpClient.callTool<{
@@ -239,8 +271,36 @@ Return ONLY valid JSON with this structure:
       if (!callRecord) {
         console.warn(`[Booking] Call record not found for vapi_call_id: ${state.call_id}`)
       }
+
+      // CRITICAL: Check if booking already exists for this call
+      // This prevents duplicate bookings if the node is called multiple times
+      if (databaseCallId) {
+        const existingBooking = await prisma.bookings.findFirst({
+          where: { call_id: databaseCallId },
+          select: { id: true, scheduled_at: true }
+        })
+
+        if (existingBooking) {
+          console.warn(`[Booking] Booking already exists for call ${databaseCallId}, skipping duplicate`)
+          // Return the existing booking info
+          return {
+            booking: {
+              scheduled_at: existingBooking.scheduled_at.toISOString(),
+              calendar_event_id: booking.event_id,
+            },
+            chosen_time: existingBooking.scheduled_at.toISOString(),
+            stage: 'closing',
+            messages: [{
+                role: 'assistant',
+                content: 'Your appointment has already been scheduled.',
+              },
+            ],
+          }
+        }
+      }
     }
 
+    console.log('[Booking Node] Creating booking record in database...')
     const bookingRecord = await prisma.bookings.create({
       data: {
         tenant_id: state.tenant_id,
