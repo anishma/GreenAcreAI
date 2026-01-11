@@ -107,7 +107,18 @@ export async function POST(req: NextRequest) {
  * Creates a new call record in database
  */
 async function handleCallStarted(event: CallStartedEvent) {
+  // Log the full event structure for debugging
+  console.log(`[VAPI Webhook] call-start event structure:`, JSON.stringify(event, null, 2).substring(0, 500))
+
   const { call } = event
+
+  // Defensive check: Ensure call object exists
+  if (!call || !call.id) {
+    console.error(`[VAPI Webhook] Invalid call-start: missing call data`)
+    console.error(`[VAPI Webhook] Event keys:`, Object.keys(event))
+    console.error(`[VAPI Webhook] Call value:`, call)
+    return
+  }
 
   console.log(`[VAPI Webhook] Call started: ${call.id}`)
 
@@ -150,7 +161,18 @@ async function handleCallStarted(event: CallStartedEvent) {
  * Updates call record with final data, transcript, recording, and cost
  */
 async function handleCallEnded(event: CallEndedEvent) {
+  // Log the full event structure for debugging
+  console.log(`[VAPI Webhook] end-of-call-report event structure:`, JSON.stringify(event, null, 2).substring(0, 500))
+
   const { call } = event
+
+  // Defensive check: Ensure call object exists
+  if (!call || !call.id) {
+    console.error(`[VAPI Webhook] Invalid end-of-call-report: missing call data`)
+    console.error(`[VAPI Webhook] Event keys:`, Object.keys(event))
+    console.error(`[VAPI Webhook] Call value:`, call)
+    return
+  }
 
   console.log(`[VAPI Webhook] Call ended: ${call.id}`)
   console.log(`[VAPI Webhook] End reason: ${call.endedReason}`)
