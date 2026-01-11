@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import fetch from 'node-fetch'
+// Node.js 18+ has built-in fetch, no need for node-fetch import
 
 const API_URL = 'http://localhost:3004/api/vapi-llm/chat/completions'
 
