@@ -51,8 +51,13 @@ export async function POST(req: NextRequest) {
 
     // Route to appropriate handler based on event type
     switch (eventType) {
-      case 'call-start':
+      case 'assistant.started':
+        // Assistant started - treat this as call-start (first event we receive)
         await handleCallStarted(event as CallStartedEvent)
+        break
+
+      case 'status-update':
+        await handleStatusUpdate(event)
         break
 
       case 'end-of-call-report':
@@ -61,15 +66,6 @@ export async function POST(req: NextRequest) {
 
       case 'transcript':
         await handleTranscriptUpdate(event as TranscriptUpdateEvent)
-        break
-
-      case 'status-update':
-        await handleStatusUpdate(event)
-        break
-
-      case 'assistant.started':
-        // Assistant started - this might be when we should create the call record
-        console.log(`[VAPI Webhook] Assistant started event received`)
         break
 
       case 'speech-update':
@@ -110,7 +106,9 @@ export async function POST(req: NextRequest) {
  * Creates a new call record in database
  */
 async function handleCallStarted(event: CallStartedEvent) {
-  const { call } = event
+  const call = (event as any).call
+  const phoneNumber = (event as any).phoneNumber
+  const customer = (event as any).customer
 
   // Defensive check: Ensure call object exists
   if (!call || !call.id) {
@@ -121,19 +119,19 @@ async function handleCallStarted(event: CallStartedEvent) {
 
   console.log(`[VAPI Webhook] Call started: ${call.id}`)
 
-  // Find tenant by phone number
+  // Find tenant by phone number (VAPI phone number, not customer number)
   const tenant = await prisma.tenants.findFirst({
     where: {
       OR: [
-        { vapi_phone_number_id: call.phoneNumber?.id },
-        { phone_number: call.phoneNumber?.number },
+        { vapi_phone_number_id: phoneNumber?.id },
+        { phone_number: phoneNumber?.number },
       ],
     },
   })
 
   if (!tenant) {
     console.error(
-      `[VAPI Webhook] No tenant found for phone number: ${call.phoneNumber?.number}`
+      `[VAPI Webhook] No tenant found for phone number: ${phoneNumber?.number} (ID: ${phoneNumber?.id})`
     )
     return
   }
@@ -143,10 +141,10 @@ async function handleCallStarted(event: CallStartedEvent) {
     data: {
       tenant_id: tenant.id,
       vapi_call_id: call.id,
-      phone_number_called: call.phoneNumber?.number,
-      caller_phone_number: call.customer?.number,
-      started_at: call.startedAt ? new Date(call.startedAt) : new Date(),
-      status: call.status,
+      phone_number_called: phoneNumber?.number,
+      caller_phone_number: customer?.number,
+      started_at: call.createdAt ? new Date(call.createdAt) : new Date(),
+      status: call.status || 'in-progress',
       metadata: call as any,
       updated_at: new Date(),
     },
@@ -160,7 +158,16 @@ async function handleCallStarted(event: CallStartedEvent) {
  * Updates call record with final data, transcript, recording, and cost
  */
 async function handleCallEnded(event: CallEndedEvent) {
-  const { call } = event
+  const call = (event as any).call
+  const endedReason = (event as any).endedReason
+  const startedAt = (event as any).startedAt
+  const endedAt = (event as any).endedAt
+  const transcript = (event as any).transcript
+  const messages = (event as any).messages
+  const summary = (event as any).summary || (event as any).analysis?.summary
+  const recordingUrl = (event as any).recordingUrl
+  const cost = (event as any).cost
+  const costBreakdown = (event as any).costBreakdown
 
   // Defensive check: Ensure call object exists
   if (!call || !call.id) {
@@ -170,9 +177,9 @@ async function handleCallEnded(event: CallEndedEvent) {
   }
 
   console.log(`[VAPI Webhook] Call ended: ${call.id}`)
-  console.log(`[VAPI Webhook] End reason: ${call.endedReason}`)
-  console.log(`[VAPI Webhook] Duration: ${call.startedAt && call.endedAt ?
-    Math.round((new Date(call.endedAt).getTime() - new Date(call.startedAt).getTime()) / 1000) : 'unknown'} seconds`)
+  console.log(`[VAPI Webhook] End reason: ${endedReason}`)
+  console.log(`[VAPI Webhook] Duration: ${startedAt && endedAt ?
+    Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 1000) : 'unknown'} seconds`)
 
   // Find existing call record
   const existingCall = await prisma.calls.findFirst({
@@ -186,9 +193,9 @@ async function handleCallEnded(event: CallEndedEvent) {
   }
 
   // Calculate duration
-  const durationSeconds = call.startedAt && call.endedAt
+  const durationSeconds = startedAt && endedAt
     ? Math.round(
-        (new Date(call.endedAt).getTime() - new Date(call.startedAt).getTime()) / 1000
+        (new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 1000
       )
     : null
 
@@ -198,19 +205,19 @@ async function handleCallEnded(event: CallEndedEvent) {
   let bookingMade = false
   let leadCaptured = false
 
-  if (call.transcript) {
+  if (transcript) {
     // Check for booking indicators
     if (
-      call.transcript.toLowerCase().includes('scheduled') ||
-      call.transcript.toLowerCase().includes('appointment') ||
-      call.transcript.toLowerCase().includes("you're all set")
+      transcript.toLowerCase().includes('scheduled') ||
+      transcript.toLowerCase().includes('appointment') ||
+      transcript.toLowerCase().includes("you're all set")
     ) {
       bookingMade = true
       outcome = 'booking_made'
     }
 
     // Extract quote if mentioned
-    const quoteMatch = call.transcript.match(/\$(\d+(?:\.\d{2})?)/g)
+    const quoteMatch = transcript.match(/\$(\d+(?:\.\d{2})?)/g)
     if (quoteMatch && quoteMatch.length > 0) {
       leadCaptured = true
       // Get the last mentioned price (likely the final quote)
@@ -223,7 +230,7 @@ async function handleCallEnded(event: CallEndedEvent) {
 
     // Check for negative outcomes
     if (
-      call.endedReason === 'customer-ended-call' &&
+      endedReason === 'customer-ended-call' &&
       !bookingMade &&
       !leadCaptured
     ) {
@@ -232,7 +239,7 @@ async function handleCallEnded(event: CallEndedEvent) {
   }
 
   // If ended due to error
-  if (call.endedReason?.includes('error')) {
+  if (endedReason?.includes('error')) {
     outcome = 'error'
   }
 
@@ -240,20 +247,20 @@ async function handleCallEnded(event: CallEndedEvent) {
   await prisma.calls.update({
     where: { id: existingCall.id },
     data: {
-      ended_at: call.endedAt ? new Date(call.endedAt) : new Date(),
+      ended_at: endedAt ? new Date(endedAt) : new Date(),
       duration_seconds: durationSeconds,
       status: 'ended',
-      end_reason: call.endedReason,
-      transcript: (call.messages as any) || undefined,
-      transcript_text: call.transcript,
-      summary: call.summary,
+      end_reason: endedReason,
+      transcript: messages || undefined,
+      transcript_text: transcript,
+      summary,
       outcome,
       quote_amount: quoteAmount,
       booking_made: bookingMade,
       lead_captured: leadCaptured,
-      recording_url: call.recordingUrl,
-      cost_total: call.cost,
-      cost_breakdown: call.costBreakdown as any,
+      recording_url: recordingUrl,
+      cost_total: cost,
+      cost_breakdown: costBreakdown as any,
       metadata: call as any,
       updated_at: new Date(),
     },
@@ -265,13 +272,13 @@ async function handleCallEnded(event: CallEndedEvent) {
   console.log(`[VAPI Webhook] Lead captured: ${leadCaptured}`)
 
   // Upload recording to Supabase Storage if available
-  if (call.recordingUrl) {
+  if (recordingUrl) {
     try {
       console.log(`[VAPI Webhook] Uploading recording to Supabase`)
       const signedUrl = await uploadRecording(
         existingCall.tenant_id,
         call.id,
-        call.recordingUrl
+        recordingUrl
       )
 
       // Update call record with Supabase storage URL
@@ -402,7 +409,7 @@ async function handleTranscriptUpdate(_event: TranscriptUpdateEvent) {
 
 /**
  * Handle status update event
- * Creates call record on first status update, then updates status on subsequent ones
+ * Updates call status (call record should already exist from assistant.started)
  */
 async function handleStatusUpdate(event: VapiWebhookEvent) {
   const call = (event as any).call
@@ -415,56 +422,18 @@ async function handleStatusUpdate(event: VapiWebhookEvent) {
 
   console.log(`[VAPI Webhook] Status update for call ${call.id}: ${status}`)
 
-  // Check if call record exists
-  const existingCall = await prisma.calls.findUnique({
+  // Update call record status
+  const result = await prisma.calls.updateMany({
     where: { vapi_call_id: call.id },
+    data: {
+      status,
+      updated_at: new Date(),
+    },
   })
 
-  if (!existingCall) {
-    // First status update - create the call record
-    console.log(`[VAPI Webhook] Creating call record for ${call.id}`)
-
-    // Find tenant by phone number
-    const tenant = await prisma.tenants.findFirst({
-      where: {
-        OR: [
-          { vapi_phone_number_id: call.phoneNumber?.id },
-          { phone_number: call.phoneNumber?.number },
-        ],
-      },
-    })
-
-    if (!tenant) {
-      console.error(
-        `[VAPI Webhook] No tenant found for phone number: ${call.phoneNumber?.number}`
-      )
-      return
-    }
-
-    await prisma.calls.create({
-      data: {
-        tenant_id: tenant.id,
-        vapi_call_id: call.id,
-        phone_number_called: call.phoneNumber?.number,
-        caller_phone_number: call.customer?.number,
-        started_at: call.startedAt ? new Date(call.startedAt) : new Date(),
-        status,
-        metadata: call as any,
-        updated_at: new Date(),
-      },
-    })
-
-    console.log(`[VAPI Webhook] Call record created for tenant: ${tenant.business_name}`)
+  if (result.count === 0) {
+    console.warn(`[VAPI Webhook] No call record found for ${call.id} - it should have been created by assistant.started`)
   } else {
-    // Call record exists - just update the status
-    await prisma.calls.update({
-      where: { vapi_call_id: call.id },
-      data: {
-        status,
-        updated_at: new Date(),
-      },
-    })
-
     console.log(`[VAPI Webhook] Call ${call.id} status updated to: ${status}`)
   }
 }
