@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     const eventType = event.type || 'unknown'
 
     console.log(`[VAPI Webhook] Received event: ${eventType}`)
+    console.log(`[VAPI Webhook] Full payload:`, JSON.stringify(body, null, 2))
 
     // Verify webhook signature if available
     const signature = req.headers.get('x-vapi-signature')
@@ -64,6 +65,11 @@ export async function POST(req: NextRequest) {
 
       case 'status-update':
         await handleStatusUpdate(event)
+        break
+
+      case 'assistant.started':
+        // Assistant started - this might be when we should create the call record
+        console.log(`[VAPI Webhook] Assistant started event received`)
         break
 
       case 'speech-update':
@@ -396,23 +402,69 @@ async function handleTranscriptUpdate(_event: TranscriptUpdateEvent) {
 
 /**
  * Handle status update event
- * Updates call status (ringing, in-progress, etc.)
+ * Creates call record on first status update, then updates status on subsequent ones
  */
 async function handleStatusUpdate(event: VapiWebhookEvent) {
-  const callId = (event as any).call?.id
+  const call = (event as any).call
   const status = (event as any).status
 
-  if (!callId || !status) {
+  if (!call || !call.id || !status) {
+    console.error(`[VAPI Webhook] Invalid status-update: missing call or status`)
     return
   }
 
-  await prisma.calls.updateMany({
-    where: { vapi_call_id: callId },
-    data: {
-      status,
-      updated_at: new Date(),
-    },
+  console.log(`[VAPI Webhook] Status update for call ${call.id}: ${status}`)
+
+  // Check if call record exists
+  const existingCall = await prisma.calls.findUnique({
+    where: { vapi_call_id: call.id },
   })
 
-  console.log(`[VAPI Webhook] Call ${callId} status updated to: ${status}`)
+  if (!existingCall) {
+    // First status update - create the call record
+    console.log(`[VAPI Webhook] Creating call record for ${call.id}`)
+
+    // Find tenant by phone number
+    const tenant = await prisma.tenants.findFirst({
+      where: {
+        OR: [
+          { vapi_phone_number_id: call.phoneNumber?.id },
+          { phone_number: call.phoneNumber?.number },
+        ],
+      },
+    })
+
+    if (!tenant) {
+      console.error(
+        `[VAPI Webhook] No tenant found for phone number: ${call.phoneNumber?.number}`
+      )
+      return
+    }
+
+    await prisma.calls.create({
+      data: {
+        tenant_id: tenant.id,
+        vapi_call_id: call.id,
+        phone_number_called: call.phoneNumber?.number,
+        caller_phone_number: call.customer?.number,
+        started_at: call.startedAt ? new Date(call.startedAt) : new Date(),
+        status,
+        metadata: call as any,
+        updated_at: new Date(),
+      },
+    })
+
+    console.log(`[VAPI Webhook] Call record created for tenant: ${tenant.business_name}`)
+  } else {
+    // Call record exists - just update the status
+    await prisma.calls.update({
+      where: { vapi_call_id: call.id },
+      data: {
+        status,
+        updated_at: new Date(),
+      },
+    })
+
+    console.log(`[VAPI Webhook] Call ${call.id} status updated to: ${status}`)
+  }
 }
