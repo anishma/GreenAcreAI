@@ -1,5 +1,6 @@
 import { ConversationState } from '../state'
 import { ChatOpenAI } from '@langchain/openai'
+import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 
 const llm = new ChatOpenAI({
   modelName: 'gpt-4o-mini',
@@ -27,9 +28,13 @@ export async function addressExtractionNode(
     }
   }
 
-  // Use GPT-4 to extract address components AND customer name
-  const extractionPrompt = `Extract the address components and customer name from the following message. Return a JSON object with street, city, state (2-letter code), zip (5 digits), and name.
+  // ✅ OPTION A: Use message array format
+  const systemPrompt = state.system_context ||
+    'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
 
+  const taskInstructions = `TASK: Extract address components and customer name from user messages.
+
+Return a JSON object with street, city, state (2-letter code), zip (5 digits), and name.
 If any component is missing or unclear, return null for that field.
 
 Common patterns:
@@ -37,8 +42,6 @@ Common patterns:
 - "This is John, my address is..." -> Extract "John" as name
 - "My name is Maria..." -> Extract "Maria" as name
 - "I'm at 123 Main St" -> name is null (no name mentioned)
-
-User message: "${lastUserMessage.content}"
 
 Return ONLY valid JSON with this exact structure:
 {
@@ -50,7 +53,10 @@ Return ONLY valid JSON with this exact structure:
 }`
 
   try {
-    const response = await llm.invoke(extractionPrompt)
+    const response = await llm.invoke([
+      new SystemMessage(`${systemPrompt}\n\n${taskInstructions}`),
+      new HumanMessage(lastUserMessage.content)
+    ])
 
     // Clean up response - remove markdown code blocks if present
     let jsonString = (response.content as string).trim()
@@ -78,7 +84,7 @@ Return ONLY valid JSON with this exact structure:
           ...state.attempts,
           address_extraction: 0, // Reset counter on success
         },
-        messages: [],
+        // ✅ FIXED: Removed messages: []
       }
     }
 

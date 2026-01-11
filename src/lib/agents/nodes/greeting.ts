@@ -1,6 +1,7 @@
 import { ConversationState } from '../state'
 import { prisma } from '@/lib/prisma'
 import { ChatOpenAI } from '@langchain/openai'
+import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 
 const llm = new ChatOpenAI({
   modelName: 'gpt-4o-mini',
@@ -12,18 +13,18 @@ export async function greetingNode(state: ConversationState): Promise<Partial<Co
   const hasGreeted = state.messages.some((m) => m.role === 'assistant')
   if (hasGreeted) {
     // Already greeted - check what stage we should resume from
-    // CRITICAL: Always return messages array (even if empty) to prevent EmptyChannelError
+    // ✅ FIXED: Removed messages: [] to prevent EmptyChannelError
     if (state.stage === 'WAITING_FOR_ADDRESS') {
-      return { messages: [], stage: 'address_collection' } // Resume address extraction
+      return { stage: 'address_collection' } // Resume address extraction
     }
     if (state.stage === 'WAITING_FOR_FREQUENCY') {
-      return { messages: [], stage: 'frequency_collection' } // Resume frequency collection
+      return { stage: 'frequency_collection' } // Resume frequency collection
     }
     if (state.stage === 'WAITING_FOR_BOOKING_DECISION') {
-      return { messages: [], stage: 'booking' } // Resume booking flow
+      return { stage: 'booking' } // Resume booking flow
     }
     // Default: continue address collection
-    return { messages: [], stage: 'address_collection' }
+    return { stage: 'address_collection' }
   }
 
   const tenant = await prisma.tenants.findUnique({
@@ -37,9 +38,11 @@ export async function greetingNode(state: ConversationState): Promise<Partial<Co
   const userMessage = state.messages.filter((m) => m.role === 'user').pop()
   if (userMessage) {
     try {
-      const nameExtractionPrompt = `Extract the customer's name from this greeting message, if provided.
+      // ✅ OPTION A: Use message array format
+      const systemPrompt = state.system_context ||
+        'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
 
-User message: "${userMessage.content}"
+      const taskInstructions = `TASK: Extract the customer's name from greeting messages.
 
 Return ONLY valid JSON:
 {
@@ -52,7 +55,10 @@ Examples:
 - "My name is Jennifer" -> {"name": "Jennifer"}
 - "I need a quote" -> {"name": null}`
 
-      const response = await llm.invoke(nameExtractionPrompt)
+      const response = await llm.invoke([
+        new SystemMessage(`${systemPrompt}\n\n${taskInstructions}`),
+        new HumanMessage(userMessage.content)
+      ])
       let jsonString = (response.content as string).trim()
       if (jsonString.startsWith('```json')) {
         jsonString = jsonString.replace(/```json\s*/, '').replace(/```\s*$/, '')

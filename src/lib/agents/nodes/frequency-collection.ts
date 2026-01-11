@@ -1,6 +1,7 @@
 import { ConversationState } from '../state'
 import { prisma } from '@/lib/prisma'
 import { ChatOpenAI } from '@langchain/openai'
+import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 
 const llm = new ChatOpenAI({
   modelName: 'gpt-4o-mini',
@@ -12,7 +13,7 @@ export async function frequencyCollectionNode(
 ): Promise<Partial<ConversationState>> {
   // Check if we already have frequency
   if (state.preferred_frequency) {
-    return { stage: 'property_lookup', messages: [] }
+    return { stage: 'property_lookup' } // ✅ FIXED: Removed messages: []
   }
 
   // Get tenant settings to see which frequencies they support
@@ -68,9 +69,13 @@ export async function frequencyCollectionNode(
       return f
     })
 
-    const extractionPrompt = `Extract the service frequency preference from the following message. The supported frequencies are: ${frequencyOptions.join(', ')}.
+    // ✅ OPTION A: Use message array format
+    const systemPrompt = state.system_context ||
+      'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
 
-User message: "${lastUserMessage.content}"
+    const taskInstructions = `TASK: Extract the service frequency preference from user messages.
+
+The supported frequencies are: ${frequencyOptions.join(', ')}.
 
 Return ONLY one of these exact values (without explanation):
 - "weekly" if they want weekly service
@@ -82,7 +87,10 @@ Return ONLY one of these exact values (without explanation):
 Return only the frequency value, nothing else.`
 
     try {
-      const response = await llm.invoke(extractionPrompt)
+      const response = await llm.invoke([
+        new SystemMessage(`${systemPrompt}\n\n${taskInstructions}`),
+        new HumanMessage(lastUserMessage.content)
+      ])
       const extractedFrequency = (response.content as string).trim().toLowerCase()
 
       if (
@@ -97,7 +105,7 @@ Return only the frequency value, nothing else.`
             | 'monthly'
             | 'one-time',
           stage: 'property_lookup',
-          messages: [],
+          // ✅ FIXED: Removed messages: []
         }
       }
     } catch (error) {

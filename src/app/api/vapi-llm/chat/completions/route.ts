@@ -103,11 +103,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Extract full system message from VAPI (personality + business rules)
+    // Nodes will prepend their task-specific instructions to this
+    const systemPrompt = systemMessage?.content ||
+      'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
+
     console.log('[VAPI LLM] Processing message:', userMessageContent)
     console.log('[VAPI LLM] Metadata extraction:')
     console.log('  - Tenant ID:', tenantId)
     console.log('  - Call ID:', callId)
     console.log('  - Customer Phone:', customerPhone)
+    console.log('  - System Prompt:', systemPrompt.substring(0, 100) + '...')
     console.log('  - Sources:')
     console.log('    - body.call.id:', bodyCallId)
     console.log('    - header x-vapi-call-id:', vapiCallId)
@@ -130,6 +136,7 @@ export async function POST(req: NextRequest) {
 
       state = {
         messages: existingMessages,
+        system_context: systemPrompt, // Preserve full system prompt across turns
         tenant_id: conversationRecord.tenant_id,
         call_id: conversationRecord.call_id,
         customer_phone: conversationRecord.customer_phone || undefined,
@@ -172,6 +179,7 @@ export async function POST(req: NextRequest) {
             content: userMessageContent,
           },
         ],
+        system_context: systemPrompt, // Store system prompt for nodes to use
         tenant_id: tenantId,
         call_id: callId,
         customer_phone: customerPhone || undefined,

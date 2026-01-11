@@ -1,5 +1,6 @@
 import { ConversationState } from '../state'
 import { ChatOpenAI } from '@langchain/openai'
+import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 import { prisma } from '@/lib/prisma'
 
 const llm = new ChatOpenAI({
@@ -25,7 +26,7 @@ export async function intentRouterNode(
 
   if (!lastUserMessage) {
     // No user message - shouldn't happen, but safe fallback
-    return { stage: 'address_collection', messages: [] }
+    return { stage: 'address_collection' } // ✅ FIXED: Removed messages: []
   }
 
   // Get tenant info for FAQ responses
@@ -40,10 +41,11 @@ export async function intentRouterNode(
     },
   })
 
-  // Classify intent using LLM
-  const intentPrompt = `You are classifying customer intent in a lawn care phone conversation.
+  // Option A: Use message array format with system/user roles
+  const systemPrompt = state.system_context ||
+    'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
 
-User message: "${lastUserMessage.content}"
+  const taskInstructions = `TASK: Classify customer intent in a lawn care phone conversation.
 
 Conversation context:
 - Customer name: ${state.customer_name || 'unknown'}
@@ -71,7 +73,11 @@ Return ONLY valid JSON:
 }`
 
   try {
-    const response = await llm.invoke(intentPrompt)
+    // ✅ OPTION A: Use LangChain message classes
+    const response = await llm.invoke([
+      new SystemMessage(`${systemPrompt}\n\n${taskInstructions}`),
+      new HumanMessage(lastUserMessage.content) // Actual user message
+    ])
     let jsonString = (response.content as string).trim()
 
     // Clean markdown
@@ -93,7 +99,7 @@ Return ONLY valid JSON:
 
       case 'booking_intent':
         // Proceed to address extraction
-        return { stage: 'address_collection', messages: [] }
+        return { stage: 'address_collection' } // ✅ FIXED: Removed messages: []
 
       case 'unclear':
         // Be helpful and ask an open-ended question
@@ -111,12 +117,12 @@ Return ONLY valid JSON:
 
       default:
         // Fallback
-        return { stage: 'address_collection', messages: [] }
+        return { stage: 'address_collection' } // ✅ FIXED: Removed messages: []
     }
   } catch (error) {
     console.error('Intent classification error:', error)
     // Fallback to address collection on error
-    return { stage: 'address_collection', messages: [] }
+    return { stage: 'address_collection' } // ✅ FIXED: Removed messages: []
   }
 }
 
@@ -128,13 +134,14 @@ async function handleGeneralQuestion(
   question: string,
   tenant: any
 ): Promise<Partial<ConversationState>> {
-  // Generate FAQ response using LLM with tenant context
-  const faqPrompt = `You are a friendly lawn care assistant for ${tenant?.business_name || 'our company'}.
+  // Option A: Use message array format
+  const systemPrompt = state.system_context ||
+    'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
 
-Answer this customer question briefly and naturally (1-2 sentences):
-"${question}"
+  const taskInstructions = `TASK: Answer customer questions briefly and naturally (1-2 sentences).
 
 Business information:
+- Business name: ${tenant?.business_name || 'our company'}
 - Services: Lawn mowing, edging, blowing (available ${tenant?.supports_one_time_service ? 'weekly, biweekly, monthly, or one-time' : 'weekly, biweekly, or monthly'})
 - Service areas: ${tenant?.service_areas?.join(', ') || 'your local area'}
 - Pricing: ${formatPricingInfo(tenant?.pricing_tiers)}
@@ -145,7 +152,11 @@ After answering, ask: "Would you like a quote for your lawn?"
 Be conversational and helpful. Don't list everything - just answer their specific question.`
 
   try {
-    const response = await llm.invoke(faqPrompt)
+    // ✅ OPTION A: Use LangChain message classes
+    const response = await llm.invoke([
+      new SystemMessage(`${systemPrompt}\n\n${taskInstructions}`),
+      new HumanMessage(question)
+    ])
     let answer = (response.content as string).trim()
 
     // Personalize with customer name if available
@@ -194,10 +205,11 @@ async function handleIntroduction(
   state: ConversationState,
   message: string
 ): Promise<Partial<ConversationState>> {
-  // Extract name if provided
-  const nameExtractionPrompt = `Extract the customer's name from this message.
+  // Option A: Use message array format
+  const systemPrompt = state.system_context ||
+    'You are a helpful AI assistant for a lawn care business. Be friendly, professional, and concise.'
 
-User message: "${message}"
+  const taskInstructions = `TASK: Extract the customer's name from user messages.
 
 Return ONLY valid JSON:
 {
@@ -211,7 +223,11 @@ Examples:
 - "Hi there" -> {"name": null}`
 
   try {
-    const response = await llm.invoke(nameExtractionPrompt)
+    // ✅ OPTION A: Use LangChain message classes
+    const response = await llm.invoke([
+      new SystemMessage(`${systemPrompt}\n\n${taskInstructions}`),
+      new HumanMessage(message)
+    ])
     let jsonString = (response.content as string).trim()
 
     if (jsonString.startsWith('```json')) {
@@ -229,7 +245,7 @@ Examples:
         {
           role: 'assistant',
           content: customerName
-            ? `Nice to meet you, ${customerName}! Are you looking for a lawn care quote?`
+            ? `Nice to meet you, ${customerName}! Are you looking for a lawn mowing quote?`
             : `How can I help you today?`,
         },
       ],

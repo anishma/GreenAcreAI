@@ -50,6 +50,11 @@ const workflow = new StateGraph<ConversationState, Partial<ConversationState>, G
       value: (prev: any[], next: any[]) => prev.concat(next),
       default: () => [],
     },
+    system_context: {
+      value: (prev: string | undefined, next: string | undefined) =>
+        next ?? prev,
+      default: () => undefined,
+    },
     tenant_id: {
       value: (prev: string, next: string) => next ?? prev,
       default: () => '',

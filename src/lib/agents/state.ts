@@ -19,7 +19,8 @@ export type ConversationStage =
   | 'END'
 
 export interface ConversationState {
-  messages: Array<{ role: 'user' | 'assistant'; content: string }>
+  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>
+  system_context?: string // Extracted from VAPI system prompt for reuse in nodes
   tenant_id: string
   call_id: string
 
