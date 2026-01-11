@@ -19,6 +19,10 @@ export const runtime = 'nodejs'
 export async function POST(req: NextRequest) {
   try {
     console.log('[VAPI LLM] Prisma client:', typeof prisma, prisma ? 'defined' : 'undefined')
+
+    // Force Prisma to connect (helps with serverless cold starts)
+    await prisma.$connect()
+
     const body: OpenAIChatCompletionRequest = await req.json()
 
     console.log('[VAPI LLM] Request body:', JSON.stringify(body, null, 2))

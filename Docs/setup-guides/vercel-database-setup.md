@@ -65,7 +65,22 @@ postgres://postgres.[PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[REGION].pooler.supabase
 
 **Why:** Vercel serverless functions are "transient" (short-lived). The transaction mode pooler efficiently manages connections from auto-scaling systems by sharing database connections between clients.
 
-**Important:** Prisma automatically handles the prepared statements limitation when using connection pooling.
+**CRITICAL - Prepared Statements Fix:**
+
+To prevent "prepared statement 's0' already exists" errors, you MUST add these parameters to your DATABASE_URL:
+
+```
+?pgbouncer=true&connection_limit=1
+```
+
+**Complete DATABASE_URL format for Vercel:**
+```
+postgres://postgres.[PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
+```
+
+**What these parameters do:**
+- `pgbouncer=true` - Tells Prisma to disable prepared statements (required for pgBouncer/Supavisor)
+- `connection_limit=1` - Limits connections per Prisma Client instance (required for serverless)
 
 ---
 
@@ -205,6 +220,23 @@ Check:
 ---
 
 ## Common Issues & Solutions
+
+### Issue: "prepared statement 's0' already exists"
+**Root Cause:** pgBouncer/Supavisor connection pooler in Transaction mode doesn't support prepared statements, but Prisma tries to use them by default.
+
+**Solution:**
+1. Add `?pgbouncer=true&connection_limit=1` to your `DATABASE_URL` in Vercel
+2. Full format:
+   ```
+   postgres://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
+   ```
+3. Redeploy to Vercel
+4. The code has been updated in `src/lib/prisma.ts` to handle serverless connections properly
+
+**Technical Details:**
+- `pgbouncer=true` disables Prisma's prepared statements
+- `connection_limit=1` prevents connection pool exhaustion in serverless
+- The updated `prisma.ts` includes query timeouts and proper cleanup
 
 ### Issue: "directUrl: Missing"
 **Solution:** Add `DIRECT_URL` to Vercel env vars and redeploy
