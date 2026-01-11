@@ -23,6 +23,10 @@ export async function POST(req: NextRequest) {
   try {
     const body: any = await req.json()
 
+    // Log the raw body structure to understand VAPI's format
+    console.log(`[VAPI Webhook] Raw body keys:`, Object.keys(body))
+    console.log(`[VAPI Webhook] Raw body sample:`, JSON.stringify(body).substring(0, 300))
+
     // VAPI sends different event formats:
     // 1. Top-level type (call-start, end-of-call-report, etc.): { type: "...", call: {...} }
     // 2. Message type (speech-update, etc.): { message: { type: "...", ... } }
