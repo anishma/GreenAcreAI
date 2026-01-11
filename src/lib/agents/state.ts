@@ -16,6 +16,7 @@ export type ConversationStage =
   | 'WAITING_FOR_ADDRESS'
   | 'WAITING_FOR_FREQUENCY'
   | 'WAITING_FOR_BOOKING_DECISION'
+  | 'WAITING_FOR_TIME_SLOT'
   | 'END'
 
 export interface ConversationState {

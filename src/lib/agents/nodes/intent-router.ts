@@ -41,6 +41,9 @@ export async function intentRouterNode(
   if (state.stage === 'WAITING_FOR_BOOKING_DECISION') {
     return { stage: 'booking' as const }
   }
+  if (state.stage === 'WAITING_FOR_TIME_SLOT') {
+    return { stage: 'booking' as const }
+  }
   // If we have customer_address but no frequency, go to frequency collection
   if (state.customer_address && !state.preferred_frequency) {
     return { stage: 'frequency_collection' as const }

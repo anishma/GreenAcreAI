@@ -47,7 +47,23 @@ export async function bookingNode(
   }
 
   // Use GPT-4 to detect booking intent and extract time preference
-  const intentPrompt = `Analyze the user's message to determine their intent regarding booking an appointment.
+  const isChoosingTimeSlot = state.stage === 'WAITING_FOR_TIME_SLOT'
+
+  const intentPrompt = isChoosingTimeSlot
+    ? `Analyze the user's message to determine which time slot they're choosing.
+
+User message: "${lastUserMessage.content}"
+
+Return ONLY valid JSON with this structure:
+{
+  "wants_to_book": true,
+  "time_preference": "morning"/"afternoon"/"specific time" or null,
+  "specific_datetime": "YYYY-MM-DD HH:mm" or null,
+  "declined": false
+}
+
+If they mention a specific day/time like "Monday at 2pm" or "the first one" or "morning", extract that preference.`
+    : `Analyze the user's message to determine their intent regarding booking an appointment.
 
 User message: "${lastUserMessage.content}"
 
@@ -115,7 +131,36 @@ Return ONLY valid JSON with this structure:
       }
     }
 
-    // If user provided specific time preference, try to match it
+    // Check if user already chose a time slot (has chosen_time in state)
+    // If not, present available slots and ask them to choose
+    if (!state.chosen_time && !intent.specific_datetime && !intent.time_preference) {
+      // Format available slots for presentation
+      const slotOptions = availableSlots.available_slots.slice(0, 3).map((slot) => {
+        const date = new Date(slot.start)
+        const dateString = date.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+        })
+        const timeString = date.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        })
+        return `${dateString} at ${timeString}`
+      }).join(', or ')
+
+      return {
+        stage: 'WAITING_FOR_TIME_SLOT',
+        messages: [{
+            role: 'assistant',
+            content: `Great! I have these available times: ${slotOptions}. Which works best for you?`,
+          },
+        ],
+      }
+    }
+
+    // User has provided time preference or already chose - find matching slot
     let selectedSlot = availableSlots.available_slots[0]
 
     if (intent.specific_datetime) {
@@ -143,6 +188,14 @@ Return ONLY valid JSON with this structure:
       })
       if (afternoonSlot) {
         selectedSlot = afternoonSlot
+      }
+    } else if (state.chosen_time) {
+      // Find the slot matching the chosen time from previous interaction
+      const chosenSlot = availableSlots.available_slots.find(
+        (slot) => slot.start === state.chosen_time
+      )
+      if (chosenSlot) {
+        selectedSlot = chosenSlot
       }
     }
 
@@ -172,10 +225,11 @@ Return ONLY valid JSON with this structure:
     )
 
     // Save booking to database
+    // Note: call_id may not exist yet if VAPI hasn't sent the webhook, so we make it optional
     const bookingRecord = await prisma.bookings.create({
       data: {
         tenant_id: state.tenant_id,
-        call_id: state.call_id,
+        call_id: state.call_id || null, // Make optional - call record may not exist yet
         updated_at: new Date(),
         customer_phone: state.customer_phone || '',
         customer_name: state.customer_name || 'Customer',
