@@ -21,9 +21,14 @@ import { uploadRecording } from '@/lib/supabase/storage'
  */
 export async function POST(req: NextRequest) {
   try {
-    const event: VapiWebhookEvent = await req.json()
+    const body: any = await req.json()
 
-    console.log(`[VAPI Webhook] Received event: ${event.type}`)
+    // VAPI sends different event formats:
+    // 1. Top-level type (call-start, end-of-call-report, etc.): { type: "...", call: {...} }
+    // 2. Message type (speech-update, etc.): { message: { type: "...", ... } }
+    const eventType = body.type || body.message?.type || 'unknown'
+
+    console.log(`[VAPI Webhook] Received event: ${eventType}`)
 
     // Verify webhook signature if available
     const signature = req.headers.get('x-vapi-signature')
@@ -36,15 +41,18 @@ export async function POST(req: NextRequest) {
     await prisma.webhooks.create({
       data: {
         source: 'vapi',
-        event_type: event.type,
-        payload: event as any,
+        event_type: eventType,
+        payload: body as any,
         headers: Object.fromEntries(req.headers.entries()),
         processed: false,
       },
     })
 
+    // Cast to VapiWebhookEvent for type safety
+    const event: VapiWebhookEvent = body
+
     // Route to appropriate handler based on event type
-    switch (event.type) {
+    switch (eventType) {
       case 'call-start':
         await handleCallStarted(event as CallStartedEvent)
         break
@@ -61,15 +69,21 @@ export async function POST(req: NextRequest) {
         await handleStatusUpdate(event)
         break
 
+      case 'speech-update':
+        // Speech updates are informational only (when assistant starts/stops speaking)
+        // We don't need to process these, just log them
+        console.log(`[VAPI Webhook] Speech update: ${body.message?.status}`)
+        break
+
       default:
-        console.log(`[VAPI Webhook] Unhandled event type: ${event.type}`)
+        console.log(`[VAPI Webhook] Unhandled event type: ${eventType}`)
     }
 
     // Mark webhook as processed
     await prisma.webhooks.updateMany({
       where: {
         source: 'vapi',
-        event_type: event.type,
+        event_type: eventType,
         processed: false,
       },
       data: {
