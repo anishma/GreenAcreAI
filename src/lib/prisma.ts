@@ -37,9 +37,14 @@ export const prisma =
   }).$extends({
     query: {
       $allOperations: async ({ operation, model, args, query }) => {
-        // Add timeout to all queries to prevent hanging connections
+        // Add timeout to all queries to prevent hanging connections in serverless
+        // operation: the Prisma operation (e.g., 'findUnique', 'create')
+        // model: the Prisma model being queried (e.g., 'conversations', 'tenants')
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Query timeout after 10s')), 10000)
+          setTimeout(
+            () => reject(new Error(`Query timeout after 10s (${model}.${operation})`)),
+            10000
+          )
         )
         return Promise.race([query(args), timeoutPromise])
       },
