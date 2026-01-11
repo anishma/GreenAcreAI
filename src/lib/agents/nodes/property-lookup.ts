@@ -1,5 +1,10 @@
-import { mcpClient } from '@/lib/mcp/client'
+// Use serverless-compatible MCP client in production (Vercel), regular MCP client in development
+import { mcpClient as mcpClientServerless } from '@/lib/mcp/client-serverless'
+import { mcpClient as mcpClientStdio } from '@/lib/mcp/client'
 import { ConversationState } from '../state'
+
+// Select appropriate client based on environment
+const mcpClient = process.env.VERCEL ? mcpClientServerless : mcpClientStdio
 
 export async function propertyLookupNode(
   state: ConversationState
