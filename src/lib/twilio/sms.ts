@@ -9,6 +9,7 @@
 
 import twilio from 'twilio'
 import { prisma } from '@/lib/prisma'
+import { format } from 'date-fns-tz'
 
 /**
  * Get Twilio client instance
@@ -117,14 +118,14 @@ export async function sendBookingConfirmation(params: {
   tenantId: string
   bookingId: string
   callId?: string
+  tenantTimezone?: string
 }) {
-  const formattedDate = params.scheduledAt.toLocaleString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
+  // Get tenant timezone (default to Central if not provided)
+  const timezone = params.tenantTimezone || 'America/Chicago'
+
+  // Format date in tenant's timezone
+  const formattedDate = format(params.scheduledAt, 'EEEE, MMMM d, yyyy \'at\' h:mm a', {
+    timeZone: timezone
   })
 
   const body = `Hi ${params.customerName}, your lawn mowing appointment with ${params.tenantBusinessName} is confirmed for ${formattedDate}. We'll see you then!`

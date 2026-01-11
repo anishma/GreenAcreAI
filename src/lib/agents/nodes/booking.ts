@@ -422,6 +422,7 @@ Return ONLY valid JSON with this structure:
             tenantBusinessName: tenant.business_name,
             tenantId: state.tenant_id,
             bookingId: bookingRecord.id,
+            tenantTimezone: tenantTimezone,  // Pass tenant timezone for SMS formatting
             // callId omitted - state.call_id is VAPI's ID, not our database ID
           })
 
