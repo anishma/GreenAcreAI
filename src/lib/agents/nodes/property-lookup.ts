@@ -3,8 +3,23 @@ import { mcpClient as mcpClientServerless } from '@/lib/mcp/client-serverless'
 import { mcpClient as mcpClientStdio } from '@/lib/mcp/client'
 import { ConversationState } from '../state'
 
-// Select appropriate client based on environment
-const mcpClient = process.env.VERCEL ? mcpClientServerless : mcpClientStdio
+// Runtime function to select appropriate client based on environment
+function getMcpClient() {
+  // Vercel sets multiple env vars, check for any of them
+  const isVercel = process.env.VERCEL === '1' ||
+                   process.env.VERCEL_ENV !== undefined ||
+                   process.env.NEXT_RUNTIME === 'edge' ||
+                   process.env.VERCEL_URL !== undefined
+
+  console.log('[Property Lookup] Environment check:', {
+    VERCEL: process.env.VERCEL,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    NEXT_RUNTIME: process.env.NEXT_RUNTIME,
+    isVercel
+  })
+
+  return isVercel ? mcpClientServerless : mcpClientStdio
+}
 
 export async function propertyLookupNode(
   state: ConversationState
@@ -14,7 +29,8 @@ export async function propertyLookupNode(
   }
 
   try {
-    // Call MCP property lookup server via MCP client
+    // Call MCP property lookup server via MCP client (select at runtime)
+    const mcpClient = getMcpClient()
     const propertyData = await mcpClient.callTool<{
       lot_size_sqft: number
       parcel_id: string

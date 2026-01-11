@@ -23,14 +23,10 @@ export async function POST(req: NextRequest) {
   try {
     const body: any = await req.json()
 
-    // Log the raw body structure to understand VAPI's format
-    console.log(`[VAPI Webhook] Raw body keys:`, Object.keys(body))
-    console.log(`[VAPI Webhook] Raw body sample:`, JSON.stringify(body).substring(0, 300))
-
-    // VAPI sends different event formats:
-    // 1. Top-level type (call-start, end-of-call-report, etc.): { type: "...", call: {...} }
-    // 2. Message type (speech-update, etc.): { message: { type: "...", ... } }
-    const eventType = body.type || body.message?.type || 'unknown'
+    // VAPI wraps events in a { message: {...} } structure
+    // Extract the actual event from body.message
+    const event: VapiWebhookEvent = body.message || body
+    const eventType = event.type || 'unknown'
 
     console.log(`[VAPI Webhook] Received event: ${eventType}`)
 
@@ -51,9 +47,6 @@ export async function POST(req: NextRequest) {
         processed: false,
       },
     })
-
-    // Cast to VapiWebhookEvent for type safety
-    const event: VapiWebhookEvent = body
 
     // Route to appropriate handler based on event type
     switch (eventType) {
@@ -111,16 +104,12 @@ export async function POST(req: NextRequest) {
  * Creates a new call record in database
  */
 async function handleCallStarted(event: CallStartedEvent) {
-  // Log the full event structure for debugging
-  console.log(`[VAPI Webhook] call-start event structure:`, JSON.stringify(event, null, 2).substring(0, 500))
-
   const { call } = event
 
   // Defensive check: Ensure call object exists
   if (!call || !call.id) {
     console.error(`[VAPI Webhook] Invalid call-start: missing call data`)
-    console.error(`[VAPI Webhook] Event keys:`, Object.keys(event))
-    console.error(`[VAPI Webhook] Call value:`, call)
+    console.error(`[VAPI Webhook] Event:`, JSON.stringify(event, null, 2).substring(0, 500))
     return
   }
 
@@ -165,16 +154,12 @@ async function handleCallStarted(event: CallStartedEvent) {
  * Updates call record with final data, transcript, recording, and cost
  */
 async function handleCallEnded(event: CallEndedEvent) {
-  // Log the full event structure for debugging
-  console.log(`[VAPI Webhook] end-of-call-report event structure:`, JSON.stringify(event, null, 2).substring(0, 500))
-
   const { call } = event
 
   // Defensive check: Ensure call object exists
   if (!call || !call.id) {
     console.error(`[VAPI Webhook] Invalid end-of-call-report: missing call data`)
-    console.error(`[VAPI Webhook] Event keys:`, Object.keys(event))
-    console.error(`[VAPI Webhook] Call value:`, call)
+    console.error(`[VAPI Webhook] Event:`, JSON.stringify(event, null, 2).substring(0, 500))
     return
   }
 
