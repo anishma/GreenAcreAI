@@ -225,11 +225,13 @@ Return ONLY valid JSON with this structure:
     )
 
     // Save booking to database
-    // Note: call_id may not exist yet if VAPI hasn't sent the webhook, so we make it optional
+    // Note: We don't set call_id here because state.call_id contains VAPI's call ID,
+    // but bookings.call_id references our database calls.id (which doesn't exist yet).
+    // The webhook handler will link the booking to the call record later.
     const bookingRecord = await prisma.bookings.create({
       data: {
         tenant_id: state.tenant_id,
-        call_id: state.call_id || null, // Make optional - call record may not exist yet
+        // call_id: null - Don't set this, let webhook link it later
         updated_at: new Date(),
         customer_phone: state.customer_phone || '',
         customer_name: state.customer_name || 'Customer',
@@ -265,7 +267,7 @@ Return ONLY valid JSON with this structure:
             tenantBusinessName: tenant.business_name,
             tenantId: state.tenant_id,
             bookingId: bookingRecord.id,
-            callId: state.call_id,
+            // callId omitted - state.call_id is VAPI's ID, not our database ID
           })
 
           // Mark confirmation as sent
