@@ -59,7 +59,25 @@ export const tenantRouter = router({
       },
     })
 
-    return tenant
+    if (!tenant) {
+      return null
+    }
+
+    // Transform pricing_tiers from snake_case (database) to camelCase (frontend)
+    const pricingTiers = Array.isArray(tenant.pricing_tiers)
+      ? (tenant.pricing_tiers as any[]).map((tier: any) => ({
+          minSqft: tier.min_sqft,
+          maxSqft: tier.max_sqft,
+          weeklyPrice: tier.weekly_price,
+          biweeklyPrice: tier.biweekly_price,
+          monthlyPrice: tier.monthly_price,
+        }))
+      : tenant.pricing_tiers
+
+    return {
+      ...tenant,
+      pricing_tiers: pricingTiers,
+    }
   }),
 
   /**
