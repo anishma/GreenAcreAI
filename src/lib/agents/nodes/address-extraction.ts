@@ -5,6 +5,9 @@ import { SystemMessage, HumanMessage } from '@langchain/core/messages'
 const llm = new ChatOpenAI({
   modelName: 'gpt-4o-mini',
   temperature: 0,
+  modelKwargs: {
+    response_format: { type: 'json_object' },
+  },
 })
 
 export async function addressExtractionNode(
@@ -34,8 +37,16 @@ export async function addressExtractionNode(
 
   const taskInstructions = `TASK: Extract address components and customer name from user messages.
 
-Return a JSON object with street, city, state (2-letter code), zip (5 digits), and name.
-If any component is missing or unclear, return null for that field.
+You must respond with ONLY a valid JSON object. Do not include any conversational text, greetings, or explanations.
+
+Extract these fields from the user's message:
+- name: Customer's name (string or null)
+- street: Street address (string or null)
+- city: City name (string or null)
+- state: 2-letter state code (string or null)
+- zip: 5-digit ZIP code (string or null)
+
+If any component is missing or unclear, use null for that field.
 
 Common patterns:
 - "Hi, I'm Sarah and I live at 123 Oak Street..." -> Extract "Sarah" as name
@@ -43,14 +54,16 @@ Common patterns:
 - "My name is Maria..." -> Extract "Maria" as name
 - "I'm at 123 Main St" -> name is null (no name mentioned)
 
-Return ONLY valid JSON with this exact structure:
+Required JSON output format:
 {
-  "name": "John Doe" or null,
-  "street": "123 Main St" or null,
-  "city": "Springfield" or null,
-  "state": "IL" or null,
-  "zip": "62701" or null
-}`
+  "name": "John Doe",
+  "street": "123 Main St",
+  "city": "Springfield",
+  "state": "IL",
+  "zip": "62701"
+}
+
+Remember: Return ONLY valid JSON, no other text.`
 
   try {
     const response = await llm.invoke([
