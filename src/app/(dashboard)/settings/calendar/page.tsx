@@ -9,7 +9,7 @@
  * - Recent sync status
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Calendar as CalendarIcon, CheckCircle2, XCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast'
 import { trpc } from '@/lib/trpc/client'
 import { formatDistanceToNow } from 'date-fns'
 
-export default function CalendarSettingsPage() {
+function CalendarSettingsContent() {
   const { toast } = useToast()
   const searchParams = useSearchParams()
   const [isDisconnecting, setIsDisconnecting] = useState(false)
@@ -269,5 +269,20 @@ export default function CalendarSettingsPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function CalendarSettingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+          <p className="mt-4 text-sm text-muted-foreground">Loading calendar settings...</p>
+        </div>
+      </div>
+    }>
+      <CalendarSettingsContent />
+    </Suspense>
   )
 }

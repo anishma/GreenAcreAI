@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGoogleAuthUrl } from '@/lib/google/oauth'
 
+// Force dynamic rendering (required for searchParams access)
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Get state parameter for redirect after auth (optional)
