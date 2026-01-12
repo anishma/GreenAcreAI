@@ -58,11 +58,10 @@ export default function CalendarSettingsPage() {
   }
 
   const handleReconnect = () => {
-    // TODO: Trigger OAuth flow
-    toast({
-      title: 'Reconnect calendar',
-      description: 'OAuth flow will be triggered here.',
-    })
+    // Redirect to Google OAuth flow
+    // State parameter will be used to redirect back to settings page after auth
+    const state = encodeURIComponent('/settings/calendar')
+    window.location.href = `/api/auth/google?state=${state}`
   }
 
   if (isLoading) {
