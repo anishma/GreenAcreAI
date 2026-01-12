@@ -16,7 +16,7 @@ export async function getCalendarClient(tenantId: string) {
   })
 
   if (!tenant?.google_calendar_refresh_token) {
-    throw new Error('Calendar not connected')
+    throw new Error('CALENDAR_NOT_CONNECTED')
   }
 
   const oauth2Client = new google.auth.OAuth2(
@@ -25,25 +25,34 @@ export async function getCalendarClient(tenantId: string) {
     process.env.GOOGLE_REDIRECT_URI
   )
 
-  oauth2Client.setCredentials({
-    refresh_token: decrypt(tenant.google_calendar_refresh_token),
-    access_token: tenant.google_calendar_access_token || undefined,
-  })
+  try {
+    oauth2Client.setCredentials({
+      refresh_token: decrypt(tenant.google_calendar_refresh_token),
+      access_token: tenant.google_calendar_access_token || undefined,
+    })
 
-  // Auto-refresh tokens
-  oauth2Client.on('tokens', async (tokens) => {
-    if (tokens.access_token) {
-      await prisma.tenants.update({
-        where: { id: tenantId },
-        data: { google_calendar_access_token: tokens.access_token },
-      })
+    // Auto-refresh tokens
+    oauth2Client.on('tokens', async (tokens) => {
+      if (tokens.access_token) {
+        await prisma.tenants.update({
+          where: { id: tenantId },
+          data: { google_calendar_access_token: tokens.access_token },
+        })
+      }
+    })
+
+    return {
+      calendar: google.calendar({ version: 'v3', auth: oauth2Client }),
+      calendarId: tenant.calendar_id,
+      timezone: tenant.timezone || 'America/New_York',
     }
-  })
-
-  return {
-    calendar: google.calendar({ version: 'v3', auth: oauth2Client }),
-    calendarId: tenant.calendar_id,
-    timezone: tenant.timezone || 'America/New_York',
+  } catch (error: any) {
+    // Handle invalid/expired refresh token
+    if (error?.message?.includes('invalid_grant') || error?.code === 400) {
+      console.error('[Calendar] Refresh token expired or revoked for tenant:', tenantId)
+      throw new Error('CALENDAR_TOKEN_EXPIRED')
+    }
+    throw error
   }
 }
 

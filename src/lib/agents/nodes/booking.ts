@@ -460,8 +460,33 @@ Return ONLY valid JSON with this structure:
         },
       ],
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Booking error:', error)
+
+    // Handle specific error types with user-friendly messages
+    if (error?.message === 'CALENDAR_TOKEN_EXPIRED') {
+      return {
+        messages: [{
+            role: 'assistant',
+            content: "I apologize, but I'm unable to access the calendar at the moment. Please call us directly to schedule your appointment, and we'll get you taken care of right away.",
+          },
+        ],
+        stage: 'closing',
+      }
+    }
+
+    if (error?.message === 'CALENDAR_NOT_CONNECTED') {
+      return {
+        messages: [{
+            role: 'assistant',
+            content: "I'm having trouble accessing the calendar. Please call us directly to schedule your appointment.",
+          },
+        ],
+        stage: 'closing',
+      }
+    }
+
+    // Generic error fallback
     return {
       messages: [{
           role: 'assistant',
