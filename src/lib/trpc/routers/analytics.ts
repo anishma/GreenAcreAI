@@ -14,9 +14,7 @@ export const analyticsRouter = router({
    * Includes today's calls, total leads, bookings, and conversion rate
    */
   getDashboardMetrics: protectedProcedure.query(async ({ ctx }) => {
-    console.log('[Analytics] getDashboardMetrics - tenantId:', ctx.tenantId)
     if (!ctx.tenantId) {
-      console.log('[Analytics] No tenantId - returning empty metrics')
       return {
         callsToday: 0,
         totalLeads: 0,
@@ -61,8 +59,6 @@ export const analyticsRouter = router({
         },
       }),
     ])
-
-    console.log('[Analytics] Query results - callsToday:', callsToday, 'totalLeads:', totalLeads, 'totalBookings:', totalBookings, 'recentCalls:', recentCalls.length)
 
     // Calculate conversion rate (bookings / leads)
     const conversionRate = totalLeads > 0 ? (totalBookings / totalLeads) * 100 : 0
