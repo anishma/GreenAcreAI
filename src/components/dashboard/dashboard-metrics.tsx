@@ -17,7 +17,12 @@ import { createClient } from '@/lib/supabase/client'
 
 export function DashboardMetrics() {
   const [tenantId, setTenantId] = useState<string | undefined>()
-  const { data: metrics, isLoading } = trpc.analytics.getDashboardMetrics.useQuery()
+  const { data: metrics, isLoading, error } = trpc.analytics.getDashboardMetrics.useQuery()
+
+  // Debug logging for production
+  useEffect(() => {
+    console.log('[Dashboard Metrics] Loading:', isLoading, 'Error:', error, 'Metrics:', metrics)
+  }, [metrics, isLoading, error])
 
   // Get tenant ID from Supabase auth
   useEffect(() => {

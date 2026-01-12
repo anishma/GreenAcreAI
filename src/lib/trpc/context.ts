@@ -61,10 +61,12 @@ export async function createContext(_opts?: FetchCreateContextFnOptions) {
 
     // Fetch tenant_id from database if user is authenticated
     if (user) {
+      console.log('[Context] Real auth - User ID:', user.id, 'Email:', user.email)
       const dbUser = await prisma.users.findUnique({
         where: { auth_user_id: user.id },
         select: { tenant_id: true },
       })
+      console.log('[Context] Real auth - dbUser:', dbUser, 'tenantId:', dbUser?.tenant_id)
       tenantId = dbUser?.tenant_id ?? null
     }
   }
