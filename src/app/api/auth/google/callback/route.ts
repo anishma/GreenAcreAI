@@ -10,26 +10,29 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get('code')
   const error = searchParams.get('error')
-  // const state = searchParams.get('state') // Unused for now, but available for CSRF protection
+  const state = searchParams.get('state') // Redirect path after auth
+
+  // Determine redirect URL (onboarding vs settings)
+  const redirectPath = state && state !== 'null' ? decodeURIComponent(state) : '/step-3-calendar'
 
   // Handle error from Google
   if (error) {
     console.error('Google OAuth error:', error)
     return NextResponse.redirect(
-      new URL(`/step-3-calendar?error=${encodeURIComponent(error)}`, request.url)
+      new URL(`${redirectPath}?error=${encodeURIComponent(error)}`, request.url)
     )
   }
 
   // Validate authorization code
   if (!code) {
     return NextResponse.redirect(
-      new URL('/step-3-calendar?error=no_code', request.url)
+      new URL(`${redirectPath}?error=no_code`, request.url)
     )
   }
 
-  // Redirect back to calendar page with code
+  // Redirect back to the original page with code
   // The frontend will handle calling the tRPC mutation
   return NextResponse.redirect(
-    new URL(`/step-3-calendar?code=${encodeURIComponent(code)}`, request.url)
+    new URL(`${redirectPath}?code=${encodeURIComponent(code)}`, request.url)
   )
 }

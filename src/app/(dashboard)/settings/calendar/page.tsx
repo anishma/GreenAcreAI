@@ -9,7 +9,8 @@
  * - Recent sync status
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Calendar as CalendarIcon, CheckCircle2, XCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,20 +27,74 @@ import { formatDistanceToNow } from 'date-fns'
 
 export default function CalendarSettingsPage() {
   const { toast } = useToast()
+  const searchParams = useSearchParams()
   const [isDisconnecting, setIsDisconnecting] = useState(false)
+  const [isConnecting, setIsConnecting] = useState(false)
 
   // Fetch current tenant data
   const { data: tenant, isLoading, refetch } = trpc.tenant.getCurrent.useQuery()
+  const connectCalendar = trpc.tenant.connectCalendar.useMutation()
+  const disconnectCalendar = trpc.tenant.disconnectCalendar.useMutation()
 
   const isConnected = Boolean(tenant?.google_calendar_refresh_token)
   const calendarId = tenant?.calendar_id
   const lastSyncedAt = null // Field doesn't exist in schema yet
 
+  // Handle OAuth callback (when redirected back from Google)
+  useEffect(() => {
+    const code = searchParams?.get('code')
+    const error = searchParams?.get('error')
+
+    if (error) {
+      toast({
+        title: 'Calendar connection failed',
+        description: error === 'access_denied'
+          ? 'You denied access to your calendar'
+          : 'Failed to connect to Google Calendar',
+        variant: 'destructive',
+      })
+      // Clear error from URL
+      window.history.replaceState({}, '', '/settings/calendar')
+      return
+    }
+
+    if (code && !isConnecting) {
+      handleConnectWithCode(code)
+    }
+  }, [searchParams])
+
+  const handleConnectWithCode = async (code: string) => {
+    setIsConnecting(true)
+
+    try {
+      await connectCalendar.mutateAsync({ code })
+
+      toast({
+        title: 'Calendar reconnected',
+        description: 'Your Google Calendar has been successfully reconnected',
+      })
+
+      // Refresh tenant data to show connected state
+      await refetch()
+
+      // Clear code from URL
+      window.history.replaceState({}, '', '/settings/calendar')
+    } catch (error) {
+      console.error('Error connecting calendar:', error)
+      toast({
+        title: 'Connection failed',
+        description: 'Failed to reconnect your calendar. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsConnecting(false)
+    }
+  }
+
   const handleDisconnect = async () => {
     setIsDisconnecting(true)
     try {
-      // TODO: Call tRPC procedure to disconnect calendar
-      // await disconnectCalendar.mutateAsync()
+      await disconnectCalendar.mutateAsync()
       toast({
         title: 'Calendar disconnected',
         description: 'Your Google Calendar has been disconnected successfully.',
@@ -134,13 +189,17 @@ export default function CalendarSettingsPage() {
                 <Button
                   variant="outline"
                   onClick={handleDisconnect}
-                  disabled={isDisconnecting}
+                  disabled={isDisconnecting || isConnecting}
                 >
                   {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
                 </Button>
-                <Button variant="outline" onClick={handleReconnect}>
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                  Reconnect
+                <Button
+                  variant="outline"
+                  onClick={handleReconnect}
+                  disabled={isConnecting}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1 ${isConnecting ? 'animate-spin' : ''}`} />
+                  {isConnecting ? 'Reconnecting...' : 'Reconnect'}
                 </Button>
               </div>
             </>
