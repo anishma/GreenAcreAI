@@ -3,6 +3,28 @@
 /**
  * Analytics Page
  * Charts and metrics for call performance
+ *
+ * Data Source: analytics_daily table
+ *
+ * How Analytics are Tracked:
+ * 1. The analytics_daily table stores aggregated daily metrics per tenant
+ * 2. Metrics include:
+ *    - Total Calls: Count of all calls made on that day
+ *    - Successful/Failed Calls: Call completion status
+ *    - Bookings Made: Number of bookings created from calls
+ *    - Leads Captured: Number of leads generated
+ *    - Total Cost: VAPI usage cost for the day (from call costs)
+ *    - Avg Cost Per Call: Average VAPI cost per call
+ *
+ * 3. Data Population (Not Yet Implemented):
+ *    - Should be populated by a daily cron job or batch process
+ *    - Aggregates data from the calls, bookings, and leads tables
+ *    - Calculates costs based on VAPI call duration and pricing
+ *
+ * 4. Current State:
+ *    - Table exists but is empty (no background job running yet)
+ *    - Analytics page will show "No data available" until populated
+ *    - This is a Phase 2 feature - MVP shows placeholder UI
  */
 
 import { trpc } from '@/lib/trpc/client'

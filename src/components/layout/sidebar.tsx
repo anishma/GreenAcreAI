@@ -15,9 +15,7 @@ import {
   Phone,
   Users,
   Calendar,
-  BarChart3,
   Settings,
-  MessageSquare,
   ChevronLeft,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -27,8 +25,6 @@ const navigation = [
   { name: 'Calls', href: '/calls', icon: Phone },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Bookings', href: '/bookings', icon: Calendar },
-  { name: 'Messages', href: '/messages', icon: MessageSquare },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
