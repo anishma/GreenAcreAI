@@ -4,9 +4,19 @@
  * Collects basic business details, contact info, and service areas.
  */
 
+import { createClient } from '@/lib/supabase/server'
 import { BusinessForm } from '@/components/onboarding/business-form'
+import { requireOnboardingIncomplete } from '@/lib/auth/onboarding-guard'
 
-export default function Step1BusinessPage() {
+export default async function Step1BusinessPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Redirect to dashboard if onboarding already complete
+  if (user) {
+    await requireOnboardingIncomplete(user.id)
+  }
+
   return (
     <div className="space-y-6">
       <div>

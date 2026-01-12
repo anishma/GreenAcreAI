@@ -6,10 +6,16 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { DashboardMetrics } from '@/components/dashboard/dashboard-metrics'
+import { requireOnboardingComplete } from '@/lib/auth/onboarding-guard'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Require onboarding to be complete before accessing dashboard
+  if (user) {
+    await requireOnboardingComplete(user.id)
+  }
 
   // Fetch user's tenant information (only if authenticated)
   let dbUser: any = null

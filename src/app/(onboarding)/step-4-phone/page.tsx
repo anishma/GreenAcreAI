@@ -4,9 +4,17 @@
  * Provisions a phone number through VAPI for the AI assistant.
  */
 
+import { createClient } from '@/lib/supabase/server'
 import { PhoneSetup } from '@/components/onboarding/phone-setup'
+import { requireOnboardingIncomplete } from '@/lib/auth/onboarding-guard'
 
-export default function Step4PhonePage() {
+export default async function Step4PhonePage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    await requireOnboardingIncomplete(user.id)
+  }
   return (
     <div className="space-y-6">
       <div>

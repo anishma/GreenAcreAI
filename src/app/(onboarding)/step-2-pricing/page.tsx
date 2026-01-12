@@ -4,9 +4,17 @@
  * Allows users to configure pricing tiers and quote settings.
  */
 
+import { createClient } from '@/lib/supabase/server'
 import { PricingForm } from '@/components/onboarding/pricing-form'
+import { requireOnboardingIncomplete } from '@/lib/auth/onboarding-guard'
 
-export default function Step2PricingPage() {
+export default async function Step2PricingPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    await requireOnboardingIncomplete(user.id)
+  }
   return (
     <div className="space-y-6">
       <div>

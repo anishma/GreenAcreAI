@@ -77,18 +77,6 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.includes('.')
 
-  // Protected routes (dashboard, settings, calls, leads, bookings)
-  const isProtectedRoute =
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/settings') ||
-    pathname.startsWith('/calls') ||
-    pathname.startsWith('/leads') ||
-    pathname.startsWith('/bookings') ||
-    pathname.startsWith('/analytics')
-
-  // Onboarding routes
-  const isOnboardingRoute = pathname.startsWith('/step-')
-
   // If user is not authenticated
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
@@ -97,63 +85,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is authenticated, check onboarding status for routing
-  if (user && (isProtectedRoute || isOnboardingRoute)) {
-    try {
-      // Import prisma dynamically to avoid edge runtime issues
-      const { prisma } = await import('@/lib/prisma')
-
-      // Check user's tenant and onboarding status
-      const userRecord = await prisma.users.findUnique({
-        where: { auth_user_id: user.id },
-        select: { tenant_id: true }
-      })
-
-      if (userRecord?.tenant_id) {
-        const tenant = await prisma.tenants.findUnique({
-          where: { id: userRecord.tenant_id },
-          select: {
-            onboarding_completed: true,
-            onboarding_step: true
-          }
-        })
-
-        if (tenant) {
-          // User trying to access protected routes but onboarding not complete
-          if (isProtectedRoute && !tenant.onboarding_completed) {
-            const url = request.nextUrl.clone()
-            // Redirect to their current onboarding step
-            const stepMap: Record<string, string> = {
-              'signup': '/step-1-business',
-              'business_info': '/step-1-business',
-              'pricing': '/step-2-pricing',
-              'calendar': '/step-3-calendar',
-              'phone': '/step-4-phone',
-              'test_call': '/step-5-test',
-              'complete': '/dashboard', // Handle completed onboarding
-            }
-            url.pathname = stepMap[tenant.onboarding_step] || '/step-1-business'
-            return NextResponse.redirect(url)
-          }
-
-          // User trying to access onboarding but already completed
-          if (isOnboardingRoute && tenant.onboarding_completed) {
-            const url = request.nextUrl.clone()
-            url.pathname = '/dashboard'
-            return NextResponse.redirect(url)
-          }
-        }
-      } else if (isProtectedRoute) {
-        // User has no tenant record, redirect to onboarding
-        const url = request.nextUrl.clone()
-        url.pathname = '/step-1-business'
-        return NextResponse.redirect(url)
-      }
-    } catch (error) {
-      // On database error, log and continue (fail open)
-      console.error('[Middleware] Error checking onboarding status:', error)
-    }
-  }
+  // Note: Onboarding checks are handled in the auth callback and server components
+  // Middleware only performs basic authentication checks to remain Edge Runtime compatible
+  // (Prisma doesn't work in Edge Runtime, which middleware uses on Vercel)
 
   // Redirect authenticated users away from login/signup pages
   if (user && (pathname.startsWith('/login') || pathname.startsWith('/signup'))) {

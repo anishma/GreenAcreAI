@@ -4,9 +4,17 @@
  * Final onboarding step where users test their AI phone assistant.
  */
 
+import { createClient } from '@/lib/supabase/server'
 import { TestCall } from '@/components/onboarding/test-call'
+import { requireOnboardingIncomplete } from '@/lib/auth/onboarding-guard'
 
-export default function Step5TestPage() {
+export default async function Step5TestPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    await requireOnboardingIncomplete(user.id)
+  }
   return (
     <div className="space-y-6">
       <div>

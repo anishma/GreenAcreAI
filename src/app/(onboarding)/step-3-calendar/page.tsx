@@ -5,8 +5,10 @@
  */
 
 import { Suspense } from 'react'
+import { createClient } from '@/lib/supabase/server'
 import { CalendarConnect } from '@/components/onboarding/calendar-connect'
 import { Skeleton } from '@/components/ui/skeleton'
+import { requireOnboardingIncomplete } from '@/lib/auth/onboarding-guard'
 
 function CalendarStepContent() {
   return (
@@ -38,7 +40,14 @@ function LoadingFallback() {
   )
 }
 
-export default function Step3CalendarPage() {
+export default async function Step3CalendarPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    await requireOnboardingIncomplete(user.id)
+  }
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <CalendarStepContent />
